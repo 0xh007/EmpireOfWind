@@ -8,6 +8,8 @@ const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
 const SHIP_HEIGHT: i32 = 8;
 
+const PLAYER_SPEED: f32 = 5.0;
+
 #[derive(Component)]
 struct Player;
 
@@ -30,11 +32,11 @@ fn main() {
         .add_systems(Startup, spawn_ship)
         .add_systems(Startup, spawn_ocean)
         .add_systems(Startup, spawn_player)
+        .add_systems(FixedUpdate, move_player_and_camera)
         .add_systems(Update, camera_switching)
         .run();
 }
 
-/// set up a simple 3D scene
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -62,6 +64,9 @@ fn setup(
 }
 
 fn setup_camera(mut commands: Commands) {
+    let ship_center = Vec3::new(SHIP_LENGTH as f32 / 2.0, SHIP_WIDTH as f32 / 2.0, SHIP_HEIGHT as f32 / 2.0);
+    let camera_position = Vec3::new(20.0, 12., 40.0);
+
     commands.spawn((
         Camera3dBundle {
             camera: Camera {
@@ -69,11 +74,11 @@ fn setup_camera(mut commands: Commands) {
                 is_active: true,
                 ..default()
             },
-            transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
+            transform: Transform::from_translation(camera_position)
+                .looking_at(ship_center, Vec3::Y),
             ..default()
         },
-        PanOrbitCamera::default(),
-        DebugCamera,
+        MainCamera,
     ));
 
     commands.spawn((
@@ -83,11 +88,11 @@ fn setup_camera(mut commands: Commands) {
                 is_active: false,
                 ..default()
             },
-            transform: Transform::from_xyz(20.0, 12.0, 40.0)
-                .looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
             ..default()
         },
-        MainCamera,
+        PanOrbitCamera::default(),
+        DebugCamera,
     ));
 }
 
@@ -114,21 +119,23 @@ fn spawn_player(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let player_height = 1.8;
-    let player_start_height = SHIP_HEIGHT as f32 + player_height / 2.0; // Position player on top of the ship
+    let player_start_height = SHIP_HEIGHT as f32 + (player_height * 2.5) / 2.0; // Position player on top of the ship
 
-    // Adjust X and Y position as needed. Example: Center of the ship
     let player_start_x = SHIP_LENGTH as f32 / 2.0;
     let player_start_z = SHIP_WIDTH as f32 / 2.0;
 
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cylinder { 
-            height: player_height,
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Cylinder { 
+                height: player_height,
+                ..default()
+            })),
+            material: materials.add(Color::YELLOW.into()),
+            transform: Transform::from_xyz(player_start_x, player_start_height, player_start_z),
             ..default()
-        })),
-        material: materials.add(Color::YELLOW.into()),
-        transform: Transform::from_xyz(player_start_x, player_start_height, player_start_z),
-        ..default()
-    });
+        },
+        Player,
+    ));
 }
 
 
@@ -137,7 +144,7 @@ fn spawn_ship(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let cube_size = 1.0; // Size of each cube, adjust as needed
+    let cube_size = 1.0; // Size of each cube,
     for x in 0..SHIP_LENGTH {
         for y in 0..SHIP_WIDTH {
             for z in 0..SHIP_HEIGHT {
@@ -166,4 +173,50 @@ fn spawn_ocean(
         transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
         ..default()
     });
+}
+
+fn move_player_and_camera(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<&mut Transform, With<Player>>,
+    mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<Player>)>,
+    time: Res<Time>,
+) {
+    let mut player_transform = query.single_mut();
+    let mut direction_x = 0.0;
+    let mut direction_z = 0.0;
+
+    // Handle horizontal movement
+    if keyboard_input.pressed(KeyCode::A) {
+        direction_x -= 1.0; // Move left
+    }
+    if keyboard_input.pressed(KeyCode::D) {
+        direction_x += 1.0; // Move right
+    }
+
+    // Handle forward/backward movement
+    if keyboard_input.pressed(KeyCode::W) {
+        direction_z -= 1.0; // Move forward
+    }
+    if keyboard_input.pressed(KeyCode::S) {
+        direction_z += 1.0; // Move backward
+    }
+
+    // Calculate the new position
+    let new_position_x =
+        player_transform.translation.x + direction_x * PLAYER_SPEED * time.delta_seconds();
+    let new_position_z =
+        player_transform.translation.z + direction_z * PLAYER_SPEED * time.delta_seconds();
+
+    // Update the player position
+    player_transform.translation.x = new_position_x;
+    player_transform.translation.z = new_position_z;
+    
+    if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+        let camera_offset_x = 0.0;
+        let camera_offset_z = 16.0;
+
+        camera_transform.translation.x = player_transform.translation.x + camera_offset_x;
+        camera_transform.translation.z = player_transform.translation.z + camera_offset_z;
+    }
+
 }
