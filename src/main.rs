@@ -9,6 +9,12 @@ const SHIP_WIDTH: i32 = 10;
 const SHIP_HEIGHT: i32 = 8;
 
 #[derive(Component)]
+struct Player;
+
+#[derive(Component)]
+struct NPC;
+
+#[derive(Component)]
 struct MainCamera;
 
 #[derive(Component)]
@@ -23,6 +29,7 @@ fn main() {
         .add_systems(Startup, setup_camera)
         .add_systems(Startup, spawn_ship)
         .add_systems(Startup, spawn_ocean)
+        .add_systems(Startup, spawn_player)
         .add_systems(Update, camera_switching)
         .run();
 }
@@ -52,19 +59,6 @@ fn setup(
         cascade_shadow_config,
         ..default()
     });
-
-    commands.spawn((
-        Camera3dBundle {
-            camera: Camera {
-                order: 0,
-                is_active: true,
-                ..default()
-            },
-            transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
-            ..default()
-        },
-        PanOrbitCamera::default(),
-    ));
 }
 
 fn setup_camera(mut commands: Commands) {
@@ -112,6 +106,31 @@ fn camera_switching(
         }
     }
 }
+
+
+fn spawn_player(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let player_height = 1.8;
+    let player_start_height = SHIP_HEIGHT as f32 + player_height / 2.0; // Position player on top of the ship
+
+    // Adjust X and Y position as needed. Example: Center of the ship
+    let player_start_x = SHIP_LENGTH as f32 / 2.0;
+    let player_start_z = SHIP_WIDTH as f32 / 2.0;
+
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Cylinder { 
+            height: player_height,
+            ..default()
+        })),
+        material: materials.add(Color::YELLOW.into()),
+        transform: Transform::from_xyz(player_start_x, player_start_height, player_start_z),
+        ..default()
+    });
+}
+
 
 fn spawn_ship(
     mut commands: Commands,
