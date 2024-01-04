@@ -11,6 +11,9 @@ const SHIP_HEIGHT: i32 = 8;
 const PLAYER_SPEED: f32 = 5.0;
 
 #[derive(Component)]
+struct Ship;
+
+#[derive(Component)]
 struct Player;
 
 #[derive(Component)]
@@ -144,22 +147,29 @@ fn spawn_ship(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let cube_size = 1.0; // Size of each cube,
-    for x in 0..SHIP_LENGTH {
-        for y in 0..SHIP_WIDTH {
-            for z in 0..SHIP_HEIGHT {
-                // Check if the current position is on the boundary
-                if x == 0 || x == SHIP_LENGTH - 1 || y == 0 || y == SHIP_WIDTH - 1 || z == 0 || z == SHIP_HEIGHT - 1 {
-                    commands.spawn(PbrBundle {
-                        mesh: meshes.add(Mesh::from(shape::Cube { size: cube_size })),
-                        material: materials.add(Color::hex("D18251").unwrap().into()),
-                        transform: Transform::from_xyz(x as f32, y as f32, z as f32),
-                        ..default()
-                    });
+    let cube_size = 1.0; // Size of each cube, adjust as needed
+
+    // Spawn the parent entity with a minimal Transform component
+    commands.spawn((
+        TransformBundle::default(),
+        Ship,
+    )).with_children(|parent| {
+        for x in 0..SHIP_LENGTH {
+            for y in 0..SHIP_WIDTH {
+                for z in 0..SHIP_HEIGHT {
+                    // Check if the current position is on the boundary
+                    if x == 0 || x == SHIP_LENGTH - 1 || y == 0 || y == SHIP_WIDTH - 1 || z == 0 || z == SHIP_HEIGHT - 1 {
+                        parent.spawn(PbrBundle {
+                            mesh: meshes.add(Mesh::from(shape::Cube { size: cube_size })),
+                            material: materials.add(Color::hex("D18251").unwrap().into()),
+                            transform: Transform::from_xyz(x as f32, y as f32, z as f32),
+                            ..default()
+                        });
+                    }
                 }
             }
         }
-    }
+    });
 }
 
 fn spawn_ocean(
