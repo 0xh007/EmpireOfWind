@@ -1,17 +1,29 @@
 use bevy::prelude::*;
 use bevy::pbr::{CascadeShadowConfigBuilder, NotShadowCaster};
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy::render::camera::ScalingMode;
 
 const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
 const SHIP_HEIGHT: i32 = 8;
 
+#[derive(Component)]
+struct MainCamera;
+
+#[derive(Component)]
+struct DebugCamera;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(PanOrbitCameraPlugin)
         .add_systems(Startup, setup)
+        .add_systems(Startup, setup_camera)
         .add_systems(Startup, spawn_ship)
+        .add_systems(Startup, spawn_ocean)
+        .add_systems(Update, camera_switching)
         .run();
 }
 
@@ -55,6 +67,52 @@ fn setup(
     ));
 }
 
+fn setup_camera(mut commands: Commands) {
+    commands.spawn((
+        Camera3dBundle {
+            camera: Camera {
+                order: 0,
+                is_active: true,
+                ..default()
+            },
+            transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
+            ..default()
+        },
+        PanOrbitCamera::default(),
+        DebugCamera,
+    ));
+
+    commands.spawn((
+        Camera3dBundle {
+            camera: Camera {
+                order: 1,
+                is_active: false,
+                ..default()
+            },
+            transform: Transform::from_xyz(20.0, 12.0, 40.0)
+                .looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
+        },
+        MainCamera,
+    ));
+}
+
+fn camera_switching(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&mut Camera, &DebugCamera), Without<MainCamera>>,
+    mut query_main: Query<(&mut Camera, &MainCamera), Without<DebugCamera>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Key0) {
+        for (mut camera, _) in query.iter_mut() {
+            camera.is_active = !camera.is_active;
+        }
+
+        for (mut camera, _) in query_main.iter_mut() {
+            camera.is_active = !camera.is_active;
+        }
+    }
+}
+
 fn spawn_ship(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -64,12 +122,10 @@ fn spawn_ship(
     for x in 0..SHIP_LENGTH {
         for y in 0..SHIP_WIDTH {
             for z in 0..SHIP_HEIGHT {
-                //D18251
                 // Check if the current position is on the boundary
                 if x == 0 || x == SHIP_LENGTH - 1 || y == 0 || y == SHIP_WIDTH - 1 || z == 0 || z == SHIP_HEIGHT - 1 {
                     commands.spawn(PbrBundle {
                         mesh: meshes.add(Mesh::from(shape::Cube { size: cube_size })),
-                        // material: materials.add(Color::rgb_u8(124, 144, 255).into()),
                         material: materials.add(Color::hex("D18251").unwrap().into()),
                         transform: Transform::from_xyz(x as f32, y as f32, z as f32),
                         ..default()
@@ -78,4 +134,17 @@ fn spawn_ship(
             }
         }
     }
+}
+
+fn spawn_ocean(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(shape::Circle::new(400.0).into()),
+        material: materials.add(Color::hex("618f92").unwrap().into()),
+        transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
+        ..default()
+    });
 }
