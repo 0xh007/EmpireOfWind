@@ -1,8 +1,9 @@
-use bevy::prelude::*;
 use bevy::pbr::{CascadeShadowConfigBuilder, NotShadowCaster};
-use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
+use bevy_xpbd_3d::prelude::*;
 
 const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
@@ -31,6 +32,7 @@ struct DebugCamera;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(PhysicsPlugins::default())
         .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(PanOrbitCameraPlugin)
         .add_systems(Startup, setup)
@@ -54,7 +56,7 @@ fn setup(
         ..default()
     }
     .build();
-    
+
     // Sun
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
@@ -70,7 +72,11 @@ fn setup(
 }
 
 fn setup_camera(mut commands: Commands) {
-    let ship_center = Vec3::new(SHIP_LENGTH as f32 / 2.0, SHIP_WIDTH as f32 / 2.0, SHIP_HEIGHT as f32 / 2.0);
+    let ship_center = Vec3::new(
+        SHIP_LENGTH as f32 / 2.0,
+        SHIP_WIDTH as f32 / 2.0,
+        SHIP_HEIGHT as f32 / 2.0,
+    );
     let camera_position = Vec3::new(20.0, 12., 40.0);
 
     commands.spawn((
@@ -118,7 +124,6 @@ fn camera_switching(
     }
 }
 
-
 fn spawn_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -131,7 +136,7 @@ fn spawn_player(
 
     commands.spawn((
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cylinder { 
+            mesh: meshes.add(Mesh::from(shape::Cylinder {
                 height: PLAYER_HEIGHT,
                 ..default()
             })),
@@ -143,7 +148,6 @@ fn spawn_player(
     ));
 }
 
-
 fn spawn_ship(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -152,26 +156,35 @@ fn spawn_ship(
     let cube_size = 1.0; // Size of each cube, adjust as needed
 
     // Spawn the parent entity with a minimal Transform component
-    commands.spawn((
-        TransformBundle::default(),
-        Ship,
-    )).with_children(|parent| {
-        for x in 0..SHIP_LENGTH {
-            for y in 0..SHIP_WIDTH {
-                for z in 0..SHIP_HEIGHT {
-                    // Check if the current position is on the boundary
-                    if x == 0 || x == SHIP_LENGTH - 1 || y == 0 || y == SHIP_WIDTH - 1 || z == 0 || z == SHIP_HEIGHT - 1 {
-                        parent.spawn(PbrBundle {
-                            mesh: meshes.add(Mesh::from(shape::Cube { size: cube_size })),
-                            material: materials.add(Color::hex("D18251").unwrap().into()),
-                            transform: Transform::from_xyz(x as f32, y as f32, z as f32),
-                            ..default()
-                        });
+    commands
+        .spawn((TransformBundle::default(), Ship))
+        .with_children(|parent| {
+            for x in 0..SHIP_LENGTH {
+                for y in 0..SHIP_WIDTH {
+                    for z in 0..SHIP_HEIGHT {
+                        // Check if the current position is on the boundary
+                        if x == 0
+                            || x == SHIP_LENGTH - 1
+                            || y == 0
+                            || y == SHIP_WIDTH - 1
+                            || z == 0
+                            || z == SHIP_HEIGHT - 1
+                        {
+                            parent.spawn((
+                                PbrBundle {
+                                    mesh: meshes.add(Mesh::from(shape::Cube { size: cube_size })),
+                                    material: materials.add(Color::hex("D18251").unwrap().into()),
+                                    transform: Transform::from_xyz(x as f32, y as f32, z as f32),
+                                    ..default()
+                                },
+                                RigidBody::Static,
+                                Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0),
+                            ));
+                        }
                     }
                 }
             }
-        }
-    });
+        });
 }
 
 fn spawn_ocean(
@@ -222,7 +235,7 @@ fn move_player_and_camera(
     // Update the player position
     player_transform.translation.x = new_position_x;
     player_transform.translation.z = new_position_z;
-    
+
     if let Ok(mut camera_transform) = camera_query.get_single_mut() {
         let camera_offset_x = 0.0;
         let camera_offset_z = 16.0;
@@ -230,5 +243,4 @@ fn move_player_and_camera(
         camera_transform.translation.x = player_transform.translation.x + camera_offset_x;
         camera_transform.translation.z = player_transform.translation.z + camera_offset_z;
     }
-
 }
