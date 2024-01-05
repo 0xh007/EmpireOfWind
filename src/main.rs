@@ -9,10 +9,12 @@ const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
 const SHIP_HEIGHT: i32 = 8;
 
-const DECK_OFFSET: f32 = 0.7; // This is the additional amount needed to spawn on the deck
+const DECK_OFFSET: f32 = 1.0; // This is the additional amount needed to spawn on the deck
 
 const PLAYER_HEIGHT: f32 = 1.8;
-const PLAYER_SPEED: f32 = 5.0;
+const PLAYER_RADIUS: f32 = 1.0;
+const PLAYER_SPEED: f32 = 500.0;
+const MOVEMENT_SMOOTHING_FACTOR: f32 = 0.5;
 
 #[derive(Component)]
 struct Ship;
@@ -144,6 +146,8 @@ fn spawn_player(
             transform: Transform::from_xyz(player_start_x, player_start_height, player_start_z),
             ..default()
         },
+        RigidBody::Kinematic,
+        Collider::capsule(PLAYER_HEIGHT / 2.0, PLAYER_RADIUS),
         Player,
     ));
 }
@@ -157,7 +161,11 @@ fn spawn_ship(
 
     // Spawn the parent entity with a minimal Transform component
     commands
-        .spawn((TransformBundle::default(), Ship))
+        .spawn((
+            TransformBundle::default(),
+            Ship,
+            InheritedVisibility::default(),
+        ))
         .with_children(|parent| {
             for x in 0..SHIP_LENGTH {
                 for y in 0..SHIP_WIDTH {
@@ -202,45 +210,53 @@ fn spawn_ocean(
 
 fn move_player_and_camera(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Player>>,
+    mut query: Query<(&mut LinearVelocity, &Transform), With<Player>>,
     mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<Player>)>,
     time: Res<Time>,
 ) {
-    let mut player_transform = query.single_mut();
-    let mut direction_x = 0.0;
-    let mut direction_z = 0.0;
+    if let Ok((mut linear_velocity, player_transform)) = query.get_single_mut() {
+        let mut direction = Vec3::ZERO;
 
-    // Handle horizontal movement
-    if keyboard_input.pressed(KeyCode::A) {
-        direction_x -= 1.0; // Move left
-    }
-    if keyboard_input.pressed(KeyCode::D) {
-        direction_x += 1.0; // Move right
-    }
+        // Handle horizontal movement
+        if keyboard_input.pressed(KeyCode::A) {
+            direction.x -= 1.0; // Move left
+        }
+        if keyboard_input.pressed(KeyCode::D) {
+            direction.x += 1.0; // Move right
+        }
 
-    // Handle forward/backward movement
-    if keyboard_input.pressed(KeyCode::W) {
-        direction_z -= 1.0; // Move forward
-    }
-    if keyboard_input.pressed(KeyCode::S) {
-        direction_z += 1.0; // Move backward
-    }
+        // Handle forward/backward movement
+        if keyboard_input.pressed(KeyCode::W) {
+            direction.z -= 1.0; // Move forward
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            direction.z += 1.0; // Move backward
+        }
 
-    // Calculate the new position
-    let new_position_x =
-        player_transform.translation.x + direction_x * PLAYER_SPEED * time.delta_seconds();
-    let new_position_z =
-        player_transform.translation.z + direction_z * PLAYER_SPEED * time.delta_seconds();
+        // Normalize the direction vector and scale by player speed
+        if direction.length_squared() > 0.0 {
+            direction = direction.normalize() * PLAYER_SPEED;
+        }
 
-    // Update the player position
-    player_transform.translation.x = new_position_x;
-    player_transform.translation.z = new_position_z;
+        // Apply a smoothing factor to the velocity change
+        linear_velocity.0 = (linear_velocity.0 * (1.0 - MOVEMENT_SMOOTHING_FACTOR))
+            + (direction * time.delta_seconds() * MOVEMENT_SMOOTHING_FACTOR);
 
-    if let Ok(mut camera_transform) = camera_query.get_single_mut() {
-        let camera_offset_x = 0.0;
-        let camera_offset_z = 16.0;
+        // Update the camera position
+        if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+            let target_position = Vec3::new(
+                player_transform.translation.x,
+                player_transform.translation.y,
+                player_transform.translation.z + 16.0,
+            );
 
-        camera_transform.translation.x = player_transform.translation.x + camera_offset_x;
-        camera_transform.translation.z = player_transform.translation.z + camera_offset_z;
+            // Interpolation factor determins how quickly the camera catches up to the target
+            let interpolation_factor = 10.0 * time.delta_seconds();
+
+            // Use linear interpolation to smoothly update the camera position
+            camera_transform.translation = camera_transform
+                .translation
+                .lerp(target_position, interpolation_factor.clamp(0.0, 1.0));
+        }
     }
 }
