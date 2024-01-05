@@ -8,6 +8,9 @@ const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
 const SHIP_HEIGHT: i32 = 8;
 
+const DECK_OFFSET: f32 = 0.7; // This is the additional amount needed to spawn on the deck
+
+const PLAYER_HEIGHT: f32 = 1.8;
 const PLAYER_SPEED: f32 = 5.0;
 
 #[derive(Component)]
@@ -121,8 +124,7 @@ fn spawn_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let player_height = 1.8;
-    let player_start_height = SHIP_HEIGHT as f32 + (player_height * 2.5) / 2.0; // Position player on top of the ship
+    let player_start_height = SHIP_HEIGHT as f32 + PLAYER_HEIGHT + DECK_OFFSET; // Position player on top of the ship
 
     let player_start_x = SHIP_LENGTH as f32 / 2.0;
     let player_start_z = SHIP_WIDTH as f32 / 2.0;
@@ -130,7 +132,7 @@ fn spawn_player(
     commands.spawn((
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cylinder { 
-                height: player_height,
+                height: PLAYER_HEIGHT,
                 ..default()
             })),
             material: materials.add(Color::YELLOW.into()),
