@@ -1,15 +1,16 @@
 use bevy::pbr::{CascadeShadowConfigBuilder, NotShadowCaster};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
+use bevy::transform::commands;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_xpbd_3d::prelude::*;
 
 const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
-const SHIP_HEIGHT: i32 = 8;
+const SHIP_HEIGHT: i32 = 10;
 
-const DECK_OFFSET: f32 = 1.0; // This is the additional amount needed to spawn on the deck
+const DECK_OFFSET: f32 = -1.4; // This is the additional amount needed to spawn on the deck
 
 const PLAYER_HEIGHT: f32 = 1.8;
 const PLAYER_RADIUS: f32 = 1.0;
@@ -168,15 +169,15 @@ fn spawn_ship(
         ))
         .with_children(|parent| {
             for x in 0..SHIP_LENGTH {
-                for y in 0..SHIP_WIDTH {
-                    for z in 0..SHIP_HEIGHT {
+                for z in 0..SHIP_WIDTH {
+                    for y in 0..SHIP_HEIGHT {
                         // Check if the current position is on the boundary
                         if x == 0
                             || x == SHIP_LENGTH - 1
-                            || y == 0
-                            || y == SHIP_WIDTH - 1
                             || z == 0
-                            || z == SHIP_HEIGHT - 1
+                            || z == SHIP_WIDTH - 1
+                            || y == 0
+                            || y == SHIP_HEIGHT - 1
                         {
                             parent.spawn((
                                 PbrBundle {
@@ -189,6 +190,25 @@ fn spawn_ship(
                                 Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0),
                             ));
                         }
+                    }
+                }
+            }
+            // Spawn railing
+            for x in 0..SHIP_LENGTH {
+                for z in 0..SHIP_WIDTH {
+                    let y = SHIP_HEIGHT; // One layer above the ship
+                                         // Spawn railing on edges
+                    if (x == 0 || x == SHIP_LENGTH - 1 || z == 0 || z == SHIP_WIDTH - 1) {
+                        parent.spawn((
+                            PbrBundle {
+                                mesh: meshes.add(Mesh::from(shape::Cube { size: cube_size })),
+                                material: materials.add(Color::hex("D18251").unwrap().into()),
+                                transform: Transform::from_xyz(x as f32, y as f32, z as f32),
+                                ..default()
+                            },
+                            RigidBody::Static,
+                            Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0),
+                        ));
                     }
                 }
             }
