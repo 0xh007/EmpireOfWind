@@ -2,7 +2,7 @@ use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
-use bevy_xpbd_3d::parry::na::{Quaternion, Scalar};
+use bevy_xpbd_3d::parry::na::Scalar;
 use bevy_xpbd_3d::{math::*, prelude::*, SubstepSchedule, SubstepSet};
 
 const SHIP_LENGTH: i32 = 40;
@@ -87,6 +87,17 @@ pub struct ControllerGravity(Vector);
 #[derive(Component)]
 pub struct MaxSlopeAngle(Scalar);
 
+/// A bundle that contains the components needed for a basic kinematic character controller.
+#[derive(Bundle)]
+pub struct CharacterControllerBundle {
+    character_controller: CharacterController,
+    rigid_body: RigidBody,
+    collider: Collider,
+    ground_caster: ShapeCaster,
+    gravity: ControllerGravity,
+    movement: MovementBundle,
+}
+
 /// A bundle that contains components for character movement.
 #[derive(Bundle)]
 pub struct MovementBundle {
@@ -109,80 +120,6 @@ impl MovementBundle {
             jump_impulse: JumpImpulse(jump_impulse),
             max_slope_angle: MaxSlopeAngle(max_slope_angle),
         }
-    }
-}
-
-impl Default for MovementBundle {
-    fn default() -> Self {
-        Self::new(30.0, 0.9, 7.0, PI * 0.45)
-    }
-}
-
-/// A bundle that contains the components needed for a basic kinematic character controller.
-#[derive(Bundle)]
-pub struct CharacterControllerBundle {
-    character_controller: CharacterController,
-    rigid_body: RigidBody,
-    collider: Collider,
-    ground_caster: ShapeCaster,
-    gravity: ControllerGravity,
-    movement: MovementBundle,
-}
-
-impl CharacterControllerBundle {
-    pub fn new(collider: Collider, gravity: Vector) -> Self {
-        // Create shape caster as a slightly smaller version of collider
-        let mut caster_shape = collider.clone();
-        caster_shape.set_scale(Vector::ONE * 0.99, 10);
-
-        Self {
-            character_controller: CharacterController,
-            rigid_body: RigidBody::Kinematic,
-            collider,
-            ground_caster: ShapeCaster::new(
-                caster_shape,
-                Vector::ZERO,
-                Quaternion::default(),
-                Vector::NEG_Y,
-            )
-            .with_max_time_of_impact(0.2),
-            gravity: ControllerGravity(gravity),
-            movement: MovementBundle::default(),
-        }
-    }
-
-    pub fn with_movement(
-        mut self,
-        acceleration: Scalar,
-        damping: Scalar,
-        jump_impulse: Scalar,
-        max_slope_angle: Scalar,
-    ) -> Self {
-        self.movement = MovementBundle::new(acceleration, damping, jump_impulse, max_slope_angle);
-        self
-    }
-}
-
-/// Sends ['MovementAction'] events based on keyboard input.
-fn keyboard_input(
-    mut movement_event_writer: EventWriter<MovementAction>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    let up = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]);
-    let down = keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]);
-    let left = keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]);
-    let right = keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]);
-
-    let horizontal = right as i8 - left as i8;
-    let vertical = up as i8 - down as i8;
-    let direction = Vector2::new(horizontal as Scalar, vertical as Scalar).clamp_length_max(1.0);
-
-    if direction != Vector2::ZERO {
-        movement_event_writer.send(MovementAction::Move(direction));
-    }
-
-    if keyboard_input.just_pressed(KeyCode::Space) {
-        movement_event_writer.send(MovementAction::Jump);
     }
 }
 
