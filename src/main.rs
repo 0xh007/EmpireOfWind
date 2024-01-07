@@ -1,21 +1,40 @@
-use bevy::pbr::{CascadeShadowConfigBuilder, NotShadowCaster};
 use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
-use bevy::transform::commands;
+use bevy::{ecs::component, pbr::CascadeShadowConfigBuilder};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
-use bevy_xpbd_3d::prelude::*;
+use bevy_xpbd_3d::parry::na::Scalar;
+use bevy_xpbd_3d::{math::*, prelude::*, SubstepSchedule, SubstepSet};
 
 const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
 const SHIP_HEIGHT: i32 = 10;
 
-const DECK_OFFSET: f32 = -1.4; // This is the additional amount needed to spawn on the deck
+const DECK_OFFSET: f32 = -0.4; // This is the additional amount needed to spawn on the deck
 
 const PLAYER_HEIGHT: f32 = 1.8;
 const PLAYER_RADIUS: f32 = 1.0;
 const PLAYER_SPEED: f32 = 500.0;
 const MOVEMENT_SMOOTHING_FACTOR: f32 = 0.5;
+
+fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(PhysicsPlugins::default())
+        .add_plugins(WorldInspectorPlugin::new())
+        .add_plugins(PanOrbitCameraPlugin)
+        .add_systems(Startup, setup)
+        .add_systems(Startup, setup_camera)
+        .add_systems(Startup, spawn_ship)
+        .add_systems(Startup, spawn_ocean)
+        .add_systems(Startup, spawn_player)
+        .add_systems(FixedUpdate, move_player_and_camera)
+        .add_systems(Update, camera_switching)
+        .add_systems(
+            SubstepSchedule,
+            player_collision_handling.in_set(SubstepSet::SolveUserConstraints),
+        )
+        .run();
+}
 
 #[derive(Component)]
 struct Ship;
@@ -32,27 +51,79 @@ struct MainCamera;
 #[derive(Component)]
 struct DebugCamera;
 
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(PhysicsPlugins::default())
-        .add_plugins(WorldInspectorPlugin::new())
-        .add_plugins(PanOrbitCameraPlugin)
-        .add_systems(Startup, setup)
-        .add_systems(Startup, setup_camera)
-        .add_systems(Startup, spawn_ship)
-        .add_systems(Startup, spawn_ocean)
-        .add_systems(Startup, spawn_player)
-        .add_systems(FixedUpdate, move_player_and_camera)
-        .add_systems(Update, camera_switching)
-        .run();
+/// An event sent for a movement input action
+#[derive(Event)]
+pub enum MovementAction {
+    Move(Vector2),
 }
 
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+/// A marker component indicating that an entity is using a character controller.
+#[derive(Component)]
+pub struct CharacterController;
+
+/// A marker component indicating that an entity is on the ground.
+#[derive(Component)]
+#[component(storage = "SparseSet")]
+pub struct Grounded;
+
+/// The acceleration used for character movement.
+#[derive(Component)]
+pub struct MovementAcceleration(Scalar);
+
+/// The damping factor used for slowing down movement.
+#[derive(Component)]
+pub struct MovementDampingFactor(Scalar);
+
+/// The strength of a jump.
+#[derive(Component)]
+pub struct JumpImpulse(Scalar);
+
+/// The gravitational acceleration used for a character controller.
+#[derive(Component)]
+pub struct ControllerGravity(Vector);
+
+/// The maximum angle a slope can have for a character controller to be able to climb and jump. If
+/// the slope is steeper than this angle, the character will slide down.
+#[derive(Component)]
+pub struct MaxSlopeAngle(Scalar);
+
+/// A bundle that contains the components needed for a basic kinematic character controller.
+#[derive(Bundle)]
+pub struct CharacterControllerBundle {
+    character_controller: CharacterController,
+    rigid_body: RigidBody,
+    collider: Collider,
+    ground_caster: ShapeCaster,
+    gravity: ControllerGravity,
+    movement: MovementBundle,
+}
+
+/// A bundle that contains components for character movement.
+#[derive(Bundle)]
+pub struct MovementBundle {
+    acceleration: MovementAcceleration,
+    damping: MovementDampingFactor,
+    jump_impulse: JumpImpulse,
+    max_slope_angle: MaxSlopeAngle,
+}
+
+impl MovementBundle {
+    pub const fn new(
+        acceleration: Scalar,
+        damping: Scalar,
+        jump_impulse: Scalar,
+        max_slope_angle: Scalar,
+    ) -> Self {
+        Self {
+            acceleration: MovementAcceleration(acceleration),
+            damping: MovementDampingFactor(damping),
+            jump_impulse: JumpImpulse(jump_impulse),
+            max_slope_angle: MaxSlopeAngle(max_slope_angle),
+        }
+    }
+}
+
+fn setup(mut commands: Commands) {
     let cascade_shadow_config = CascadeShadowConfigBuilder {
         first_cascade_far_bound: 0.3,
         maximum_distance: 3.0,
@@ -148,6 +219,7 @@ fn spawn_player(
             ..default()
         },
         RigidBody::Kinematic,
+        // DebugRender::default().with_collider_color(Color::RED),
         Collider::capsule(PLAYER_HEIGHT / 2.0, PLAYER_RADIUS),
         Player,
     ));
@@ -187,6 +259,7 @@ fn spawn_ship(
                                     ..default()
                                 },
                                 RigidBody::Static,
+                                // DebugRender::default().with_collider_color(Color::YELLOW),
                                 Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0),
                             ));
                         }
@@ -198,7 +271,7 @@ fn spawn_ship(
                 for z in 0..SHIP_WIDTH {
                     let y = SHIP_HEIGHT; // One layer above the ship
                                          // Spawn railing on edges
-                    if (x == 0 || x == SHIP_LENGTH - 1 || z == 0 || z == SHIP_WIDTH - 1) {
+                    if x == 0 || x == SHIP_LENGTH - 1 || z == 0 || z == SHIP_WIDTH - 1 {
                         parent.spawn((
                             PbrBundle {
                                 mesh: meshes.add(Mesh::from(shape::Cube { size: cube_size })),
@@ -208,6 +281,7 @@ fn spawn_ship(
                             },
                             RigidBody::Static,
                             Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0),
+                            // DebugRender::default().with_collider_color(Color::YELLOW),
                         ));
                     }
                 }
@@ -277,6 +351,93 @@ fn move_player_and_camera(
             camera_transform.translation = camera_transform
                 .translation
                 .lerp(target_position, interpolation_factor.clamp(0.0, 1.0));
+        }
+    }
+}
+
+fn player_collision_handling(
+    collisions: Res<Collisions>,
+    collider_parents: Query<(&ColliderParent, &Rotation)>,
+    mut player_query: Query<(
+        &RigidBody,
+        &mut Transform,
+        &mut LinearVelocity,
+        With<Player>,
+    )>,
+) {
+    // Go through all collisions
+    for contacts in collisions.iter() {
+        // Skip if the collision didn't happen during this substep
+        if !contacts.during_current_substep {
+            continue;
+        }
+
+        // Retrieve the parent entities and their rotations of the colliders involved in the collision
+        let Ok([(collider_parent1, rotation1), (collider_parent2, rotation2)]) =
+            collider_parents.get_many([contacts.entity1, contacts.entity2])
+        else {
+            continue;
+        };
+
+        let handle_collision = |rb: &RigidBody,
+                                transform: &mut Transform,
+                                linear_velocity: &mut LinearVelocity,
+                                rotation: &Rotation,
+                                is_first: bool| {
+            // Ensure we're dealing with the kinematic player
+            if !rb.is_kinematic() {
+                return;
+            }
+
+            // Handle the collision response for the player
+            for manifold in contacts.manifolds.iter() {
+                let normal = if is_first {
+                    manifold.global_normal1(rotation)
+                } else {
+                    manifold.global_normal2(rotation)
+                };
+
+                for contact in manifold.contacts.iter().filter(|c| c.penetration > 0.0) {
+                    // Calculate a response vector that is a fraction of the penetration depth
+                    let response = normal * (contact.penetration * 0.01);
+
+                    // Apply the response vector to the player's position
+                    transform.translation += response;
+
+                    // Optionally, adjust the player's response velocity to prevent further
+                    // movement into the collider
+                    let velocity_along_normal = linear_velocity.0.dot(normal);
+                    if velocity_along_normal < 0.0 {
+                        *linear_velocity =
+                            LinearVelocity(linear_velocity.0 - normal * velocity_along_normal);
+                    }
+                }
+            }
+        };
+
+        // Check if the player is involved in the collision and retrieve the player components
+        if let Ok((rb, mut transform, mut linear_velocity, _)) =
+            player_query.get_mut(collider_parent1.get())
+        {
+            handle_collision(
+                rb,
+                &mut *transform, // Deref the Mut<Transform> to get &mut Transform
+                &mut *linear_velocity, // Deref the Mut<LinearVelocity> to get &mut LinearVelocity
+                rotation1,
+                true,
+            );
+        }
+
+        if let Ok((rb, mut transform, mut linear_velocity, _)) =
+            player_query.get_mut(collider_parent2.get())
+        {
+            handle_collision(
+                rb,
+                &mut *transform,       // Deref the Mut<Transform>
+                &mut *linear_velocity, // Deref the Mut<LinearVelocity>
+                rotation2,
+                false,
+            );
         }
     }
 }
