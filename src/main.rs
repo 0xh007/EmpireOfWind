@@ -186,6 +186,33 @@ fn keyboard_input(
     }
 }
 
+/// Updates the ['Grounded'] status for character controllers.
+fn update_grounded(
+    mut commands: Commands,
+    mut query: Query<
+        (Entity, &ShapeHits, &Rotation, Option<&MaxSlopeAngle>),
+        With<CharacterController>,
+    >,
+) {
+    for (entity, hits, rotation, max_slope_angle) in &mut query {
+        // The character is grounded if the shape caster has a hit with a normal that isn't too
+        // steep
+        let is_grounded = hits.iter().any(|hit| {
+            if let Some(angle) = max_slope_angle {
+                rotation.rotate(-hit.normal2).angle_between(Vector::Y).abs() <= angle.0
+            } else {
+                true
+            }
+        });
+
+        if is_grounded {
+            commands.entity(entity).insert(Grounded);
+        } else {
+            commands.entity(entity).remove::<Grounded>();
+        }
+    }
+}
+
 fn setup(mut commands: Commands) {
     let cascade_shadow_config = CascadeShadowConfigBuilder {
         first_cascade_far_bound: 0.3,
