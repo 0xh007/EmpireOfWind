@@ -437,7 +437,7 @@ fn spawn_player(
             ..default()
         },
         CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
-            .with_movement(30.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
+            .with_movement(90.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
     ));
 }
 
@@ -451,6 +451,19 @@ fn spawn_ship(mut commands: Commands, assets: ResMut<AssetServer>) {
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
         RigidBody::Static,
     ));
+}
+
+fn spawn_ocean(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(shape::Circle::new(400.0).into()),
+        material: materials.add(Color::hex("618f92").unwrap().into()),
+        transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
+        ..default()
+    });
 }
 
 // fn spawn_ship(
@@ -516,19 +529,6 @@ fn spawn_ship(mut commands: Commands, assets: ResMut<AssetServer>) {
 //             }
 //         });
 // }
-
-fn spawn_ocean(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(shape::Circle::new(400.0).into()),
-        material: materials.add(Color::hex("618f92").unwrap().into()),
-        transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
-        ..default()
-    });
-}
 
 // fn camera_switching(
 //     keyboard_input: Res<Input<KeyCode>>,
