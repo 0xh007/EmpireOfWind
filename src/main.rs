@@ -433,7 +433,7 @@ fn spawn_player(
                 ..default()
             })),
             material: materials.add(Color::YELLOW.into()),
-            transform: Transform::from_xyz(0.0, 10.0, 0.0),
+            transform: Transform::from_xyz(0.0, 15.0, 0.0),
             ..default()
         },
         CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
@@ -448,9 +448,7 @@ fn spawn_ship(mut commands: Commands, assets: ResMut<AssetServer>) {
             transform: Transform::from_xyz(0.0, 9.0, 0.0),
             ..default()
         },
-        AsyncSceneCollider::new(Some(ComputedCollider::ConvexDecomposition(
-            VHACDParameters::default(),
-        ))),
+        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
         RigidBody::Static,
     ));
 }
