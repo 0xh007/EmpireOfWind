@@ -30,7 +30,7 @@ fn main() {
         .add_systems(Startup, spawn_ocean)
         .add_systems(Startup, spawn_player)
         // .add_systems(FixedUpdate, move_player_and_camera)
-        // .add_systems(Update, camera_switching)
+        .add_systems(Update, camera_switching)
         .add_systems(
             Update,
             (
@@ -248,8 +248,8 @@ fn movement(
         {
             match event {
                 MovementAction::Move(direction) => {
-                    linear_velocity.x += direction.x * movement_acceleration.0 * delta_time;
-                    linear_velocity.z += direction.y * movement_acceleration.0 * delta_time;
+                    linear_velocity.z -= direction.x * movement_acceleration.0 * delta_time;
+                    linear_velocity.x -= direction.y * movement_acceleration.0 * delta_time;
                 }
                 MovementAction::Jump => {
                     if is_grounded {
@@ -380,32 +380,28 @@ fn setup(mut commands: Commands) {
 }
 
 fn setup_camera(mut commands: Commands) {
-    let ship_center = Vec3::new(
-        SHIP_LENGTH as f32 / 2.0,
-        SHIP_WIDTH as f32 / 2.0,
-        SHIP_HEIGHT as f32 / 2.0,
-    );
-    let camera_position = Vec3::new(20.0, 12., 40.0);
-
-    // commands.spawn((
-    //     Camera3dBundle {
-    //         camera: Camera {
-    //             order: 0,
-    //             is_active: true,
-    //             ..default()
-    //         },
-    //         transform: Transform::from_translation(camera_position)
-    //             .looking_at(ship_center, Vec3::Y),
-    //         ..default()
-    //     },
-    //     MainCamera,
-    // ));
+    // transform: Transform::from_xyz(0.0, 15.0, 0.0),
+    let focus = Vec3::new(0.0, 8.0, 0.0);
+    let camera_position = Vec3::new(28.0, 20., 0.0);
 
     commands.spawn((
         Camera3dBundle {
             camera: Camera {
                 order: 0,
                 is_active: true,
+                ..default()
+            },
+            transform: Transform::from_translation(camera_position).looking_at(focus, Vec3::Y),
+            ..default()
+        },
+        MainCamera,
+    ));
+
+    commands.spawn((
+        Camera3dBundle {
+            camera: Camera {
+                order: 1,
+                is_active: false,
                 ..default()
             },
             transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
@@ -464,6 +460,22 @@ fn spawn_ocean(
         transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
         ..default()
     });
+}
+
+fn camera_switching(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&mut Camera, &DebugCamera), Without<MainCamera>>,
+    mut query_main: Query<(&mut Camera, &MainCamera), Without<DebugCamera>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Key0) {
+        for (mut camera, _) in query.iter_mut() {
+            camera.is_active = !camera.is_active;
+        }
+
+        for (mut camera, _) in query_main.iter_mut() {
+            camera.is_active = !camera.is_active;
+        }
+    }
 }
 
 // fn spawn_ship(
@@ -528,22 +540,6 @@ fn spawn_ocean(
 //                 }
 //             }
 //         });
-// }
-
-// fn camera_switching(
-//     keyboard_input: Res<Input<KeyCode>>,
-//     mut query: Query<(&mut Camera, &DebugCamera), Without<MainCamera>>,
-//     mut query_main: Query<(&mut Camera, &MainCamera), Without<DebugCamera>>,
-// ) {
-//     if keyboard_input.just_pressed(KeyCode::Key0) {
-//         for (mut camera, _) in query.iter_mut() {
-//             camera.is_active = !camera.is_active;
-//         }
-//
-//         for (mut camera, _) in query_main.iter_mut() {
-//             camera.is_active = !camera.is_active;
-//         }
-//     }
 // }
 
 // fn move_player_and_camera(
