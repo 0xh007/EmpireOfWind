@@ -1,5 +1,5 @@
-use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
+use bevy::{pbr::CascadeShadowConfigBuilder, transform::TransformSystem};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_xpbd_3d::{
@@ -29,7 +29,6 @@ fn main() {
         .add_systems(Startup, spawn_ship)
         .add_systems(Startup, spawn_ocean)
         .add_systems(Startup, spawn_player)
-        // .add_systems(FixedUpdate, move_player_and_camera)
         .add_systems(Update, camera_switching)
         .add_systems(
             Update,
@@ -46,6 +45,12 @@ fn main() {
         .add_systems(
             SubstepSchedule,
             kinematic_controller_collisions.in_set(SubstepSet::SolveUserConstraints),
+        )
+        .add_systems(
+            PostUpdate,
+            move_camera
+                .after(PhysicsSet::Sync)
+                .before(TransformSystem::TransformPropagate),
         )
         .run();
 }
@@ -478,6 +483,38 @@ fn camera_switching(
     }
 }
 
+fn move_camera(
+    mut query: Query<&Transform, With<CharacterController>>,
+    mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<CharacterController>)>,
+    time: Res<Time>,
+) {
+    if let Ok(player_transform) = query.get_single() {
+        if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+            let camera_offset = Vec3::new(25.0, 12.0, 0.0); // Adjust as needed
+
+            // Calculate the target position based on the player's position and the offset
+            let target_position = player_transform.translation + camera_offset;
+
+            // Interpolation factor
+            let interpolation_factor = 10.0 * time.delta_seconds();
+
+            // Smoothly interpolate the camera's position
+            camera_transform.translation = camera_transform
+                .translation
+                .lerp(target_position, interpolation_factor.clamp(0.0, 1.0));
+
+            // Calculate the desired forward vector from the camera to the player
+            let forward = (player_transform.translation - camera_transform.translation).normalize();
+
+            // Calculate the desired up vector, which should be the global up vector
+            let up = Vec3::Y;
+
+            // Use the `look_at` method to point the camera towards the player while maintaining the up vector
+            camera_transform.look_at(player_transform.translation, up);
+        }
+    }
+}
+
 // fn spawn_ship(
 //     mut commands: Commands,
 //     mut meshes: ResMut<Assets<Mesh>>,
@@ -540,144 +577,4 @@ fn camera_switching(
 //                 }
 //             }
 //         });
-// }
-
-// fn move_player_and_camera(
-//     keyboard_input: Res<Input<KeyCode>>,
-//     mut query: Query<(&mut LinearVelocity, &Transform), With<Player>>,
-//     mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<Player>)>,
-//     time: Res<Time>,
-// ) {
-//     if let Ok((mut linear_velocity, player_transform)) = query.get_single_mut() {
-//         let mut direction = Vec3::ZERO;
-//
-//         // Handle horizontal movement
-//         if keyboard_input.pressed(KeyCode::A) {
-//             direction.x -= 1.0; // Move left
-//         }
-//         if keyboard_input.pressed(KeyCode::D) {
-//             direction.x += 1.0; // Move right
-//         }
-//
-//         // Handle forward/backward movement
-//         if keyboard_input.pressed(KeyCode::W) {
-//             direction.z -= 1.0; // Move forward
-//         }
-//         if keyboard_input.pressed(KeyCode::S) {
-//             direction.z += 1.0; // Move backward
-//         }
-//
-//         // Normalize the direction vector and scale by player speed
-//         if direction.length_squared() > 0.0 {
-//             direction = direction.normalize() * PLAYER_SPEED;
-//         }
-//
-//         // Apply a smoothing factor to the velocity change
-//         linear_velocity.0 = (linear_velocity.0 * (1.0 - MOVEMENT_SMOOTHING_FACTOR))
-//             + (direction * time.delta_seconds() * MOVEMENT_SMOOTHING_FACTOR);
-//
-//         // Update the camera position
-//         if let Ok(mut camera_transform) = camera_query.get_single_mut() {
-//             let target_position = Vec3::new(
-//                 player_transform.translation.x,
-//                 player_transform.translation.y,
-//                 player_transform.translation.z + 16.0,
-//             );
-//
-//             // Interpolation factor determins how quickly the camera catches up to the target
-//             let interpolation_factor = 10.0 * time.delta_seconds();
-//
-//             // Use linear interpolation to smoothly update the camera position
-//             camera_transform.translation = camera_transform
-//                 .translation
-//                 .lerp(target_position, interpolation_factor.clamp(0.0, 1.0));
-//         }
-//     }
-// }
-
-// fn player_collision_handling(
-//     collisions: Res<Collisions>,
-//     collider_parents: Query<(&ColliderParent, &Rotation)>,
-//     mut player_query: Query<(
-//         &RigidBody,
-//         &mut Transform,
-//         &mut LinearVelocity,
-//         With<Player>,
-//     )>,
-// ) {
-//     // Go through all collisions
-//     for contacts in collisions.iter() {
-//         // Skip if the collision didn't happen during this substep
-//         if !contacts.during_current_substep {
-//             continue;
-//         }
-//
-//         // Retrieve the parent entities and their rotations of the colliders involved in the collision
-//         let Ok([(collider_parent1, rotation1), (collider_parent2, rotation2)]) =
-//             collider_parents.get_many([contacts.entity1, contacts.entity2])
-//         else {
-//             continue;
-//         };
-//
-//         let handle_collision = |rb: &RigidBody,
-//                                 transform: &mut Transform,
-//                                 linear_velocity: &mut LinearVelocity,
-//                                 rotation: &Rotation,
-//                                 is_first: bool| {
-//             // Ensure we're dealing with the kinematic player
-//             if !rb.is_kinematic() {
-//                 return;
-//             }
-//
-//             // Handle the collision response for the player
-//             for manifold in contacts.manifolds.iter() {
-//                 let normal = if is_first {
-//                     manifold.global_normal1(rotation)
-//                 } else {
-//                     manifold.global_normal2(rotation)
-//                 };
-//
-//                 for contact in manifold.contacts.iter().filter(|c| c.penetration > 0.0) {
-//                     // Calculate a response vector that is a fraction of the penetration depth
-//                     let response = normal * (contact.penetration * 0.01);
-//
-//                     // Apply the response vector to the player's position
-//                     transform.translation += response;
-//
-//                     // Optionally, adjust the player's response velocity to prevent further
-//                     // movement into the collider
-//                     let velocity_along_normal = linear_velocity.0.dot(normal);
-//                     if velocity_along_normal < 0.0 {
-//                         *linear_velocity =
-//                             LinearVelocity(linear_velocity.0 - normal * velocity_along_normal);
-//                     }
-//                 }
-//             }
-//         };
-//
-//         // Check if the player is involved in the collision and retrieve the player components
-//         if let Ok((rb, mut transform, mut linear_velocity, _)) =
-//             player_query.get_mut(collider_parent1.get())
-//         {
-//             handle_collision(
-//                 rb,
-//                 &mut *transform, // Deref the Mut<Transform> to get &mut Transform
-//                 &mut *linear_velocity, // Deref the Mut<LinearVelocity> to get &mut LinearVelocity
-//                 rotation1,
-//                 true,
-//             );
-//         }
-//
-//         if let Ok((rb, mut transform, mut linear_velocity, _)) =
-//             player_query.get_mut(collider_parent2.get())
-//         {
-//             handle_collision(
-//                 rb,
-//                 &mut *transform,       // Deref the Mut<Transform>
-//                 &mut *linear_velocity, // Deref the Mut<LinearVelocity>
-//                 rotation2,
-//                 false,
-//             );
-//         }
-//     }
 // }
