@@ -1,3 +1,5 @@
+// .add_event::<MovementAction>()
+
 /// Sends ['MovementAction'] event based on keyboard input
 fn keyboard_input(
     mut movement_event_writer: EventWriter<MovementAction>,

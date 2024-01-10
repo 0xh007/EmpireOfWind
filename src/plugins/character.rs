@@ -1,4 +1,25 @@
 use bevy::prelude::*;
+use bevy_xpbd_3d::{math::*, prelude::*, SubstepSchedule, SubstepSet};
+
+use crate::prelude::*;
+
+pub struct CharacterPlugin;
+
+impl Plugin for CharacterPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            app
+            .add_systems(Update, update_grounded)
+            .add_systems(Update, apply_deferred)
+            .add_systems(Update, apply_gravity)
+            .add_systems(Update, movement)
+            .add_systems(Update, apply_movement_damping)
+            .add_systems(
+                SubstepSchedule,
+                kinematic_controller_collisions.in_set(SubstepSet::SolveUserConstraints),
+            );
+    }
+}
 
 /// Updates the ['Grounded'] status for character controllers.
 fn update_grounded(
