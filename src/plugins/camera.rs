@@ -1,5 +1,31 @@
-use crate::prelude::*;
 use bevy::prelude::*;
+use bevy_xpbd_3d::{
+    math::*, parry::transformation::vhacd::VHACDParameters, prelude::*, SubstepSchedule, SubstepSet,
+};
+
+use crate::prelude::*;
+
+pub struct CameraPlugin;
+
+impl Plugin for CameraPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup_camera)
+            .add_systems(Update, camera_switching)
+            .add_systems(
+                PostUpdate,
+                move_camera
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
+            );
+    }
+}
+
+// .add_systems(
+//     PostUpdate,
+//     move_camera
+//         .after(PhysicsSet::Sync)
+//         .before(TransformSystem::TransformPropagate),
+// )
 
 fn setup_camera(mut commands: Commands) {
     // transform: Transform::from_xyz(0.0, 15.0, 0.0),
