@@ -1,5 +1,7 @@
-#[derive(Component)]
-struct MainCamera;
+use bevy::prelude::*;
 
 #[derive(Component)]
-struct DebugCamera;
+pub struct MainCamera;
+
+#[derive(Component)]
+pub struct DebugCamera;
