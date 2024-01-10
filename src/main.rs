@@ -25,11 +25,11 @@ fn main() {
         .add_plugins(PanOrbitCameraPlugin)
         .add_event::<MovementAction>()
         .add_systems(Startup, setup)
-        .add_systems(Startup, setup_camera)
+        // .add_systems(Startup, setup_camera)
         .add_systems(Startup, spawn_ship)
         .add_systems(Startup, spawn_ocean)
         .add_systems(Startup, spawn_player)
-        .add_systems(Update, camera_switching)
+        // .add_systems(Update, camera_switching)
         .add_systems(
             Update,
             (
@@ -78,110 +78,110 @@ pub enum MovementAction {
 }
 
 /// A marker component indicating that an entity is using a character controller.
-#[derive(Component)]
-pub struct CharacterController;
+// #[derive(Component)]
+// pub struct CharacterController;
 
-/// A marker component indicating that an entity is on the ground.
-#[derive(Component)]
-#[component(storage = "SparseSet")]
-pub struct Grounded;
-
-/// The acceleration used for character movement.
-#[derive(Component)]
-pub struct MovementAcceleration(Scalar);
-
-/// The damping factor used for slowing down movement.
-#[derive(Component)]
-pub struct MovementDampingFactor(Scalar);
-
-/// The strength of a jump.
-#[derive(Component)]
-pub struct JumpImpulse(Scalar);
-
-/// The gravitational acceleration used for a character controller.
-#[derive(Component)]
-pub struct ControllerGravity(Vector);
-
-/// The maximum angle a slope can have for a character controller to be able to climb and jump. If
-/// the slope is steeper than this angle, the character will slide down.
-#[derive(Component)]
-pub struct MaxSlopeAngle(Scalar);
-
-/// A bundle that contains components for character movement.
-#[derive(Bundle)]
-pub struct MovementBundle {
-    acceleration: MovementAcceleration,
-    damping: MovementDampingFactor,
-    jump_impulse: JumpImpulse,
-    max_slope_angle: MaxSlopeAngle,
-}
-
-impl MovementBundle {
-    pub const fn new(
-        acceleration: Scalar,
-        damping: Scalar,
-        jump_impulse: Scalar,
-        max_slope_angle: Scalar,
-    ) -> Self {
-        Self {
-            acceleration: MovementAcceleration(acceleration),
-            damping: MovementDampingFactor(damping),
-            jump_impulse: JumpImpulse(jump_impulse),
-            max_slope_angle: MaxSlopeAngle(max_slope_angle),
-        }
-    }
-}
-
-impl Default for MovementBundle {
-    fn default() -> Self {
-        Self::new(30.0, 0.9, 7.0, PI * 0.45)
-    }
-}
-
-/// A bundle that contains the components needed for a basic kinematic character controller.
-#[derive(Bundle)]
-pub struct CharacterControllerBundle {
-    character_controller: CharacterController,
-    rigid_body: RigidBody,
-    collider: Collider,
-    ground_caster: ShapeCaster,
-    gravity: ControllerGravity,
-    movement: MovementBundle,
-}
-
-impl CharacterControllerBundle {
-    pub fn new(collider: Collider, gravity: Vector) -> Self {
-        // Create shape caster as a slightly smaller version of collider
-        let mut caster_shape = collider.clone();
-        caster_shape.set_scale(Vector::ONE * 0.99, 10);
-
-        Self {
-            character_controller: CharacterController,
-            rigid_body: RigidBody::Kinematic,
-            collider,
-            ground_caster: ShapeCaster::new(
-                caster_shape,
-                Vector::ZERO,
-                Quaternion::default(),
-                Vector::NEG_Y,
-            )
-            .with_max_time_of_impact(0.2),
-            gravity: ControllerGravity(gravity),
-            movement: MovementBundle::default(),
-        }
-    }
-
-    pub fn with_movement(
-        mut self,
-        acceleration: Scalar,
-        damping: Scalar,
-        jump_impulse: Scalar,
-        max_slope_angle: Scalar,
-    ) -> Self {
-        self.movement = MovementBundle::new(acceleration, damping, jump_impulse, max_slope_angle);
-        self
-    }
-}
+// /// A marker component indicating that an entity is on the ground.
+// #[derive(Component)]
+// #[component(storage = "SparseSet")]
+// pub struct Grounded;
+//
+// /// The acceleration used for character movement.
+// #[derive(Component)]
+// pub struct MovementAcceleration(Scalar);
+//
+// /// The damping factor used for slowing down movement.
+// #[derive(Component)]
+// pub struct MovementDampingFactor(Scalar);
+//
+// /// The strength of a jump.
+// #[derive(Component)]
+// pub struct JumpImpulse(Scalar);
+//
+// /// The gravitational acceleration used for a character controller.
+// #[derive(Component)]
+// pub struct ControllerGravity(Vector);
+//
+// /// The maximum angle a slope can have for a character controller to be able to climb and jump. If
+// /// the slope is steeper than this angle, the character will slide down.
+// #[derive(Component)]
+// pub struct MaxSlopeAngle(Scalar);
+//
+// /// A bundle that contains components for character movement.
+// #[derive(Bundle)]
+// pub struct MovementBundle {
+//     acceleration: MovementAcceleration,
+//     damping: MovementDampingFactor,
+//     jump_impulse: JumpImpulse,
+//     max_slope_angle: MaxSlopeAngle,
+// }
+//
+// impl MovementBundle {
+//     pub const fn new(
+//         acceleration: Scalar,
+//         damping: Scalar,
+//         jump_impulse: Scalar,
+//         max_slope_angle: Scalar,
+//     ) -> Self {
+//         Self {
+//             acceleration: MovementAcceleration(acceleration),
+//             damping: MovementDampingFactor(damping),
+//             jump_impulse: JumpImpulse(jump_impulse),
+//             max_slope_angle: MaxSlopeAngle(max_slope_angle),
+//         }
+//     }
+// }
+//
+// impl Default for MovementBundle {
+//     fn default() -> Self {
+//         Self::new(30.0, 0.9, 7.0, PI * 0.45)
+//     }
+// }
+//
+// /// A bundle that contains the components needed for a basic kinematic character controller.
+// #[derive(Bundle)]
+// pub struct CharacterControllerBundle {
+//     character_controller: CharacterController,
+//     rigid_body: RigidBody,
+//     collider: Collider,
+//     ground_caster: ShapeCaster,
+//     gravity: ControllerGravity,
+//     movement: MovementBundle,
+// }
+//
+// impl CharacterControllerBundle {
+//     pub fn new(collider: Collider, gravity: Vector) -> Self {
+//         // Create shape caster as a slightly smaller version of collider
+//         let mut caster_shape = collider.clone();
+//         caster_shape.set_scale(Vector::ONE * 0.99, 10);
+//
+//         Self {
+//             character_controller: CharacterController,
+//             rigid_body: RigidBody::Kinematic,
+//             collider,
+//             ground_caster: ShapeCaster::new(
+//                 caster_shape,
+//                 Vector::ZERO,
+//                 Quaternion::default(),
+//                 Vector::NEG_Y,
+//             )
+//             .with_max_time_of_impact(0.2),
+//             gravity: ControllerGravity(gravity),
+//             movement: MovementBundle::default(),
+//         }
+//     }
+//
+//     pub fn with_movement(
+//         mut self,
+//         acceleration: Scalar,
+//         damping: Scalar,
+//         jump_impulse: Scalar,
+//         max_slope_angle: Scalar,
+//     ) -> Self {
+//         self.movement = MovementBundle::new(acceleration, damping, jump_impulse, max_slope_angle);
+//         self
+//     }
+// }
 
 /// Sends ['MovementAction'] events based on keyboard input.
 fn keyboard_input(

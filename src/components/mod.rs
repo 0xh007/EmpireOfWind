@@ -1,3 +1,4 @@
 mod camera;
+mod character;
 
-pub use camera::*;
+pub use {camera::*, character::*};
