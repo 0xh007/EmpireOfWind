@@ -1,4 +1,6 @@
 mod camera;
 mod character;
+mod npc;
+mod player;
 
-pub use {camera::*, character::*};
+pub use {camera::*, character::*, npc::*, player::*};
