@@ -1,5 +1,6 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, transform::TransformSystem};
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
+use bevy_xpbd_3d::PhysicsSet;
 // use bevy_xpbd_3d::{
 //     math::*, parry::transformation::vhacd::VHACDParameters, prelude::*, SubstepSchedule, SubstepSet,
 // };
@@ -13,13 +14,12 @@ impl Plugin for CameraPlugin {
         app.add_systems(Startup, setup_camera)
             .add_plugins(PanOrbitCameraPlugin)
             .add_systems(Update, camera_switching)
-            .add_systems(PostUpdate, move_camera);
-        // .add_systems(
-        //     PostUpdate,
-        //     move_camera
-        //         .after(PhysicsSet::Sync)
-        //         .before(TransformSystem::TransformPropagate),
-        // )
+            .add_systems(
+                PostUpdate,
+                move_camera
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
+            );
     }
 }
 
