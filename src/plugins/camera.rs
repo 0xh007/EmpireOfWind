@@ -73,7 +73,7 @@ fn camera_switching(
 }
 
 fn move_camera(
-    mut query: Query<&Transform, With<CharacterController>>,
+    query: Query<&Transform, With<CharacterController>>,
     mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<CharacterController>)>,
     time: Res<Time>,
 ) {
@@ -91,9 +91,6 @@ fn move_camera(
             camera_transform.translation = camera_transform
                 .translation
                 .lerp(target_position, interpolation_factor.clamp(0.0, 1.0));
-
-            // Calculate the desired forward vector from the camera to the player
-            let forward = (player_transform.translation - camera_transform.translation).normalize();
 
             // Calculate the desired up vector, which should be the global up vector
             let up = Vec3::Y;
