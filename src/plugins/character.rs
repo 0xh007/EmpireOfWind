@@ -51,12 +51,15 @@ fn update_grounded(
 fn movement(
     time: Res<Time>,
     mut movement_event_reader: EventReader<MovementAction>,
-    mut controllers: Query<(
-        &MovementAcceleration,
-        &JumpImpulse,
-        &mut LinearVelocity,
-        Has<Grounded>,
-    )>,
+    mut controllers: Query<
+        (
+            &MovementAcceleration,
+            &JumpImpulse,
+            &mut LinearVelocity,
+            Has<Grounded>,
+        ),
+        With<Player>,
+    >,
 ) {
     // Precision is adjusted so that the example works with both the 'f32' and 'f64' features.
     let delta_time = time.delta_seconds();
