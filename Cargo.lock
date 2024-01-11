@@ -1733,6 +1733,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_panorbit_camera",
  "bevy_xpbd_3d",
+ "oxidized_navigation",
  "rand",
 ]
 
@@ -3081,6 +3082,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4586edfe4c648c71797a74c84bacb32b52b212eff5dfe2bb9f2c599844023e7"
 dependencies = [
  "ttf-parser",
+]
+
+[[package]]
+name = "oxidized_navigation"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f6588a1cf7510571473f465b7bffda4a13a2feb93a594215665d0b7b0de19645"
+dependencies = [
+ "bevy",
+ "nalgebra",
+ "parry3d",
+ "smallvec",
 ]
 
 [[package]]
