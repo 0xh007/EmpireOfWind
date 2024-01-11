@@ -1,4 +1,15 @@
-// .add_event::<MovementAction>()
+use bevy::{input::keyboard::KeyboardInput, prelude::*};
+use bevy_xpbd_3d::math::*;
+
+use crate::prelude::*;
+
+pub struct InputPlugin;
+
+impl Plugin for InputPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, keyboard_input);
+    }
+}
 
 /// Sends ['MovementAction'] event based on keyboard input
 fn keyboard_input(

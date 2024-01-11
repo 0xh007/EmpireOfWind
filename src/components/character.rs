@@ -13,22 +13,63 @@ pub struct Grounded;
 #[derive(Component)]
 pub struct MovementAcceleration(Scalar);
 
+impl MovementAcceleration {
+    pub fn acceleration(&self) -> Scalar {
+        self.0
+    }
+}
+
 /// The damping factor used for slowing down movement.
 #[derive(Component)]
 pub struct MovementDampingFactor(Scalar);
+
+impl MovementDampingFactor {
+    pub fn damping_factor(&self) -> Scalar {
+        self.0
+    }
+}
 
 /// The strength of a jump.
 #[derive(Component)]
 pub struct JumpImpulse(Scalar);
 
-/// The gravitational acceleration used for a character controller.
+impl JumpImpulse {
+    pub fn impulse(&self) -> Scalar {
+        self.0
+    }
+}
+
+/// Represents the gravitational force applied to a character controller.
+///
+/// This component stores the acceleration vector due to gravity, which affects the character's
+/// movement by applying a constant force in a specified direction, typically downwards.
 #[derive(Component)]
 pub struct ControllerGravity(Vector);
+
+impl ControllerGravity {
+    /// Retrieves the gravitational acceleration vector for the character controller.
+    ///
+    /// This vector defines the direction and magnitude of the gravitational force. For example,
+    /// a standard Earth-like gravity would be represented as a vector pointing downwards
+    /// along the negative Y-axis with a magnitude of approximately 9.81.
+    ///
+    /// Returns:
+    /// A `Vector` representing the current gravitational acceleration affecting the character.
+    pub fn gravitational_acceleration(&self) -> Vector {
+        self.0
+    }
+}
 
 /// The maximum angle a slope can have for a character controller to be able to climb and jump. If
 /// the slope is steeper than this angle, the character will slide down.
 #[derive(Component)]
 pub struct MaxSlopeAngle(Scalar);
+
+impl MaxSlopeAngle {
+    pub fn angle(&self) -> Scalar {
+        self.0
+    }
+}
 
 /// A bundle that contains components for character movement.
 #[derive(Bundle)]
