@@ -7,8 +7,7 @@ pub struct CharacterPlugin;
 
 impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
-        app
-            app
+        app.add_event::<MovementAction>()
             .add_systems(Update, update_grounded)
             .add_systems(Update, apply_deferred)
             .add_systems(Update, apply_gravity)
@@ -34,7 +33,7 @@ fn update_grounded(
         // steep
         let is_grounded = hits.iter().any(|hit| {
             if let Some(angle) = max_slope_angle {
-                rotation.rotate(-hit.normal2).angle_between(Vector::Y).abs() <= angle.0
+                rotation.rotate(-hit.normal2).angle_between(Vector::Y).abs() <= angle.angle()
             } else {
                 true
             }
@@ -68,12 +67,14 @@ fn movement(
         {
             match event {
                 MovementAction::Move(direction) => {
-                    linear_velocity.z -= direction.x * movement_acceleration.0 * delta_time;
-                    linear_velocity.x -= direction.y * movement_acceleration.0 * delta_time;
+                    linear_velocity.z -=
+                        direction.x * movement_acceleration.acceleration() * delta_time;
+                    linear_velocity.x -=
+                        direction.y * movement_acceleration.acceleration() * delta_time;
                 }
                 MovementAction::Jump => {
                     if is_grounded {
-                        linear_velocity.y = jump_impulse.0;
+                        linear_velocity.y = jump_impulse.impulse();
                     }
                 }
             }
@@ -90,15 +91,15 @@ fn apply_gravity(
     let delta_time = time.delta_seconds();
 
     for (gravity, mut linear_velocity) in &mut controllers {
-        linear_velocity.0 += gravity.0 * delta_time;
+        linear_velocity.0 += gravity.gravitational_acceleration() * delta_time;
     }
 }
 
 /// Slows down movement in the XZ plane.
 fn apply_movement_damping(mut query: Query<(&MovementDampingFactor, &mut LinearVelocity)>) {
     for (damping_factor, mut linear_velocity) in &mut query {
-        linear_velocity.x *= damping_factor.0;
-        linear_velocity.z *= damping_factor.0;
+        linear_velocity.x *= damping_factor.damping_factor();
+        linear_velocity.z *= damping_factor.damping_factor();
     }
 }
 
@@ -168,7 +169,8 @@ fn kinematic_controller_collisions(
 
             // If the slope isn't too steep to walk on but the character is falling, reset vertical
             // velocity.
-            if max_slope_angle.is_some_and(|angle| normal.angle_between(Vector::Y).abs() <= angle.0)
+            if max_slope_angle
+                .is_some_and(|angle| normal.angle_between(Vector::Y).abs() <= angle.angle())
                 && linear_velocity.y < 0.0
             {
                 linear_velocity.y = linear_velocity.y.max(0.0);
