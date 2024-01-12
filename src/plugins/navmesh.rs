@@ -31,8 +31,7 @@ impl Plugin for NavMeshPlugin {
                 }),
                 OxidizedNavigationDebugDrawPlugin,
             ))
-            .add_systems(Update, toggle_nav_mesh)
-            .run();
+            .add_systems(Update, toggle_nav_mesh);
     }
 }
 
@@ -40,7 +39,7 @@ fn toggle_nav_mesh(
     mut navmesh_debug_event_reader: EventReader<NavMeshDebugToggle>,
     mut show_navmesh: ResMut<DrawNavMesh>,
 ) {
-    for event in navmesh_debug_event_reader.read() {
+    for _event in navmesh_debug_event_reader.read() {
         show_navmesh.0 = !show_navmesh.0;
     }
 }
