@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::{math::*, prelude::*};
+use oxidized_navigation::NavMeshAffector;
 
 use crate::prelude::*;
 
@@ -36,6 +37,7 @@ fn spawn_npc(
             CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
                 .with_movement(90.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
             Npc,
+            NavMeshAffector,
         ));
     }
 }
