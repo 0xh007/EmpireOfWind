@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
+use oxidized_navigation::NavMeshAffector;
 
 pub struct ShipPlugin;
 
@@ -18,5 +19,6 @@ fn spawn_ship(mut commands: Commands, assets: ResMut<AssetServer>) {
         },
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
         RigidBody::Static,
+        NavMeshAffector,
     ));
 }
