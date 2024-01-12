@@ -14,6 +14,7 @@ impl Plugin for InputPlugin {
 /// Sends ['MovementAction'] event based on keyboard input
 fn keyboard_input(
     mut movement_event_writer: EventWriter<MovementAction>,
+    mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     let up = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]);
@@ -31,5 +32,9 @@ fn keyboard_input(
 
     if keyboard_input.just_pressed(KeyCode::Space) {
         movement_event_writer.send(MovementAction::Jump);
+    }
+
+    if keyboard_input.just_pressed(KeyCode::M) {
+        nav_mesh_event_writer.send(NavMeshDebugToggle);
     }
 }

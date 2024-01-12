@@ -10,7 +10,7 @@ bevy = { version = "0.12.1", features = ["dynamic_linking", "wayland"] }
 bevy_xpbd_3d = "0.3"
 bevy-inspector-egui = "0.22.0"
 bevy_panorbit_camera = "0.10.0"
-oxidized_navigation = { version = "0.8.0", features = ["xpbd"] }
+oxidized_navigation = { version = "0.8.0", features = ["debug_draw", "xpbd"] }
 rand = "0.8.5"
 
 [profile.dev]

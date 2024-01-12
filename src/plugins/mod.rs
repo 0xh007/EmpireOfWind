@@ -4,6 +4,7 @@ mod atmosphere;
 mod camera;
 mod character;
 mod input;
+mod navmesh;
 mod npc;
 mod ocean;
 mod player;
@@ -18,6 +19,7 @@ impl PluginGroup for CorePlugins {
             .add(camera::CameraPlugin)
             .add(character::CharacterPlugin)
             .add(input::InputPlugin)
+            .add(navmesh::NavMeshPlugin)
             .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
             .add(player::PlayerPlugin)
