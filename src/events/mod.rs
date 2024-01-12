@@ -1,3 +1,4 @@
 mod movement;
+mod navmesh;
 
-pub use movement::*;
+pub use {movement::*, navmesh::*};
