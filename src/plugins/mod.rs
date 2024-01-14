@@ -22,7 +22,7 @@ impl PluginGroup for CorePlugins {
             .add(input::InputPlugin)
             .add(navmesh::NavMeshPlugin)
             // .add(npc::NpcPlugin)
-            .add(ocean::OceanPlugin)
+            // .add(ocean::OceanPlugin)
             .add(player::PlayerPlugin)
             .add(ship_builder::ShipBuilderPlugin)
         // .add(ship::ShipPlugin)
