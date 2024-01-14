@@ -26,7 +26,8 @@ impl Plugin for CameraPlugin {
 fn setup_camera(mut commands: Commands) {
     // transform: Transform::from_xyz(0.0, 15.0, 0.0),
     let focus = Vec3::new(0.0, 8.0, 0.0);
-    let camera_position = Vec3::new(28.0, 20., 0.0);
+    // let camera_position = Vec3::new(28.0, 20., 0.0);
+    let camera_position = Vec3::new(0.0, 20., 0.0);
 
     commands.spawn((
         Camera3dBundle {

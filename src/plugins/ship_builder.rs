@@ -27,9 +27,10 @@ fn generate_ship(
 ) {
     // Thickness of the ship's walls, bottom, and top deck
     let wall_thickness = 0.5;
-    // let half_length = SHIP_LENGTH as f32 / 2.0;
-    // let half_width = SHIP_WIDTH as f32 / 2.0;
-    // let height = SHIP_HEIGHT as f32 - wall_thickness; // Subtract top and bottom thickness
+    let half_height = SHIP_HEIGHT as f32 / 2.0;
+    let half_length = SHIP_LENGTH as f32 / 2.0;
+    let half_width = SHIP_WIDTH as f32 / 2.0;
+    let height = SHIP_HEIGHT as f32 - wall_thickness; // Subtract top and bottom thickness
 
     // Create the bottom of the ship
     commands.spawn((
@@ -40,7 +41,7 @@ fn generate_ship(
                 SHIP_WIDTH as f32,
             ))),
             material: materials.add(Color::hex("D18251").unwrap().into()),
-            transform: Transform::from_xyz(0.0, (-wall_thickness / 2.0) + 2.0, 0.0),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         },
         Deck,
@@ -49,46 +50,64 @@ fn generate_ship(
         NavMeshAffector,
     ));
 
-    // Create the top deck of the ship
-    // commands.spawn((
-    //     PbrBundle {
-    //         mesh: meshes.add(Mesh::from(shape::Box::new(
-    //             SHIP_LENGTH as f32,
-    //             wall_thickness,
-    //             SHIP_WIDTH as f32,
-    //         ))),
-    //         material: materials.add(Color::hex("D18251").unwrap().into()),
-    //         transform: Transform::from_xyz(0.0, -wall_thickness / 2.0, 0.0),
-    //         ..default()
-    //     },
-    //     Transform::from_xyz(0.0, SHIP_HEIGHT as f32 - wall_thickness / 2.0, 0.0),
-    //     Collider::cuboid(
-    //         SHIP_LENGTH as f32 / 2.0,
-    //         wall_thickness / 2.0,
-    //         SHIP_WIDTH as f32 / 2.0,
-    //     ),
-    // ));
+    // Top deck of the ship
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box::new(
+                SHIP_LENGTH as f32,
+                wall_thickness,
+                SHIP_WIDTH as f32,
+            ))),
+            material: materials.add(Color::hex("A0522D").unwrap().into()),
+            transform: Transform::from_xyz(0.0, SHIP_HEIGHT as f32, 0.0),
+            ..default()
+        },
+        Deck,
+        RigidBody::Static,
+        Collider::cuboid(SHIP_LENGTH as f32, wall_thickness, SHIP_WIDTH as f32),
+        NavMeshAffector,
+    ));
 
-    // Create the walls (port, starboard, bow, stern) of the ship
-    // Each wall is a separate entity
+    // Starboard side of the hull
 
-    // Port
-    // commands.spawn((
-    // ));
+    // Create port side of hull
+    // Create bow
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box::new(
+                wall_thickness,
+                SHIP_HEIGHT as f32 + (wall_thickness),
+                SHIP_WIDTH as f32,
+            ))),
+            material: materials.add(Color::hex("8B4513").unwrap().into()),
+            transform: Transform::from_xyz(
+                -((SHIP_LENGTH as f32 / 2.0) + (wall_thickness / 2.0)),
+                SHIP_HEIGHT as f32 / 2.0,
+                0.0,
+            ),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(wall_thickness, SHIP_HEIGHT as f32, SHIP_WIDTH as f32),
+    ));
 
-    // Starboard
-
-    // Bow (front)
-    // commands.spawn((Collider::cuboid(
-    //     half_length,
-    //     height / 2.0,
-    //     wall_thickness / 2.0,
-    // ),));
-
-    // Stern (back)
-    // commands.spawn((Collider::cuboid(
-    //     half_length,
-    //     height / 2.0,
-    //     wall_thickness / 2.0,
-    // ),));
+    // Create Stern
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box::new(
+                wall_thickness,
+                SHIP_HEIGHT as f32 + (wall_thickness),
+                SHIP_WIDTH as f32,
+            ))),
+            material: materials.add(Color::hex("8B4513").unwrap().into()),
+            transform: Transform::from_xyz(
+                (SHIP_LENGTH as f32 / 2.0) + (wall_thickness / 2.0),
+                SHIP_HEIGHT as f32 / 2.0,
+                0.0,
+            ),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(wall_thickness, SHIP_HEIGHT as f32, SHIP_WIDTH as f32),
+    ));
 }
