@@ -26,8 +26,7 @@ impl Plugin for CameraPlugin {
 fn setup_camera(mut commands: Commands) {
     // transform: Transform::from_xyz(0.0, 15.0, 0.0),
     let focus = Vec3::new(0.0, 8.0, 0.0);
-    // let camera_position = Vec3::new(28.0, 20., 0.0);
-    let camera_position = Vec3::new(0.0, 20., 0.0);
+    let camera_position = Vec3::new(28.0, 20., 0.0);
 
     commands.spawn((
         Camera3dBundle {
@@ -80,7 +79,8 @@ fn move_camera(
 ) {
     if let Ok(player_transform) = query.get_single() {
         if let Ok(mut camera_transform) = camera_query.get_single_mut() {
-            let camera_offset = Vec3::new(25.0, 12.0, 0.0); // Adjust as needed
+            // let camera_offset = Vec3::new(25.0, 12.0, 0.0); // Adjust as needed
+            let camera_offset = Vec3::new(0.0, 12.0, 25.0); // Adjust as needed
 
             // Calculate the target position based on the player's position and the offset
             let target_position = player_transform.translation + camera_offset;
