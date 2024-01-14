@@ -1,3 +1,32 @@
+use bevy::prelude::*;
+use bevy_xpbd_3d::prelude::*;
+
+const SHIP_LENGTH: i32 = 40;
+const SHIP_WIDTH: i32 = 10;
+const SHIP_HEIGHT: i32 = 10;
+
+#[derive(Component)]
+struct Ship;
+
+pub struct ShipBuilderPlugin;
+
+impl Plugin for ShipBuilderPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_ship);
+    }
+}
+
+fn spawn_ship(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+}
+
+fn generate_deck() {}
+
+fn generate_rails() {}
+
 // fn spawn_ship(
 //     mut commands: Commands,
 //     mut meshes: ResMut<Assets<Mesh>>,

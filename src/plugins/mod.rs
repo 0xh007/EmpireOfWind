@@ -9,6 +9,7 @@ mod npc;
 mod ocean;
 mod player;
 mod ship;
+mod ship_builder;
 
 pub struct CorePlugins;
 
@@ -23,6 +24,7 @@ impl PluginGroup for CorePlugins {
             .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
             .add(player::PlayerPlugin)
-            .add(ship::ShipPlugin)
+            .add(ship_builder::ShipBuilderPlugin)
+        // .add(ship::ShipPlugin)
     }
 }

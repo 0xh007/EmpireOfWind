@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::{
     debug_draw::{DrawNavMesh, OxidizedNavigationDebugDrawPlugin},
-    NavMeshAffector, NavMeshSettings, OxidizedNavigationPlugin,
+    NavMeshSettings, OxidizedNavigationPlugin,
 };
 
 use crate::prelude::*;

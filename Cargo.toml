@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.12.1", features = ["dynamic_linking", "wayland"] }
+bevy_editor_pls = "0.7"
 bevy_xpbd_3d = "0.3"
 bevy-inspector-egui = "0.22.0"
 bevy_panorbit_camera = "0.10.0"
