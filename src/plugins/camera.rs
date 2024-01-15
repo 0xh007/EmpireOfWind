@@ -29,6 +29,7 @@ fn setup_camera(mut commands: Commands) {
     let camera_position = Vec3::new(28.0, 20., 0.0);
 
     commands.spawn((
+        Name::new("Main Camera"),
         Camera3dBundle {
             camera: Camera {
                 order: 0,
@@ -42,6 +43,7 @@ fn setup_camera(mut commands: Commands) {
     ));
 
     commands.spawn((
+        Name::new("Debug Camera"),
         Camera3dBundle {
             camera: Camera {
                 order: 1,
