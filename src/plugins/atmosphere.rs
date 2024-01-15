@@ -17,15 +17,18 @@ fn spawn_atmosphere(mut commands: Commands) {
     .build();
 
     // Sun
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            color: Color::rgb(0.98, 0.95, 0.82),
-            shadows_enabled: true,
+    commands.spawn((
+        Name::new("Sun"),
+        DirectionalLightBundle {
+            directional_light: DirectionalLight {
+                color: Color::rgb(0.98, 0.95, 0.82),
+                shadows_enabled: true,
+                ..default()
+            },
+            transform: Transform::from_xyz(0.0, 0.0, 0.0)
+                .looking_at(Vec3::new(-0.15, -0.05, 0.25), Vec3::Y),
+            cascade_shadow_config,
             ..default()
         },
-        transform: Transform::from_xyz(0.0, 0.0, 0.0)
-            .looking_at(Vec3::new(-0.15, -0.05, 0.25), Vec3::Y),
-        cascade_shadow_config,
-        ..default()
-    });
+    ));
 }

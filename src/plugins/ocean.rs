@@ -13,10 +13,15 @@ fn spawn_ocean(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(shape::Circle::new(400.0).into()),
-        material: materials.add(Color::hex("618f92").unwrap().into()),
-        transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
-        ..default()
-    });
+    commands.spawn((
+        Name::new("Ocean"),
+        PbrBundle {
+            mesh: meshes.add(shape::Circle::new(400.0).into()),
+            material: materials.add(Color::hex("618f92").unwrap().into()),
+            transform: Transform::from_rotation(Quat::from_rotation_x(
+                -std::f32::consts::FRAC_PI_2,
+            )),
+            ..default()
+        },
+    ));
 }

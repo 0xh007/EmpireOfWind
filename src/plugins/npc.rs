@@ -25,6 +25,7 @@ fn spawn_npc(
         let position = start_position + Vec3::new(0.0, 0.0, spacing * i as f32);
 
         commands.spawn((
+            Name::new("NPC"),
             PbrBundle {
                 mesh: meshes.add(Mesh::from(shape::Capsule {
                     radius: 0.4,

@@ -34,6 +34,7 @@ fn generate_ship(
 
     // Create the bottom of the ship
     commands.spawn((
+        Name::new("Bottom Deck"),
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
                 SHIP_LENGTH as f32,
@@ -52,6 +53,7 @@ fn generate_ship(
 
     // Top deck of the ship
     commands.spawn((
+        Name::new("Top Deck"),
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
                 SHIP_LENGTH as f32,
@@ -71,8 +73,10 @@ fn generate_ship(
     // Starboard side of the hull
 
     // Create port side of hull
+
     // Create bow
     commands.spawn((
+        Name::new("Bow"),
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
                 wall_thickness,
@@ -93,6 +97,7 @@ fn generate_ship(
 
     // Create Stern
     commands.spawn((
+        Name::new("Stern"),
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
                 wall_thickness,
