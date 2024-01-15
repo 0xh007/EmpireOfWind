@@ -70,9 +70,9 @@ fn movement(
         {
             match event {
                 MovementAction::Move(direction) => {
-                    linear_velocity.z -=
+                    linear_velocity.x +=
                         direction.x * movement_acceleration.acceleration() * delta_time;
-                    linear_velocity.x -=
+                    linear_velocity.z -=
                         direction.y * movement_acceleration.acceleration() * delta_time;
                 }
                 MovementAction::Jump => {
