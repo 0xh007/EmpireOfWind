@@ -11,7 +11,7 @@ bevy_editor_pls = "0.7"
 bevy_xpbd_3d = "0.3"
 bevy-inspector-egui = "0.22.0"
 bevy_panorbit_camera = "0.10.0"
-oxidized_navigation = { version = "0.8.0", features = ["debug_draw", "xpbd"] }
+oxidized_navigation = { version = "0.8.1", features = ["debug_draw", "xpbd"] }
 rand = "0.8.5"
 
 [profile.dev]
