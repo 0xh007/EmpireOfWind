@@ -75,7 +75,7 @@ fn camera_switching(
 }
 
 fn move_camera(
-    query: Query<&Transform, With<CharacterController>>,
+    query: Query<&Transform, (With<CharacterController>, With<Player>)>,
     mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<CharacterController>)>,
     time: Res<Time>,
 ) {
