@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+#[derive(Component, Debug, Reflect)]
 pub struct Fatigue {
     /// A boolean indicating whether the entity is currently sleeping.
     pub is_sleeping: bool,
