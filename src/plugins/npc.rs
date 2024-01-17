@@ -21,7 +21,7 @@ fn spawn_npc(
     let start_position = Vec3::new(0.0, 15.0, 2.0);
     let spacing = 1.0; // Spacing between each NPC.
 
-    for i in 0..10 {
+    for i in 0..2 {
         let position = start_position + Vec3::new(0.0, 0.0, spacing * i as f32);
 
         commands.spawn((
