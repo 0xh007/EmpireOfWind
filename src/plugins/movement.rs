@@ -3,9 +3,9 @@ use bevy_xpbd_3d::{math::*, prelude::*, SubstepSchedule, SubstepSet};
 
 use crate::prelude::*;
 
-pub struct CharacterPlugin;
+pub struct MovementPlugin;
 
-impl Plugin for CharacterPlugin {
+impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<MovementAction>()
             .add_systems(Update, update_grounded)

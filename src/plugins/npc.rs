@@ -1,8 +1,8 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_xpbd_3d::{math::*, prelude::*};
+use big_brain::prelude::*;
 use oxidized_navigation::NavMeshAffector;
-
-use crate::prelude::*;
 
 pub struct NpcPlugin;
 
@@ -21,23 +21,42 @@ fn spawn_npc(
     let start_position = Vec3::new(0.0, 15.0, 2.0);
     let spacing = 1.0; // Spacing between each NPC.
 
-    for i in 0..2 {
-        let position = start_position + Vec3::new(0.0, 0.0, spacing * i as f32);
+    let move_and_sleep = Steps::build()
+        .label("MoveAndSleep")
+        .step(MoveToNearest::<SleepArea> {
+            speed: 1.5,
+            _marker: std::marker::PhantomData,
+        })
+        .step(Sleep {
+            until: 10.0,
+            per_second: 15.0,
+        });
 
-        commands.spawn((
-            Name::new("NPC"),
-            PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Capsule {
-                    radius: 0.4,
-                    ..default()
-                })),
-                material: materials.add(Color::YELLOW.into()),
-                transform: Transform::from_translation(position),
+    let position = start_position + Vec3::new(0.0, 0.0, spacing * 1.0);
+
+    commands.spawn((
+        Name::new("NPC"),
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Capsule {
+                radius: 0.4,
                 ..default()
-            },
-            CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
-                .with_movement(90.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
-            Npc,
-        ));
-    }
+            })),
+            material: materials.add(Color::YELLOW.into()),
+            transform: Transform::from_translation(position),
+            ..default()
+        },
+        CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
+            .with_movement(90.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
+        Npc,
+        Fatigue {
+            is_sleeping: false,
+            per_second: 4.0,
+            level: 0.0,
+        },
+        Thinker::build()
+            .label("NPC Thinker")
+            // Selects the action with the highest score that is above the threshold
+            .picker(FirstToScore::new(0.6))
+            .when(FatigueScorer, move_and_sleep),
+    ));
 }

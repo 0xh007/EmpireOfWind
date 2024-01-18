@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use big_brain::prelude::*;
 
-#[derive(Clone, Component, Debug, ActionBuilder)]
+#[derive(Clone, Component, Debug, ActionBuilder, Reflect, Default)]
+#[reflect(Component)]
 pub struct Sleep {
     /// The fatigue level at which the entity will stop sleeping.
     pub until: f32,

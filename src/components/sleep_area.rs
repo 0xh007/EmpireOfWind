@@ -1,4 +1,4 @@
 use bevy::prelude::*;
 
-#[derive(Component, Debug, Reflect)]
+#[derive(Component, Debug, Clone, Reflect)]
 pub struct SleepArea;
