@@ -1,4 +1,5 @@
 use bevy::app::{PluginGroup, PluginGroupBuilder};
+use bevy::{window::*, DefaultPlugins};
 
 mod atmosphere;
 mod camera;
@@ -9,6 +10,7 @@ mod movement;
 mod navmesh;
 mod npc;
 mod ocean;
+mod pathfinding;
 mod player;
 mod ship;
 mod ship_builder;
@@ -28,6 +30,7 @@ impl PluginGroup for CorePlugins {
             .add(navmesh::NavMeshPlugin)
             .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
+            .add(pathfinding::PathfindingPlugin)
             .add(player::PlayerPlugin)
             .add(ship_builder::ShipBuilderPlugin)
             .add(sleep::SleepPlugin)
