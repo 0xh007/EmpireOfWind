@@ -2,9 +2,10 @@ use bevy::app::{PluginGroup, PluginGroupBuilder};
 
 mod atmosphere;
 mod camera;
-mod character;
+mod editor_types;
 mod fatigue;
 mod input;
+mod movement;
 mod navmesh;
 mod npc;
 mod ocean;
@@ -20,15 +21,18 @@ impl PluginGroup for CorePlugins {
         PluginGroupBuilder::start::<Self>()
             .add(atmosphere::AtmospherePlugin)
             .add(camera::CameraPlugin)
-            .add(character::CharacterPlugin)
+            .add(editor_types::EditorTypesPlugin)
             .add(fatigue::FatiguePlugin)
             .add(input::InputPlugin)
+            .add(movement::MovementPlugin)
             .add(navmesh::NavMeshPlugin)
             .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
             .add(player::PlayerPlugin)
             .add(ship_builder::ShipBuilderPlugin)
             .add(sleep::SleepPlugin)
+
+        // Disable
         // .add(ship::ShipPlugin)
     }
 }

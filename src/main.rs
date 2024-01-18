@@ -10,7 +10,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(EditorPlugin::default())
-        // .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(CorePlugins)
         .run();
 }

@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use oxidized_navigation::NavMeshAffector;
 
+use crate::prelude::SleepArea;
+
 const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
 const SHIP_HEIGHT: i32 = 10;
@@ -16,8 +18,28 @@ pub struct ShipBuilderPlugin;
 
 impl Plugin for ShipBuilderPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, generate_ship);
+        app.add_systems(Startup, generate_ship)
+            .add_systems(Startup, place_furniture);
     }
+}
+
+fn place_furniture(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let wall_thickness = 0.5;
+    // Create a bed
+    commands.spawn((
+        Name::new("Bed"),
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box::new(2.0, 1.0, 1.0))),
+            material: materials.add(Color::MAROON.into()),
+            transform: Transform::from_xyz(3.0, SHIP_HEIGHT as f32 + wall_thickness, 0.0),
+            ..default()
+        },
+        SleepArea,
+    ));
 }
 
 fn generate_ship(
