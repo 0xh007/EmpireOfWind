@@ -26,6 +26,7 @@ fn sleep_action_system(
     mut query: Query<(&Actor, &mut ActionState, &Sleep, &ActionSpan)>,
 ) {
     for (Actor(actor), mut state, sleep, span) in &mut query {
+        debug!("Found actor with sleep component");
         // This sets up the tracing scope. Any `debug` calls here will be
         // spanned together in the output.
         let _guard = span.span().enter();

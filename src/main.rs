@@ -1,11 +1,11 @@
 use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    diagnostic::LogDiagnosticsPlugin,
+    log::LogPlugin,
     prelude::*,
     window::{PresentMode, WindowTheme},
 };
-use bevy_editor_pls::{prelude, EditorPlugin};
+use bevy_editor_pls::EditorPlugin;
 use bevy_xpbd_3d::prelude::*;
-// use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use empire_of_wind::prelude::*;
 
