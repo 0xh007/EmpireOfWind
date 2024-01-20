@@ -17,6 +17,7 @@ fn spawn_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    info!("Spawning player");
     commands.spawn((
         Name::new("Player"),
         Player,
