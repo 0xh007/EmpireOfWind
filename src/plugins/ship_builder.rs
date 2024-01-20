@@ -49,10 +49,6 @@ fn generate_ship(
 ) {
     // Thickness of the ship's walls, bottom, and top deck
     let wall_thickness = 0.5;
-    let half_height = SHIP_HEIGHT as f32 / 2.0;
-    let half_length = SHIP_LENGTH as f32 / 2.0;
-    let half_width = SHIP_WIDTH as f32 / 2.0;
-    let height = SHIP_HEIGHT as f32 - wall_thickness; // Subtract top and bottom thickness
 
     // Create the bottom of the ship
     commands.spawn((
