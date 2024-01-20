@@ -7,9 +7,12 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.12.1", features = ["dynamic_linking", "wayland"] }
+bevy_editor_pls = "0.7"
 bevy_xpbd_3d = "0.3"
 bevy-inspector-egui = "0.22.0"
 bevy_panorbit_camera = "0.10.0"
+big-brain = { git = "https://github.com/zkat/big-brain.git", rev = "be99c75d4a0eddd7b0d44cab5df5e6d7fbb3be59"}
+oxidized_navigation = { version = "0.8.1", features = ["debug_draw", "xpbd"] }
 rand = "0.8.5"
 
 [profile.dev]
