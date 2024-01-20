@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use big_brain::prelude::*;
-use oxidized_navigation::query::*;
 
 const MAX_DISTANCE: f32 = 0.1;
 
