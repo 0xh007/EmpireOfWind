@@ -29,7 +29,6 @@ fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
                 *action_state = ActionState::Executing;
             }
             ActionState::Executing => {
-                debug!("Moving to is executing");
                 let mut actor_transform = thinkers.get_mut(actor.0).unwrap();
                 // The goal is the nearest entity with the specified component.
                 let goal_transform = query
