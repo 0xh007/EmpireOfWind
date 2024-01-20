@@ -1,5 +1,5 @@
-use bevy::app::{PluginGroup, PluginGroupBuilder};
-use bevy::{window::*, DefaultPlugins};
+use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
+use big_brain::prelude::*;
 
 mod atmosphere;
 mod camera;
@@ -22,6 +22,7 @@ impl PluginGroup for CorePlugins {
     fn build(self) -> bevy::app::PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
             .add(atmosphere::AtmospherePlugin)
+            .add(BigBrainPlugin::new(PreUpdate))
             .add(camera::CameraPlugin)
             .add(editor_types::EditorTypesPlugin)
             .add(fatigue::FatiguePlugin)
