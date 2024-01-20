@@ -34,7 +34,7 @@ fn main() {
     let default_plugins = default_plugins.set(LogPlugin {
         // Modify the filter and level as needed for release builds
         filter: "warn".into(),
-        level: bevy::log::Level::INFO,
+        level: bevy::log::Level::WARN,
         ..default()
     });
 
