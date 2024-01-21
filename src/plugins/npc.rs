@@ -1,7 +1,9 @@
 use crate::prelude::*;
 use bevy::prelude::*;
+use bevy_inspector_egui::egui::epaint::tessellator::Path;
 use bevy_xpbd_3d::{math::*, prelude::*};
 use big_brain::prelude::*;
+use oxidized_navigation::NavMeshAffector;
 
 pub struct NpcPlugin;
 
@@ -52,6 +54,7 @@ fn spawn_npc(
             per_second: 4.0,
             level: 0.0,
         },
+        NavigationPath::default(),
         Thinker::build()
             .label("NPC Thinker")
             // Selects the action with the highest score that is above the threshold
