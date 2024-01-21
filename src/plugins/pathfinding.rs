@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use big_brain::prelude::*;
+use oxidized_navigation::{NavMesh, NavMeshSettings};
 
 const MAX_DISTANCE: f32 = 0.1;
 
@@ -8,9 +9,21 @@ pub struct PathfindingPlugin;
 
 impl Plugin for PathfindingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreUpdate, move_to_nearest_system::<SleepArea>);
+        app.insert_resource(AsyncPathfindingTasks::default())
+            .add_systems(PreUpdate, move_to_nearest_system::<SleepArea>)
+            .add_systems(Update, async_pathfinding_system)
+            .add_systems(Update, poll_pathfinding_tasks_system);
     }
 }
+
+fn async_pathfinding_system(
+    nav_mesh_settings: Res<NavMeshSettings>,
+    nav_mesh: Res<NavMesh>,
+    mut pathfinding_task: ResMut<AsyncPathfindingTasks>,
+) {
+}
+
+fn poll_pathfinding_tasks_system() {}
 
 fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
     time: Res<Time>,
