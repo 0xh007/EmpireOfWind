@@ -13,6 +13,7 @@ pub struct PathfindingPlugin;
 impl Plugin for PathfindingPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(AsyncPathfindingTasks::default())
+            .register_type::<NavigationPath>()
             .add_systems(PreUpdate, move_to_nearest_system::<SleepArea>)
             .add_systems(Update, async_pathfinding_system)
             .add_systems(Update, poll_pathfinding_tasks_system);
@@ -31,13 +32,26 @@ fn poll_pathfinding_tasks_system() {}
 fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
     nav_mesh: Res<NavMesh>,
     nav_mesh_settings: Res<NavMeshSettings>,
-    mut action_query: Query<(&Actor, &mut ActionState, &MoveToNearest<T>, &ActionSpan)>,
     mut goal_query: Query<&mut Transform, (With<T>, Without<Actor>)>,
-    mut path_query: Query<(&mut NavigationPath, &Transform), With<Actor>>,
-    mut thinkers_query: Query<&mut Transform, (With<HasThinker>, Without<T>)>,
+    mut actor_query: Query<(
+        &Actor,
+        &mut ActionState,
+        &ActionSpan,
+        &MoveToNearest<T>,
+        &mut NavigationPath,
+        &Transform,
+    )>,
 ) {
-    for (actor, mut action_state, move_to, span) in &mut action_query {
-        let _guard = span.span().enter();
+    for (
+        actor,
+        mut action_state,
+        action_span,
+        move_to_nearest,
+        mut navigation_path,
+        actor_transform,
+    ) in &mut actor_query
+    {
+        let _guard = action_span.span().enter();
 
         match *action_state {
             ActionState::Requested => {
@@ -47,35 +61,37 @@ fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
             }
 
             ActionState::Executing => {
-                let actor_transform = thinkers_query.get_mut(actor.0).unwrap();
-                for (mut navigation_path, _transform) in &mut path_query {
-                    // TODO: implement a function for goal_has_moved
-                    let goal_has_moved = false;
+                // TODO: implement a function for goal_has_moved
+                let goal_has_moved = false;
 
-                    let goal_transform = goal_query
-                        .iter()
-                        .map(|t| (t.translation, t))
-                        .min_by(|(a, _), (b, _)| {
-                            // We need partial_cmp here because f32 doesn't implement Ord.
-                            let delta_a = *a - actor_transform.translation;
-                            let delta_b = *b - actor_transform.translation;
-                            delta_a.length().partial_cmp(&delta_b.length()).unwrap()
-                        })
-                        .unwrap()
-                        .1;
+                let goal_transform = goal_query
+                    .iter()
+                    .map(|t| (t.translation, t))
+                    .min_by(|(a, _), (b, _)| {
+                        // We need partial_cmp here because f32 doesn't implement Ord.
+                        let delta_a = *a - actor_transform.translation;
+                        let delta_b = *b - actor_transform.translation;
+                        delta_a.length().partial_cmp(&delta_b.length()).unwrap()
+                    })
+                    .unwrap()
+                    .1;
 
-                    if navigation_path.points.is_empty() || goal_has_moved {
-                        if let Some(new_path) = calculate_path_blocking(
-                            &nav_mesh,
-                            &nav_mesh_settings,
-                            actor_transform.translation,
-                            goal_transform.translation,
-                        ) {
-                            navigation_path.points = new_path;
-                        } else {
-                            *action_state = ActionState::Failure;
-                            continue;
-                        }
+                if !navigation_path.points.is_empty() {
+                    debug!("Nav path not empty?");
+                }
+
+                if navigation_path.points.is_empty() || goal_has_moved {
+                    if let Some(new_path) = calculate_path_blocking(
+                        &nav_mesh,
+                        &nav_mesh_settings,
+                        actor_transform.translation,
+                        goal_transform.translation,
+                    ) {
+                        debug!("Updating navgation path.");
+                        navigation_path.points = new_path;
+                    } else {
+                        *action_state = ActionState::Failure;
+                        continue;
                     }
                 }
 
