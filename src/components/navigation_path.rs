@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 /// Component for storing a set of points to navigate along
 #[derive(Component, Debug, Clone, Reflect)]
+#[reflect(Component)]
 pub struct NavigationPath {
     pub points: Vec<Vec3>,
 }
