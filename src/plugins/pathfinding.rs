@@ -51,6 +51,7 @@ fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
         actor_transform,
     ) in &mut actor_query
     {
+        debug!("Query at least worked");
         let _guard = action_span.span().enter();
 
         match *action_state {
