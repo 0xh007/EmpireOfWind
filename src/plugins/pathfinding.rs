@@ -66,7 +66,6 @@ fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
                         let direction = (*next_point - actor_transform.translation).normalize();
                         let distance_to_next_point =
                             (*next_point - actor_transform.translation).length();
-                        debug!("Distance: {:?}", distance_to_next_point);
 
                         // Check if we are close enough to the next point to consider it reached
                         if distance_to_next_point < MAX_DISTANCE {
