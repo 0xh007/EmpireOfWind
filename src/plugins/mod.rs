@@ -5,6 +5,7 @@ mod atmosphere;
 mod camera;
 mod editor_types;
 mod fatigue;
+mod hunger;
 mod input;
 mod movement;
 mod navmesh;
@@ -26,6 +27,7 @@ impl PluginGroup for CorePlugins {
             .add(camera::CameraPlugin)
             .add(editor_types::EditorTypesPlugin)
             .add(fatigue::FatiguePlugin)
+            .add(hunger::HungerPlugin)
             .add(input::InputPlugin)
             .add(movement::MovementPlugin)
             .add(navmesh::NavMeshPlugin)
