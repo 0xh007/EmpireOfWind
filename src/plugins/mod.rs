@@ -3,6 +3,7 @@ use big_brain::prelude::*;
 
 mod atmosphere;
 mod camera;
+mod eat;
 mod editor_types;
 mod fatigue;
 mod hunger;
