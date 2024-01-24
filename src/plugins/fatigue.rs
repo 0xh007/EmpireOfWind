@@ -43,7 +43,7 @@ pub fn fatigue_scorer_system(
                 score.set(new_score);
                 if fatigue.level >= 80.0 {
                     span.span().in_scope(|| {
-                        debug!("Fatigue above threshold! Score: {}", fatigue.level / 100.0)
+                        trace!("Fatigue above threshold! Score: {}", fatigue.level / 100.0)
                     });
                 }
             }

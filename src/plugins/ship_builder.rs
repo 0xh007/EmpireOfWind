@@ -19,8 +19,28 @@ pub struct ShipBuilderPlugin;
 impl Plugin for ShipBuilderPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, generate_ship)
+            .add_systems(Startup, place_obstacle)
             .add_systems(Startup, place_furniture);
     }
+}
+
+fn place_obstacle(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.spawn((
+        Name::new("Obstacle"),
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 2.0, 6.0))),
+            material: materials.add(Color::ORANGE.into()),
+            transform: Transform::from_xyz(-4.0, SHIP_HEIGHT as f32 + 0.5, 1.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(1.0, 2.0, 6.0),
+        NavMeshAffector,
+    ));
 }
 
 fn place_furniture(
@@ -35,7 +55,7 @@ fn place_furniture(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(2.0, 1.0, 1.0))),
             material: materials.add(Color::MAROON.into()),
-            transform: Transform::from_xyz(3.0, SHIP_HEIGHT as f32 + wall_thickness, 0.0),
+            transform: Transform::from_xyz(7.0, SHIP_HEIGHT as f32 + wall_thickness, 0.0),
             ..default()
         },
         SleepArea,

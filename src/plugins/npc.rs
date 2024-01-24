@@ -17,7 +17,7 @@ fn spawn_npc(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Define the starting point for the NPCs.
-    let start_position = Vec3::new(0.0, 15.0, 2.0);
+    let start_position = Vec3::new(-10.0, 15.0, 4.0);
     let spacing = 1.0; // Spacing between each NPC.
 
     let move_and_sleep = Steps::build()
@@ -50,8 +50,9 @@ fn spawn_npc(
         Fatigue {
             is_sleeping: false,
             per_second: 4.0,
-            level: 0.0,
+            level: 60.0,
         },
+        NavigationPath::default(),
         Thinker::build()
             .label("NPC Thinker")
             // Selects the action with the highest score that is above the threshold
