@@ -4,7 +4,10 @@ This is a work in progress open source game. The idea is that it will play somet
 
 ## Building
 Get Rust: https://www.rust-lang.org/learn/get-started
+
 Install Bevy Dependencies: https://bevyengine.org/learn/book/getting-started/setup/#install-os-dependencies
 
-`cargo build --release`
-`cargo run`
+```
+cargo build --release
+cargo run
+```
