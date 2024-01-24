@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use bevy_inspector_egui::egui::epaint::tessellator::Path;
 use bevy_xpbd_3d::{math::*, prelude::*};
 use big_brain::prelude::*;
-use oxidized_navigation::NavMeshAffector;
 
 pub struct NpcPlugin;
 
