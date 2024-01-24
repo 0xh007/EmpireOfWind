@@ -1,8 +1,8 @@
 use crate::prelude::*;
-use bevy::{prelude::*, reflect::Reflect};
+use bevy::prelude::*;
 use big_brain::prelude::*;
 use oxidized_navigation::{
-    query::{find_path, find_polygon_path, perform_string_pulling_on_path},
+    query::{find_polygon_path, perform_string_pulling_on_path},
     NavMesh, NavMeshSettings,
 };
 
@@ -12,12 +12,12 @@ pub struct PathfindingPlugin;
 
 impl Plugin for PathfindingPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(AsyncPathfindingTasks::default())
-            .register_type::<NavigationPath>()
+        app.register_type::<NavigationPath>()
             .add_systems(PreUpdate, move_to_nearest_system::<SleepArea>);
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
     time: Res<Time>,
     nav_mesh: Res<NavMesh>,
