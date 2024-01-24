@@ -6,7 +6,7 @@ use oxidized_navigation::{
     NavMesh, NavMeshSettings,
 };
 
-const MAX_DISTANCE: f32 = 0.1;
+const MAX_DISTANCE: f32 = 1.0;
 
 pub struct PathfindingPlugin;
 
@@ -29,64 +29,40 @@ fn async_pathfinding_system(
 
 fn poll_pathfinding_tasks_system() {}
 
-// mut actor_query: Query<(
-//     &Actor,
-//     &mut ActionState,
-//     &ActionSpan,
-//     &MoveToNearest<T>,
-//     &mut NavigationPath,
-//     &Transform,
-// )>,
-
 fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
+    time: Res<Time>,
     nav_mesh: Res<NavMesh>,
     nav_mesh_settings: Res<NavMeshSettings>,
-    mut goal_query: Query<&mut Transform, (With<T>, Without<Actor>)>,
-    // mut thinkers_query: Query<&mut Transform, (With<HasThinker>, Without<T>)>,
-    mut navigation_path_query: Query<(&mut NavigationPath, &Transform, &Actor), With<HasThinker>>,
+    goal_query: Query<&Transform, With<T>>,
+    mut thinker_query: Query<(&mut NavigationPath, &mut Transform), (With<HasThinker>, Without<T>)>,
     mut action_query: Query<(&Actor, &mut ActionState, &MoveToNearest<T>, &ActionSpan)>,
 ) {
-    for (actor, mut action_state, move_to, span) in &mut action_query {
-        debug!("Query at least worked");
+    for (Actor(actor), mut action_state, move_to, span) in &mut action_query {
         let _guard = span.span().enter();
 
-        match *action_state {
-            ActionState::Requested => {
-                debug!("Let's go find a {:?}", std::any::type_name::<T>());
-
-                *action_state = ActionState::Executing;
-            }
-
-            ActionState::Executing => {
-                // let mut actor_transform = thinkers_query.get_mut(actor.0).unwrap();
-                if let Ok((mut navigation_path, actor_transform, _)) =
-                    navigation_path_query.get_mut(actor.0)
-                {
-                    // TODO: implement a function for goal_has_moved
-                    let goal_has_moved = false;
-
+        if let Ok((mut navigation_path, mut actor_transform)) = thinker_query.get_mut(*actor) {
+            match *action_state {
+                ActionState::Requested => {
+                    debug!("Lets go find a {:?}", std::any::type_name::<T>());
+                    *action_state = ActionState::Executing;
+                }
+                ActionState::Executing => {
                     let goal_transform = goal_query
                         .iter()
                         .map(|t| (t.translation, t))
                         .min_by(|(a, _), (b, _)| {
-                            // We need partial_cmp here because f32 doesn't implement Ord.
-                            let delta_a = *a - actor_transform.translation;
-                            let delta_b = *b - actor_transform.translation;
-                            delta_a.length().partial_cmp(&delta_b.length()).unwrap()
+                            a.distance_squared(actor_transform.translation)
+                                .partial_cmp(&b.distance_squared(actor_transform.translation))
+                                .unwrap()
                         })
-                        .unwrap()
-                        .1;
+                        .map(|(_, t)| t);
 
-                    if !navigation_path.points.is_empty() {
-                        debug!("Nav path not empty?");
-                    }
-
-                    if navigation_path.points.is_empty() || goal_has_moved {
+                    if navigation_path.points.is_empty() {
                         if let Some(new_path) = calculate_path_blocking(
                             &nav_mesh,
                             &nav_mesh_settings,
                             actor_transform.translation,
-                            goal_transform.translation,
+                            goal_transform.unwrap().translation,
                         ) {
                             debug!("Updating navgation path.");
                             navigation_path.points = new_path;
@@ -95,22 +71,106 @@ fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
                             continue;
                         }
                     }
-                } else {
-                    warn!("Failed to find navigation path for Actor {:?}", actor.0);
+
+                    // Check if we have a path to follow
+                    if let Some(next_point) = navigation_path.points.first() {
+                        let direction = (*next_point - actor_transform.translation).normalize();
+                        let distance_to_next_point =
+                            (*next_point - actor_transform.translation).length();
+                        debug!("Distance: {:?}", distance_to_next_point);
+
+                        // Check if we are close enough to the next point to consider it reached
+                        if distance_to_next_point < MAX_DISTANCE {
+                            debug!("We have reached the point");
+                            // Remove the reached point from the navigation path
+                            navigation_path.points.remove(0);
+                        } else {
+                            // Move towards the next point
+                            let step_size = time.delta_seconds() * move_to.speed;
+                            let step = direction * step_size.min(distance_to_next_point);
+                            actor_transform.translation += step;
+                        }
+                    } else {
+                        // We've reaced the end of the path
+                        *action_state = ActionState::Success;
+                    }
+                }
+                ActionState::Cancelled => {
+                    debug!("Moving to is cancelled.");
                     *action_state = ActionState::Failure;
                 }
-
-                // TODO: Move along the path
+                _ => {}
             }
-
-            ActionState::Cancelled => {
-                debug!("Moving to is cancelled");
-                *action_state = ActionState::Failure;
-            }
-            _ => {}
         }
     }
 }
+
+// fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
+//     nav_mesh: Res<NavMesh>,
+//     nav_mesh_settings: Res<NavMeshSettings>,
+//     goal_query: Query<&Transform, With<T>>,
+//     mut actor_query: Query<(&mut NavigationPath, &Transform), With<Actor>>,
+//     mut action_query: Query<(&Actor, &mut ActionState, &MoveToNearest<T>, &ActionSpan)>,
+// ) {
+//     for (Actor(actor), mut action_state, move_to, span) in &mut action_query {
+//         let _guard = span.span().enter();
+//
+//         if let Ok((mut navigation_path, actor_transform)) = actor_query.get_mut(*actor) {
+//             match *action_state {
+//                 ActionState::Requested => {
+//                     debug!("Let's go find a {:?}", std::any::type_name::<T>());
+//
+//                     *action_state = ActionState::Executing;
+//                 }
+//
+//                 ActionState::Executing => {
+//                     debug!("EXECUTING!");
+//                     // TODO: implement a function for goal_has_moved
+//                     let goal_has_moved = false;
+//                     let goal_transform = goal_query
+//                         .iter()
+//                         .map(|t| (t.translation, t))
+//                         .min_by(|(a, _), (b, _)| {
+//                             a.distance_squared(actor_transform.translation)
+//                                 .partial_cmp(&b.distance_squared(actor_transform.translation))
+//                                 .unwrap()
+//                         })
+//                         .map(|(_, t)| t);
+//
+//                     if !navigation_path.points.is_empty() {
+//                         debug!("Nav path not empty?");
+//                     }
+//
+//                     if navigation_path.points.is_empty() || goal_has_moved {
+//                         if let Some(new_path) = calculate_path_blocking(
+//                             &nav_mesh,
+//                             &nav_mesh_settings,
+//                             actor_transform.translation,
+//                             goal_transform.unwrap().translation,
+//                         ) {
+//                             debug!("Updating navgation path.");
+//                             navigation_path.points = new_path;
+//                         } else {
+//                             *action_state = ActionState::Failure;
+//                             continue;
+//                         }
+//                     }
+//
+//                     // TODO: Move along the path
+//                 }
+//
+//                 ActionState::Cancelled => {
+//                     debug!("Moving to is cancelled");
+//                     *action_state = ActionState::Failure;
+//                 }
+//                 _ => {}
+//             }
+//         } else {
+//             debug!("Failed to find transform or nav path for actor {:?}", actor);
+//             *action_state = ActionState::Failure;
+//         }
+//     }
+// }
 
 fn calculate_path_blocking(
     nav_mesh: &NavMesh,

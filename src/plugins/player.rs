@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::{math::*, prelude::*};
+use oxidized_navigation::NavMeshAffector;
 
 use crate::prelude::*;
 
