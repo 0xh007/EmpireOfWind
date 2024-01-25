@@ -1,4 +1,4 @@
-use bevy::{pbr::PbrPlugin, prelude::*};
+use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use oxidized_navigation::NavMeshAffector;
 
