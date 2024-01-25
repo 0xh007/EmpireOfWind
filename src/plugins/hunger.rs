@@ -6,10 +6,12 @@ pub struct HungerPlugin;
 
 impl Plugin for HungerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, hunger_system).add_systems(
-            PreUpdate,
-            (hunger_scorer_system).in_set(BigBrainSet::Scorers),
-        );
+        app.register_type::<Hunger>()
+            .add_systems(Update, hunger_system)
+            .add_systems(
+                PreUpdate,
+                (hunger_scorer_system).in_set(BigBrainSet::Scorers),
+            );
     }
 }
 

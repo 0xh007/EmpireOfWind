@@ -20,6 +20,17 @@ fn spawn_npc(
     let start_position = Vec3::new(-10.0, 15.0, 4.0);
     let spacing = 1.0; // Spacing between each NPC.
 
+    let move_and_eat = Steps::build()
+        .label("MoveAndEat")
+        .step(MoveToNearest::<Food> {
+            speed: 1.5,
+            _marker: std::marker::PhantomData,
+        })
+        .step(Eat {
+            until: 10.0,
+            per_second: 15.0,
+        });
+
     let move_and_sleep = Steps::build()
         .label("MoveAndSleep")
         .step(MoveToNearest::<SleepArea> {
@@ -47,16 +58,22 @@ fn spawn_npc(
         CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
             .with_movement(90.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
         Npc,
+        Hunger {
+            is_eating: false,
+            per_second: 4.0,
+            level: 0.0,
+        },
         Fatigue {
             is_sleeping: false,
             per_second: 4.0,
-            level: 60.0,
+            level: 0.0,
         },
         NavigationPath::default(),
         Thinker::build()
             .label("NPC Thinker")
             // Selects the action with the highest score that is above the threshold
             .picker(FirstToScore::new(0.6))
-            .when(FatigueScorer, move_and_sleep),
+            .when(FatigueScorer, move_and_sleep)
+            .when(HungerScorer, move_and_eat),
     ));
 }
