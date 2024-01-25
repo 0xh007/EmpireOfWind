@@ -20,7 +20,8 @@ impl Plugin for ShipBuilderPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, generate_ship)
             .add_systems(Startup, place_obstacle)
-            .add_systems(Startup, place_furniture);
+            .add_systems(Startup, place_furniture)
+            .add_systems(Startup, place_food);
     }
 }
 
@@ -48,6 +49,7 @@ fn place_furniture(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    // TODO: Move this up
     let wall_thickness = 0.5;
     // Create a bed
     commands.spawn((
@@ -62,12 +64,39 @@ fn place_furniture(
     ));
 }
 
+fn place_food(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // TODO: Move this up
+    let wall_thickness = 0.5;
+
+    commands.spawn((
+        Name::new("Food"),
+        PbrBundle {
+            mesh: meshes.add(
+                shape::Icosphere {
+                    radius: 0.2,
+                    subdivisions: 20,
+                }
+                .try_into()
+                .unwrap(),
+            ),
+            material: materials.add(Color::RED.into()),
+            transform: Transform::from_xyz(10.0, SHIP_HEIGHT as f32 + wall_thickness, 2.0),
+            ..default()
+        },
+    ));
+}
+
 fn generate_ship(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Thickness of the ship's walls, bottom, and top deck
+    // TODO: Move this up
     let wall_thickness = 0.5;
 
     // Create the bottom of the ship
