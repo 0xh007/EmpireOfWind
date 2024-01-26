@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::prelude::SleepArea;
+use crate::prelude::*;
 
 const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
@@ -74,6 +74,7 @@ fn place_food(
 
     commands.spawn((
         Name::new("Food"),
+        Food,
         PbrBundle {
             mesh: meshes.add(
                 shape::Icosphere {

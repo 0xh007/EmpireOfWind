@@ -19,15 +19,10 @@ impl Plugin for SleepPlugin {
 fn sleep_action_system(
     time: Res<Time>,
     mut fatigues: Query<(&mut Fatigue, &Handle<StandardMaterial>)>,
-    // Resource used to modify the appearance of the farmer.
     mut materials: ResMut<Assets<StandardMaterial>>,
-    // We execute actions by querying for their associated Action Component
-    // (Sleep in this case). You'll always need both Actor and ActionState.
     mut query: Query<(&Actor, &mut ActionState, &Sleep, &ActionSpan)>,
 ) {
     for (Actor(actor), mut state, sleep, span) in &mut query {
-        // This sets up the tracing scope. Any `debug` calls here will be
-        // spanned together in the output.
         let _guard = span.span().enter();
 
         // Use the sleep_action's actor to look up the corresponding Fatigue component.
