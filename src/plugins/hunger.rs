@@ -45,7 +45,7 @@ pub fn hunger_scorer_system(
                 score.set(new_score);
                 if hunger.level >= 100.0 {
                     span.span().in_scope(|| {
-                        trace!("Fatigue above threshold! Score: {}", hunger.level / 100.0)
+                        trace!("Hunger above threshold! Score: {}", hunger.level / 100.0)
                     });
                 }
             }

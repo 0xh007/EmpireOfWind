@@ -12,8 +12,13 @@ pub struct PathfindingPlugin;
 
 impl Plugin for PathfindingPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<NavigationPath>()
-            .add_systems(PreUpdate, move_to_nearest_system::<SleepArea>);
+        app.register_type::<NavigationPath>().add_systems(
+            PreUpdate,
+            (
+                move_to_nearest_system::<SleepArea>,
+                move_to_nearest_system::<Food>,
+            ),
+        );
     }
 }
 
@@ -69,18 +74,22 @@ fn move_to_nearest_system<T: Component + std::fmt::Debug + Clone>(
 
                         // Check if we are close enough to the next point to consider it reached
                         if distance_to_next_point < MAX_DISTANCE {
-                            debug!("We have reached the point");
                             // Remove the reached point from the navigation path
                             navigation_path.points.remove(0);
+
+                            // If after removing the point, the path is empty, we've reached the
+                            // end
+                            if navigation_path.points.is_empty() {
+                                debug!("Reached end of path.");
+                                *action_state = ActionState::Success;
+                                continue;
+                            }
                         } else {
                             // Move towards the next point
                             let step_size = time.delta_seconds() * move_to.speed;
                             let step = direction * step_size.min(distance_to_next_point);
                             actor_transform.translation += step;
                         }
-                    } else {
-                        // We've reaced the end of the path
-                        *action_state = ActionState::Success;
                     }
                 }
                 ActionState::Cancelled => {
