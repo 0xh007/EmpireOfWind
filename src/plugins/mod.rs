@@ -26,6 +26,7 @@ impl PluginGroup for CorePlugins {
             .add(atmosphere::AtmospherePlugin)
             .add(BigBrainPlugin::new(PreUpdate))
             .add(camera::CameraPlugin)
+            .add(eat::EatPlugin)
             .add(editor_types::EditorTypesPlugin)
             .add(fatigue::FatiguePlugin)
             .add(hunger::HungerPlugin)
