@@ -28,7 +28,7 @@ fn spawn_npc(
         })
         .step(Eat {
             until: 10.0,
-            per_second: 15.0,
+            per_second: 10.0,
         });
 
     let move_and_sleep = Steps::build()
