@@ -8,6 +8,5 @@ Get Rust: https://www.rust-lang.org/learn/get-started
 Install Bevy Dependencies: https://bevyengine.org/learn/book/getting-started/setup/#install-os-dependencies
 
 ```
-cargo build --release
-cargo run
+cargo run --release
 ```
