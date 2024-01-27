@@ -138,9 +138,22 @@ fn generate_ship(
         NavMeshAffector,
     ));
 
-    // Starboard side of the hull
-
-    // Create port side of hull
+    // Create side of hull
+    commands.spawn((
+        Name::new("Port Wall"),
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box::new(
+                SHIP_LENGTH as f32,
+                SHIP_HEIGHT as f32 + wall_thickness,
+                wall_thickness,
+            ))),
+            material: materials.add(Color::hex("8B4513").unwrap().into()),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(0.0, 0.0, 0.0),
+    ));
 
     // Create bow
     commands.spawn((
