@@ -144,11 +144,15 @@ fn generate_ship(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
                 SHIP_LENGTH as f32,
-                SHIP_HEIGHT as f32 + wall_thickness,
+                SHIP_HEIGHT as f32 - wall_thickness,
                 wall_thickness,
             ))),
             material: materials.add(Color::hex("8B4513").unwrap().into()),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            transform: Transform::from_xyz(
+                0.0,
+                SHIP_HEIGHT as f32 / 2.0,
+                -((SHIP_WIDTH as f32 - wall_thickness) / 2.0),
+            ),
             ..default()
         },
         RigidBody::Static,
