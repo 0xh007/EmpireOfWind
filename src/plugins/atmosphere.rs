@@ -26,7 +26,7 @@ fn spawn_atmosphere(mut commands: Commands) {
                 ..default()
             },
             transform: Transform::from_xyz(0.0, 0.0, 0.0)
-                .looking_at(Vec3::new(-0.15, -0.05, 0.25), Vec3::Y),
+                .looking_at(Vec3::new(-0.15, -0.05, -0.35), Vec3::Y),
             cascade_shadow_config,
             ..default()
         },
