@@ -35,7 +35,7 @@ fn place_obstacle(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 2.0, 6.0))),
             material: materials.add(Color::ORANGE.into()),
-            transform: Transform::from_xyz(-4.0, SHIP_HEIGHT as f32 + 0.5, 1.0),
+            transform: Transform::from_xyz(-4.0, SHIP_HEIGHT as f32 + (0.5 + 2.0) / 2.0, 1.0),
             ..default()
         },
         RigidBody::Static,
