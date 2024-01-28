@@ -81,8 +81,9 @@ fn move_camera(
 ) {
     if let Ok(player_transform) = query.get_single() {
         if let Ok(mut camera_transform) = camera_query.get_single_mut() {
-            // let camera_offset = Vec3::new(25.0, 12.0, 0.0); // Adjust as needed
-            let camera_offset = Vec3::new(0.0, 12.0, 25.0); // Adjust as needed
+            // Old offset left for reference
+            // let camera_offset = Vec3::new(0.0, 12.0, 25.0);
+            let camera_offset = Vec3::new(0.0, 2.0, 19.0);
 
             // Calculate the target position based on the player's position and the offset
             let target_position = player_transform.translation + camera_offset;
@@ -98,7 +99,6 @@ fn move_camera(
             // Calculate the desired up vector, which should be the global up vector
             let up = Vec3::Y;
 
-            // Use the `look_at` method to point the camera towards the player while maintaining the up vector
             camera_transform.look_at(player_transform.translation, up);
         }
     }
