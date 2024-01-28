@@ -138,9 +138,9 @@ fn generate_ship(
         NavMeshAffector,
     ));
 
-    // Create side of hull
+    // Create port side of hull
     commands.spawn((
-        Name::new("Port Wall"),
+        Name::new("Port Hull"),
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
                 SHIP_LENGTH as f32,
