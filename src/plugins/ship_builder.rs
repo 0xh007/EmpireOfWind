@@ -156,7 +156,11 @@ fn generate_ship(
             ..default()
         },
         RigidBody::Static,
-        Collider::cuboid(0.0, 0.0, 0.0),
+        Collider::cuboid(
+            SHIP_LENGTH as f32,
+            SHIP_HEIGHT as f32 - wall_thickness,
+            wall_thickness,
+        ),
     ));
 
     // Create bow
