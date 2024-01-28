@@ -109,7 +109,7 @@ fn generate_ship(
                 wall_thickness,
                 SHIP_WIDTH as f32,
             ))),
-            material: materials.add(Color::hex("D18251").unwrap().into()),
+            material: materials.add(Color::hex("A0522D").unwrap().into()),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         },
@@ -147,7 +147,7 @@ fn generate_ship(
                 SHIP_HEIGHT as f32 - wall_thickness,
                 wall_thickness,
             ))),
-            material: materials.add(Color::hex("8B4513").unwrap().into()),
+            material: materials.add(Color::hex("A0522D").unwrap().into()),
             transform: Transform::from_xyz(
                 0.0,
                 SHIP_HEIGHT as f32 / 2.0,
@@ -168,7 +168,7 @@ fn generate_ship(
                 SHIP_HEIGHT as f32 + (wall_thickness),
                 SHIP_WIDTH as f32,
             ))),
-            material: materials.add(Color::hex("8B4513").unwrap().into()),
+            material: materials.add(Color::hex("A0522D").unwrap().into()),
             transform: Transform::from_xyz(
                 -((SHIP_LENGTH as f32 / 2.0) + (wall_thickness / 2.0)),
                 SHIP_HEIGHT as f32 / 2.0,
@@ -189,7 +189,7 @@ fn generate_ship(
                 SHIP_HEIGHT as f32 + (wall_thickness),
                 SHIP_WIDTH as f32,
             ))),
-            material: materials.add(Color::hex("8B4513").unwrap().into()),
+            material: materials.add(Color::hex("A0522D").unwrap().into()),
             transform: Transform::from_xyz(
                 (SHIP_LENGTH as f32 / 2.0) + (wall_thickness / 2.0),
                 SHIP_HEIGHT as f32 / 2.0,
@@ -200,4 +200,28 @@ fn generate_ship(
         RigidBody::Static,
         Collider::cuboid(wall_thickness, SHIP_HEIGHT as f32, SHIP_WIDTH as f32),
     ));
+
+    // Create internal decks
+    let space_between_decks = (SHIP_HEIGHT as f32 - 2.0 * wall_thickness) / 4.0;
+    for i in 1..=3 {
+        let deck_height = wall_thickness + (space_between_decks * i as f32);
+
+        commands.spawn((
+            Name::new(format!("Internal Deck {}", i)),
+            PbrBundle {
+                mesh: meshes.add(Mesh::from(shape::Box::new(
+                    SHIP_LENGTH as f32,
+                    wall_thickness,
+                    SHIP_WIDTH as f32,
+                ))),
+                material: materials.add(Color::hex("A0522D").unwrap().into()),
+                transform: Transform::from_xyz(0.0, deck_height, 0.0),
+                ..default()
+            },
+            Deck,
+            RigidBody::Static,
+            Collider::cuboid(SHIP_LENGTH as f32, wall_thickness, SHIP_WIDTH as f32),
+            NavMeshAffector,
+        ));
+    }
 }
