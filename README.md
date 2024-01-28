@@ -10,3 +10,13 @@ Install Bevy Dependencies: https://bevyengine.org/learn/book/getting-started/set
 ```
 cargo run --release
 ```
+
+## Controls
+Move: `W,A,S,D`
+
+Jump: `SPACE`
+
+### Development Controls
+Toggle Navigation Meshes: `M`
+
+Editor: `E`

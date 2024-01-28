@@ -35,7 +35,7 @@ fn place_obstacle(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 2.0, 6.0))),
             material: materials.add(Color::ORANGE.into()),
-            transform: Transform::from_xyz(-4.0, SHIP_HEIGHT as f32 + 0.5, 1.0),
+            transform: Transform::from_xyz(-4.0, SHIP_HEIGHT as f32 + (0.5 + 2.0) / 2.0, 1.0),
             ..default()
         },
         RigidBody::Static,
@@ -138,9 +138,26 @@ fn generate_ship(
         NavMeshAffector,
     ));
 
-    // Starboard side of the hull
-
     // Create port side of hull
+    commands.spawn((
+        Name::new("Port Hull"),
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box::new(
+                SHIP_LENGTH as f32,
+                SHIP_HEIGHT as f32 - wall_thickness,
+                wall_thickness,
+            ))),
+            material: materials.add(Color::hex("8B4513").unwrap().into()),
+            transform: Transform::from_xyz(
+                0.0,
+                SHIP_HEIGHT as f32 / 2.0,
+                -((SHIP_WIDTH as f32 - wall_thickness) / 2.0),
+            ),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(0.0, 0.0, 0.0),
+    ));
 
     // Create bow
     commands.spawn((
