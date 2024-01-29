@@ -92,6 +92,7 @@ fn place_food(
 }
 
 fn generate_ship(
+    assets: Res<AssetServer>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -207,7 +208,31 @@ fn generate_ship(
 
     // Create internal decks
     let space_between_decks = (SHIP_HEIGHT as f32 - 2.0 * wall_thickness) / 4.0;
+    let stairs_asset = assets.load("models/export/stairs/stairs_1m.glb#Scene0");
     for i in 1..=3 {
+        let lower_deck_height = wall_thickness + (space_between_decks * (i - 1) as f32);
+        let upper_deck_height = wall_thickness + (space_between_decks * i as f32);
+        let height_diff = upper_deck_height - lower_deck_height;
+        let stair_section_height = 1.0;
+
+        // Calculate the number of stair sections needed
+        let num_stairs = (height_diff / stair_section_height).ceil() as i32;
+
+        for j in 0..num_stairs {
+            let stair_height = lower_deck_height + (j as f32 * stair_section_height);
+            let stair_x_position = j as f32 * stair_section_height;
+            // let stair_z_position = 0.0;
+
+            commands.spawn((
+                Name::new(format!("Stair Section {}", j)),
+                SceneBundle {
+                    scene: stairs_asset.clone(),
+                    transform: Transform::from_xyz(stair_x_position, stair_height, 0.0),
+                    ..default()
+                },
+            ));
+        }
+
         let deck_height = wall_thickness + (space_between_decks * i as f32);
 
         commands.spawn((
