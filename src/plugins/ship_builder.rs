@@ -233,22 +233,23 @@ fn generate_ship(
         let num_stairs = (height_diff / stair_section_height).ceil() as i32;
         println!("Number of stairs: {}", num_stairs);
 
-        for j in 0..num_stairs {
-            let stair_height = lower_deck_height + (j as f32 * stair_section_height);
-            println!("Stair {} Y Position: {}", j, stair_height);
-            let stair_x_position = -(j as f32 * stair_section_height);
-            println!("Stair {} X Position: {}", j, stair_x_position);
-            // let stair_z_position = 0.0;
-
-            commands.spawn((
-                Name::new(format!("Stair Section {}", j)),
-                SceneBundle {
-                    scene: stairs_asset.clone(),
-                    transform: Transform::from_xyz(stair_x_position, stair_height, 0.0),
-                    ..default()
-                },
-            ));
-        }
+        // TODO: Reactivate this once hull shapes are working
+        // for j in 0..num_stairs {
+        //     let stair_height = lower_deck_height + (j as f32 * stair_section_height);
+        //     println!("Stair {} Y Position: {}", j, stair_height);
+        //     let stair_x_position = -(j as f32 * stair_section_height);
+        //     println!("Stair {} X Position: {}", j, stair_x_position);
+        //     // let stair_z_position = 0.0;
+        //
+        //     commands.spawn((
+        //         Name::new(format!("Stair Section {}", j)),
+        //         SceneBundle {
+        //             scene: stairs_asset.clone(),
+        //             transform: Transform::from_xyz(stair_x_position, stair_height, 0.0),
+        //             ..default()
+        //         },
+        //     ));
+        // }
 
         let deck_height = wall_thickness + (space_between_decks * i as f32);
 
