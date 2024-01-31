@@ -92,7 +92,6 @@ fn place_food(
 }
 
 fn generate_ship(
-    assets: Res<AssetServer>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
