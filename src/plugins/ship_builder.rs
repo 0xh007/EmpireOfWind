@@ -6,7 +6,7 @@ use crate::prelude::*;
 
 const SHIP_LENGTH: i32 = 40;
 const SHIP_WIDTH: i32 = 10;
-const SHIP_HEIGHT: i32 = 10;
+const SHIP_HEIGHT: i32 = 12;
 
 #[derive(Component)]
 struct Ship;
@@ -120,23 +120,23 @@ fn generate_ship(
     ));
 
     // Top deck of the ship
-    commands.spawn((
-        Name::new("Top Deck"),
-        PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(
-                SHIP_LENGTH as f32,
-                wall_thickness,
-                SHIP_WIDTH as f32,
-            ))),
-            material: materials.add(Color::hex("A0522D").unwrap().into()),
-            transform: Transform::from_xyz(0.0, SHIP_HEIGHT as f32, 0.0),
-            ..default()
-        },
-        Deck,
-        RigidBody::Static,
-        Collider::cuboid(SHIP_LENGTH as f32, wall_thickness, SHIP_WIDTH as f32),
-        NavMeshAffector,
-    ));
+    // commands.spawn((
+    //     Name::new("Top Deck"),
+    //     PbrBundle {
+    //         mesh: meshes.add(Mesh::from(shape::Box::new(
+    //             SHIP_LENGTH as f32,
+    //             wall_thickness,
+    //             SHIP_WIDTH as f32,
+    //         ))),
+    //         material: materials.add(Color::hex("A0522D").unwrap().into()),
+    //         transform: Transform::from_xyz(0.0, SHIP_HEIGHT as f32, 0.0),
+    //         ..default()
+    //     },
+    //     Deck,
+    //     RigidBody::Static,
+    //     Collider::cuboid(SHIP_LENGTH as f32, wall_thickness, SHIP_WIDTH as f32),
+    //     NavMeshAffector,
+    // ));
 
     // Create port side of hull
     commands.spawn((
@@ -207,7 +207,49 @@ fn generate_ship(
 
     // Create internal decks
     let space_between_decks = (SHIP_HEIGHT as f32 - 2.0 * wall_thickness) / 4.0;
-    for i in 1..=3 {
+    // let stairs_asset = assets.load("models/export/stairs/stairs_1m.glb#Scene0");
+    for i in 1..=4 {
+        println!("Deck: {}", i);
+        let lower_deck_height = if i == 1 {
+            0.0
+        } else {
+            wall_thickness + (space_between_decks * (i - 1) as f32)
+        };
+        println!("Lower Deck Height: {}", lower_deck_height);
+
+        let upper_deck_height = if i == 4 {
+            SHIP_HEIGHT as f32
+        } else {
+            wall_thickness + (space_between_decks * i as f32)
+        };
+
+        println!("Upper Deck Height: {}", upper_deck_height);
+        let height_diff = upper_deck_height - lower_deck_height;
+        println!("Height Diff: {}", height_diff);
+        let stair_section_height = 1.0;
+
+        // Calculate the number of stair sections needed
+        let num_stairs = (height_diff / stair_section_height).ceil() as i32;
+        println!("Number of stairs: {}", num_stairs);
+
+        // TODO: Reactivate this once hull shapes are working
+        // for j in 0..num_stairs {
+        //     let stair_height = lower_deck_height + (j as f32 * stair_section_height);
+        //     println!("Stair {} Y Position: {}", j, stair_height);
+        //     let stair_x_position = -(j as f32 * stair_section_height);
+        //     println!("Stair {} X Position: {}", j, stair_x_position);
+        //     // let stair_z_position = 0.0;
+        //
+        //     commands.spawn((
+        //         Name::new(format!("Stair Section {}", j)),
+        //         SceneBundle {
+        //             scene: stairs_asset.clone(),
+        //             transform: Transform::from_xyz(stair_x_position, stair_height, 0.0),
+        //             ..default()
+        //         },
+        //     ));
+        // }
+
         let deck_height = wall_thickness + (space_between_decks * i as f32);
 
         commands.spawn((
