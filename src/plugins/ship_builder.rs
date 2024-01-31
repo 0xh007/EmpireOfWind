@@ -208,7 +208,7 @@ fn generate_ship(
 
     // Create internal decks
     let space_between_decks = (SHIP_HEIGHT as f32 - 2.0 * wall_thickness) / 4.0;
-    let stairs_asset = assets.load("models/export/stairs/stairs_1m.glb#Scene0");
+    // let stairs_asset = assets.load("models/export/stairs/stairs_1m.glb#Scene0");
     for i in 1..=4 {
         println!("Deck: {}", i);
         let lower_deck_height = if i == 1 {
