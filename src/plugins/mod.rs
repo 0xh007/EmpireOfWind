@@ -12,6 +12,7 @@ mod hunger;
 mod input;
 mod movement;
 mod navmesh;
+mod navmesh_test;
 mod npc;
 mod ocean;
 mod pathfinding;
@@ -28,7 +29,6 @@ impl PluginGroup for CorePlugins {
             .add(assets::AssetsPlugin)
             .add(atmosphere::AtmospherePlugin)
             .add(BigBrainPlugin::new(PreUpdate))
-            // .add(BlueprintsPlugin::default())
             .add(camera::CameraPlugin)
             .add(eat::EatPlugin)
             .add(editor_types::EditorTypesPlugin)
@@ -37,12 +37,12 @@ impl PluginGroup for CorePlugins {
             .add(input::InputPlugin)
             .add(movement::MovementPlugin)
             .add(navmesh::NavMeshPlugin)
+            .add(navmesh_test::NavmeshtestPlugin)
             // .add(npc::NpcPlugin)
-            .add(ocean::OceanPlugin)
+            // .add(ocean::OceanPlugin)
             .add(pathfinding::PathfindingPlugin)
             .add(player::PlayerPlugin)
-            // .add(ship_builder::ShipBuilderPlugin)
             .add(sleep::SleepPlugin)
-            .add(ship::ShipPlugin)
+        // .add(ship::ShipPlugin)
     }
 }
