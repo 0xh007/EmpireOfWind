@@ -19,11 +19,12 @@ impl Plugin for NavMeshPlugin {
                 OxidizedNavigationPlugin::<Collider>::new(NavMeshSettings {
                     cell_height: CELL_WIDTH * 0.5,
                     cell_width: CELL_WIDTH,
-                    tile_width: 170,
+                    tile_width: 180,
                     world_half_extents: 250.0,
                     world_bottom_bound: -20.0,
                     max_traversable_slope_radians: (40.0_f32 - 0.1).to_radians(),
                     walkable_height: 25,
+                    // walkable_height: 10,
                     walkable_radius: 4,
                     step_height: 3,
                     min_region_area: 30,
