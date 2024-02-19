@@ -23,17 +23,32 @@ struct NavmeshtestAssets {
     test_asset: Handle<Scene>,
 }
 
-fn spawn_test_assets(mut commands: Commands, test_assets: Res<NavmeshtestAssets>) {
+fn spawn_test_assets(
+    mut commands: Commands,
+    test_assets: Res<NavmeshtestAssets>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // commands.spawn((
+    //     PbrBundle {
+    //         mesh: meshes.add(Mesh::from(bevy::prelude::shape::Cube { size: 5.0 })),
+    //         material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
+    //         ..default()
+    //     },
+    //     AsyncCollider(ComputedCollider::TriMesh),
+    //     RigidBody::Static,
+    //     NavMeshAffector,
+    // ));
     commands.spawn((
         SceneBundle {
             scene: test_assets.test_asset.clone(),
             visibility: Visibility::Hidden,
             ..default()
         },
-        // AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
-        AsyncSceneCollider::new(Some(ComputedCollider::ConvexDecomposition(
-            VHACDParameters::default(),
-        ))),
+        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+        // AsyncSceneCollider::new(Some(ComputedCollider::ConvexDecomposition(
+        //     VHACDParameters::default(),
+        // ))),
         RigidBody::Static,
         NavMeshAffector,
     ));

@@ -14,7 +14,7 @@ impl Plugin for ShipPlugin {
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
         .add_systems(OnEnter(AppStates::Next), spawn_ship)
-        .add_systems(OnEnter(AppStates::Next), spawn_ship_colliders)
+        // .add_systems(OnEnter(AppStates::Next), spawn_ship_colliders)
         .add_systems(OnEnter(AppStates::Next), spawn_furniture)
         .add_systems(OnEnter(AppStates::Next), spawn_food);
     }
@@ -108,36 +108,38 @@ fn spawn_food(
 // Blender X == Bevy X
 // Blender Z == Bevy Y
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
-    commands.spawn(SceneBundle {
-        scene: ship_assets.carrack_hull.clone(),
-        ..default()
-    });
+    commands.spawn(({
+        SceneBundle {
+            scene: ship_assets.carrack_hull.clone(),
+            ..default()
+        }
+    },));
 }
 
-fn spawn_ship_colliders(mut commands: Commands, ship_assets: Res<ShipAssets>) {
-    // Create a vector of all collider handles
-    let collider_handles = vec![
-        &ship_assets.top_deck_collider,
-        &ship_assets.deck_1_bow_collider,
-        &ship_assets.deck_1_stern_aft_wall_collider,
-        &ship_assets.deck_1_stern_collider,
-        &ship_assets.deck_1_stern_port_wall_collider,
-        &ship_assets.deck_1_stern_starboard_wall_collider,
-        &ship_assets.deck_2_stern_collider,
-        &ship_assets.deck_3_collider,
-    ];
-
-    // Iterate over the collider handles and spawn each collider
-    for collider_handle in collider_handles {
-        commands.spawn((
-            SceneBundle {
-                scene: collider_handle.clone(),
-                visibility: Visibility::Hidden,
-                ..default()
-            },
-            AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
-            RigidBody::Static,
-            NavMeshAffector,
-        ));
-    }
-}
+// fn spawn_ship_colliders(mut commands: Commands, ship_assets: Res<ShipAssets>) {
+//     // Create a vector of all collider handles
+//     let collider_handles = vec![
+//         &ship_assets.top_deck_collider,
+//         &ship_assets.deck_1_bow_collider,
+//         &ship_assets.deck_1_stern_aft_wall_collider,
+//         &ship_assets.deck_1_stern_collider,
+//         &ship_assets.deck_1_stern_port_wall_collider,
+//         &ship_assets.deck_1_stern_starboard_wall_collider,
+//         &ship_assets.deck_2_stern_collider,
+//         &ship_assets.deck_3_collider,
+//     ];
+//
+//     // Iterate over the collider handles and spawn each collider
+//     for collider_handle in collider_handles {
+//         commands.spawn((
+//             SceneBundle {
+//                 scene: collider_handle.clone(),
+//                 visibility: Visibility::Hidden,
+//                 ..default()
+//             },
+//             AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+//             RigidBody::Static,
+//             NavMeshAffector,
+//         ));
+//     }
+// }
