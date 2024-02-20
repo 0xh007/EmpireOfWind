@@ -6,6 +6,9 @@ use oxidized_navigation::NavMeshAffector;
 
 use crate::prelude::*;
 
+#[derive(Component)]
+struct ColliderMarker;
+
 pub struct NavmeshtestPlugin;
 
 impl Plugin for NavmeshtestPlugin {
@@ -50,6 +53,6 @@ fn spawn_test_assets(
         //     VHACDParameters::default(),
         // ))),
         RigidBody::Static,
-        NavMeshAffector,
+        // NavMeshAffector,
     ));
 }
