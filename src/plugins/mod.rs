@@ -47,6 +47,6 @@ impl PluginGroup for CorePlugins {
             .add(physics::PhysicsPlugin)
             .add(player::PlayerPlugin)
             .add(sleep::SleepPlugin)
-        // .add(ship::ShipPlugin)
+            .add(ship::ShipPlugin)
     }
 }

@@ -30,32 +30,31 @@ struct ColliderBundle {
 
 #[derive(AssetCollection, Resource)]
 struct ShipAssets {
-    #[asset(path = "models/export/ship/carrack_hull.glb#Scene0")]
+    #[asset(path = "models/export/ship/carrack.glb#Scene0")]
     carrack_hull: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/carrack_top_deck_collider.glb#Scene0")]
-    top_deck_collider: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/deck_1_bow_collider.glb#Scene0")]
-    deck_1_bow_collider: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/deck_1_stern_aft_wall_collider.glb#Scene0")]
-    deck_1_stern_aft_wall_collider: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/deck_1_stern_collider.glb#Scene0")]
-    deck_1_stern_collider: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/deck_1_stern_port_wall_collider.glb#Scene0")]
-    deck_1_stern_port_wall_collider: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/deck_1_stern_starboard_wall_collider.glb#Scene0")]
-    deck_1_stern_starboard_wall_collider: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/deck_2_stern_collider.glb#Scene0")]
-    deck_2_stern_collider: Handle<Scene>,
-
-    #[asset(path = "models/export/ship/colliders/deck_3_collider.glb#Scene0")]
-    deck_3_collider: Handle<Scene>,
+    // #[asset(path = "models/export/ship/colliders/carrack_top_deck_collider.glb#Scene0")]
+    // top_deck_collider: Handle<Scene>,
+    //
+    // #[asset(path = "models/export/ship/colliders/deck_1_bow_collider.glb#Scene0")]
+    // deck_1_bow_collider: Handle<Scene>,
+    //
+    // #[asset(path = "models/export/ship/colliders/deck_1_stern_aft_wall_collider.glb#Scene0")]
+    // deck_1_stern_aft_wall_collider: Handle<Scene>,
+    //
+    // #[asset(path = "models/export/ship/colliders/deck_1_stern_collider.glb#Scene0")]
+    // deck_1_stern_collider: Handle<Scene>,
+    //
+    // #[asset(path = "models/export/ship/colliders/deck_1_stern_port_wall_collider.glb#Scene0")]
+    // deck_1_stern_port_wall_collider: Handle<Scene>,
+    //
+    // #[asset(path = "models/export/ship/colliders/deck_1_stern_starboard_wall_collider.glb#Scene0")]
+    // deck_1_stern_starboard_wall_collider: Handle<Scene>,
+    //
+    // #[asset(path = "models/export/ship/colliders/deck_2_stern_collider.glb#Scene0")]
+    // deck_2_stern_collider: Handle<Scene>,
+    //
+    // #[asset(path = "models/export/ship/colliders/deck_3_collider.glb#Scene0")]
+    // deck_3_collider: Handle<Scene>,
 }
 
 fn spawn_furniture(

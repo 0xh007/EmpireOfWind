@@ -12,6 +12,7 @@ impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         // TODO: Add xpbd in here
         app.register_type::<ColliderMarker>()
+            .register_type::<NavMeshMarker>()
             .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
 }
@@ -20,23 +21,33 @@ impl Plugin for PhysicsPlugin {
 #[reflect(Component, Serialize, Deserialize)]
 pub struct ColliderMarker;
 
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct NavMeshMarker;
+
 #[sysfail(log(level = "error"))]
 pub fn read_colliders(
-    collider_marker: Query<Entity, Added<ColliderMarker>>,
+    collider_marker_query: Query<(Entity, Option<&NavMeshMarker>), Added<ColliderMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
 ) -> Result<()> {
-    for entity in collider_marker.iter() {
+    for (entity, nav_mesh_marker_opt) in collider_marker_query.iter() {
         let mesh = find_mesh(entity, &children, &meshes, &mesh_handles)
             .context("Failed to find mesh for collider")?;
         let collider =
             Collider::trimesh_from_mesh(mesh).context("Failed to create collider from mesh")?;
 
+        // Insert the common components, including making the collider invisible
         commands
             .entity(entity)
-            .insert((collider, RigidBody::Static, NavMeshAffector));
+            .insert((collider, RigidBody::Static, Visibility::Hidden));
+
+        // If the NavMeshMarker is present, also add NavMeshAffector in a separate step
+        if nav_mesh_marker_opt.is_some() {
+            commands.entity(entity).insert(NavMeshAffector);
+        }
     }
     Ok(())
 }
