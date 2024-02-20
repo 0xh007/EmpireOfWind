@@ -1,4 +1,5 @@
 use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
+use bevy_gltf_components::ComponentsFromGltfPlugin;
 use big_brain::BigBrainPlugin;
 
 pub use assets::AppStates;
@@ -16,6 +17,7 @@ mod navmesh_test;
 mod npc;
 mod ocean;
 mod pathfinding;
+mod physics;
 mod player;
 mod ship;
 mod ship_builder;
@@ -30,6 +32,7 @@ impl PluginGroup for CorePlugins {
             .add(atmosphere::AtmospherePlugin)
             .add(BigBrainPlugin::new(PreUpdate))
             .add(camera::CameraPlugin)
+            .add(ComponentsFromGltfPlugin::default())
             .add(eat::EatPlugin)
             .add(editor_types::EditorTypesPlugin)
             .add(fatigue::FatiguePlugin)
@@ -37,10 +40,11 @@ impl PluginGroup for CorePlugins {
             .add(input::InputPlugin)
             .add(movement::MovementPlugin)
             .add(navmesh::NavMeshPlugin)
-            .add(navmesh_test::NavmeshtestPlugin)
+            // .add(navmesh_test::NavmeshtestPlugin)
             // .add(npc::NpcPlugin)
             // .add(ocean::OceanPlugin)
             .add(pathfinding::PathfindingPlugin)
+            .add(physics::PhysicsPlugin)
             .add(player::PlayerPlugin)
             .add(sleep::SleepPlugin)
         // .add(ship::ShipPlugin)

@@ -925,6 +925,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_mod_sysfail"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e12a8eb3047d9a84506ce630d44c9774a122259e79cd7f5e8d40837a7a82591"
+dependencies = [
+ "anyhow",
+ "bevy_ecs",
+ "bevy_log",
+ "bevy_mod_sysfail_macros",
+ "bevy_time",
+ "bevy_utils",
+]
+
+[[package]]
+name = "bevy_mod_sysfail_macros"
+version = "4.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73fae27cbc3735ce397be4e089112c411b5cead6d0778b31b69e47df4ebffd37"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.46",
+]
+
+[[package]]
 name = "bevy_panorbit_camera"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1889,16 +1914,19 @@ dependencies = [
 name = "empire_of_wind"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bevy",
  "bevy-inspector-egui",
  "bevy_asset_loader",
  "bevy_editor_pls",
  "bevy_gltf_components",
+ "bevy_mod_sysfail",
  "bevy_panorbit_camera",
  "bevy_xpbd_3d",
  "big-brain",
  "oxidized_navigation",
  "rand",
+ "serde",
 ]
 
 [[package]]

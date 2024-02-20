@@ -45,14 +45,14 @@ fn spawn_test_assets(
     commands.spawn((
         SceneBundle {
             scene: test_assets.test_asset.clone(),
-            visibility: Visibility::Hidden,
+            visibility: Visibility::Visible,
             ..default()
         },
-        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+        // AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
         // AsyncSceneCollider::new(Some(ComputedCollider::ConvexDecomposition(
         //     VHACDParameters::default(),
         // ))),
-        RigidBody::Static,
+        // RigidBody::Static,
         // NavMeshAffector,
     ));
 }
