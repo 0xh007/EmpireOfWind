@@ -1,11 +1,8 @@
+use crate::prelude::*;
+use bevy::core_pipeline::prepass::DepthPrepass;
 use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_xpbd_3d::PhysicsSet;
-// use bevy_xpbd_3d::{
-//     math::*, parry::transformation::vhacd::VHACDParameters, prelude::*, SubstepSchedule, SubstepSet,
-// };
-
-use crate::prelude::*;
 
 pub struct CameraPlugin;
 
@@ -42,6 +39,7 @@ fn setup_camera(mut commands: Commands) {
             ..default()
         },
         MainCamera,
+        DepthPrepass,
     ));
 
     commands.spawn((
@@ -57,6 +55,7 @@ fn setup_camera(mut commands: Commands) {
         },
         PanOrbitCamera::default(),
         DebugCamera,
+        DepthPrepass,
     ));
 }
 
