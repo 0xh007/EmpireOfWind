@@ -62,7 +62,6 @@ fn find_mesh<'a>(
         for child in children.iter() {
             if let Ok(mesh_handle) = mesh_handles.get(*child) {
                 if let Some(mesh) = meshes.get(mesh_handle) {
-                    println!("Found a mesh!");
                     return Some(mesh);
                 }
             }

@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_xpbd_3d::math::*;
 
 use crate::prelude::*;
 
@@ -24,10 +23,26 @@ fn keyboard_input(
 
     let horizontal = right as i8 - left as i8;
     let vertical = up as i8 - down as i8;
-    let direction = Vector2::new(horizontal as Scalar, vertical as Scalar).clamp_length_max(1.0);
 
-    if direction != Vector2::ZERO {
-        movement_event_writer.send(MovementAction::Move(direction));
+    // Create a direction vector from the input
+    let mut direction = Vec2::new(horizontal as f32, vertical as f32);
+
+    if direction != Vec2::ZERO {
+        // Normalize the direction to have a maximum length of 1
+        direction = direction.normalize_or_zero();
+
+        // Rotate the direction vector by +45 degrees to align with the isometric perspective
+        let rotation_angle = 45.0f32.to_radians(); // Convert +45 degrees to radians
+        let cos_angle = rotation_angle.cos();
+        let sin_angle = rotation_angle.sin();
+        let rotated_direction = Vec2::new(
+            direction.x * cos_angle - direction.y * sin_angle,
+            direction.x * sin_angle + direction.y * cos_angle,
+        );
+
+        movement_event_writer.send(MovementAction::Move(
+            rotated_direction.clamp_length_max(1.0),
+        ));
     }
 
     if keyboard_input.just_pressed(KeyCode::Space) {

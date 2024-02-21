@@ -1,8 +1,6 @@
-use bevy::gltf::Gltf;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_xpbd_3d::prelude::*;
-use oxidized_navigation::NavMeshAffector;
 
 use crate::prelude::*;
 
@@ -14,7 +12,6 @@ impl Plugin for ShipPlugin {
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
         .add_systems(OnEnter(AppStates::Next), spawn_ship)
-        // .add_systems(OnEnter(AppStates::Next), spawn_ship_colliders)
         .add_systems(OnEnter(AppStates::Next), spawn_furniture)
         .add_systems(OnEnter(AppStates::Next), spawn_food);
     }
@@ -32,29 +29,6 @@ struct ColliderBundle {
 struct ShipAssets {
     #[asset(path = "models/export/ship/carrack.glb#Scene0")]
     carrack_hull: Handle<Scene>,
-    // #[asset(path = "models/export/ship/colliders/carrack_top_deck_collider.glb#Scene0")]
-    // top_deck_collider: Handle<Scene>,
-    //
-    // #[asset(path = "models/export/ship/colliders/deck_1_bow_collider.glb#Scene0")]
-    // deck_1_bow_collider: Handle<Scene>,
-    //
-    // #[asset(path = "models/export/ship/colliders/deck_1_stern_aft_wall_collider.glb#Scene0")]
-    // deck_1_stern_aft_wall_collider: Handle<Scene>,
-    //
-    // #[asset(path = "models/export/ship/colliders/deck_1_stern_collider.glb#Scene0")]
-    // deck_1_stern_collider: Handle<Scene>,
-    //
-    // #[asset(path = "models/export/ship/colliders/deck_1_stern_port_wall_collider.glb#Scene0")]
-    // deck_1_stern_port_wall_collider: Handle<Scene>,
-    //
-    // #[asset(path = "models/export/ship/colliders/deck_1_stern_starboard_wall_collider.glb#Scene0")]
-    // deck_1_stern_starboard_wall_collider: Handle<Scene>,
-    //
-    // #[asset(path = "models/export/ship/colliders/deck_2_stern_collider.glb#Scene0")]
-    // deck_2_stern_collider: Handle<Scene>,
-    //
-    // #[asset(path = "models/export/ship/colliders/deck_3_collider.glb#Scene0")]
-    // deck_3_collider: Handle<Scene>,
 }
 
 fn spawn_furniture(
@@ -66,11 +40,11 @@ fn spawn_furniture(
     commands.spawn((
         Name::new("Bed"),
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(2.0, 1.0, 1.0))),
+            mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 2.0))),
             material: materials.add(Color::MAROON.into()),
             transform: Transform {
-                translation: Vec3::new(0.209, 8.0, 13.93),
-                rotation: Quat::from_rotation_x(-9.099f32.to_radians()),
+                translation: Vec3::new(-14.155, 7.8825, -0.147),
+                rotation: Quat::from_rotation_z(-9.8367f32.to_radians()),
                 scale: Vec3::ONE,
             },
             ..default()
@@ -97,15 +71,12 @@ fn spawn_food(
                 .unwrap(),
             ),
             material: materials.add(Color::RED.into()),
-            transform: Transform::from_xyz(0.27241, 5.9766, -11.16),
+            transform: Transform::from_xyz(13.167, 6.1885, 0.0),
             ..default()
         },
     ));
 }
 
-// Blender Y == Bevy -Z
-// Blender X == Bevy X
-// Blender Z == Bevy Y
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
     commands.spawn(({
         SceneBundle {
@@ -114,31 +85,3 @@ fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
         }
     },));
 }
-
-// fn spawn_ship_colliders(mut commands: Commands, ship_assets: Res<ShipAssets>) {
-//     // Create a vector of all collider handles
-//     let collider_handles = vec![
-//         &ship_assets.top_deck_collider,
-//         &ship_assets.deck_1_bow_collider,
-//         &ship_assets.deck_1_stern_aft_wall_collider,
-//         &ship_assets.deck_1_stern_collider,
-//         &ship_assets.deck_1_stern_port_wall_collider,
-//         &ship_assets.deck_1_stern_starboard_wall_collider,
-//         &ship_assets.deck_2_stern_collider,
-//         &ship_assets.deck_3_collider,
-//     ];
-//
-//     // Iterate over the collider handles and spawn each collider
-//     for collider_handle in collider_handles {
-//         commands.spawn((
-//             SceneBundle {
-//                 scene: collider_handle.clone(),
-//                 visibility: Visibility::Hidden,
-//                 ..default()
-//             },
-//             AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
-//             RigidBody::Static,
-//             NavMeshAffector,
-//         ));
-//     }
-// }

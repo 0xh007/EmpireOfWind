@@ -13,7 +13,6 @@ mod hunger;
 mod input;
 mod movement;
 mod navmesh;
-mod navmesh_test;
 mod npc;
 mod ocean;
 mod pathfinding;
@@ -40,9 +39,8 @@ impl PluginGroup for CorePlugins {
             .add(input::InputPlugin)
             .add(movement::MovementPlugin)
             .add(navmesh::NavMeshPlugin)
-            // .add(navmesh_test::NavmeshtestPlugin)
-            // .add(npc::NpcPlugin)
-            // .add(ocean::OceanPlugin)
+            .add(npc::NpcPlugin)
+            .add(ocean::OceanPlugin)
             .add(pathfinding::PathfindingPlugin)
             .add(physics::PhysicsPlugin)
             .add(player::PlayerPlugin)

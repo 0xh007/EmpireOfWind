@@ -26,7 +26,7 @@ fn spawn_player(
                 ..default()
             })),
             material: materials.add(Color::YELLOW.into()),
-            transform: Transform::from_xyz(-14.0, 12.7, -0.14),
+            transform: Transform::from_xyz(-14.0, 13.5, -0.14),
             ..default()
         },
         CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
