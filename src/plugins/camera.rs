@@ -1,4 +1,4 @@
-use bevy::{prelude::*, transform::TransformSystem};
+use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_xpbd_3d::PhysicsSet;
 // use bevy_xpbd_3d::{
@@ -24,19 +24,21 @@ impl Plugin for CameraPlugin {
 }
 
 fn setup_camera(mut commands: Commands) {
-    // transform: Transform::from_xyz(0.0, 15.0, 0.0),
-    let focus = Vec3::new(0.0, 8.0, 0.0);
-    let camera_position = Vec3::new(28.0, 20., 0.0);
-
     commands.spawn((
         Name::new("Main Camera"),
         Camera3dBundle {
             camera: Camera {
-                order: 0,
+                order: 1,
                 is_active: true,
                 ..default()
             },
-            transform: Transform::from_translation(camera_position).looking_at(focus, Vec3::Y),
+            projection: OrthographicProjection {
+                scale: 25.0,
+                scaling_mode: ScalingMode::FixedVertical(1.0),
+                ..default()
+            }
+            .into(),
+            transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
         MainCamera,
@@ -81,14 +83,14 @@ fn move_camera(
 ) {
     if let Ok(player_transform) = query.get_single() {
         if let Ok(mut camera_transform) = camera_query.get_single_mut() {
-            // Old offset left for reference
-            // let camera_offset = Vec3::new(0.0, 12.0, 25.0);
-            let camera_offset = Vec3::new(0.0, 2.0, 19.0);
+            // Adjust the camera offset for an isometric view
+            // The exact values here might need tweaking based on your game's scale and desired view
+            let camera_offset = Vec3::new(30.0, 50.0, 30.0); // Example isometric offset
 
             // Calculate the target position based on the player's position and the offset
             let target_position = player_transform.translation + camera_offset;
 
-            // Interpolation factor
+            // Interpolation factor for smooth camera movement
             let interpolation_factor = 10.0 * time.delta_seconds();
 
             // Smoothly interpolate the camera's position
@@ -96,10 +98,9 @@ fn move_camera(
                 .translation
                 .lerp(target_position, interpolation_factor.clamp(0.0, 1.0));
 
-            // Calculate the desired up vector, which should be the global up vector
-            let up = Vec3::Y;
-
-            camera_transform.look_at(player_transform.translation, up);
+            // Maintain the camera's isometric perspective while following the player
+            // This might require adjusting depending on your game's specific needs
+            camera_transform.look_at(player_transform.translation, Vec3::Y);
         }
     }
 }

@@ -17,7 +17,7 @@ fn spawn_npc(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Define the starting point for the NPCs.
-    let start_position = Vec3::new(-10.0, 15.0, 4.0);
+    let start_position = Vec3::new(0.0, 10.0, -3.187);
     let spacing = 1.0; // Spacing between each NPC.
 
     let move_and_eat = Steps::build()
