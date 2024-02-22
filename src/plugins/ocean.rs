@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_water::*;
 
@@ -11,34 +12,21 @@ impl Plugin for OceanPlugin {
             height: WATER_HEIGHT,
             ..default()
         })
-        .add_plugins(WaterPlugin);
-        // .add_systems(Startup, setup);
-        // app.add_systems(Startup, spawn_ocean);
+        .add_plugins(WaterPlugin)
+        .add_systems(Update, update_water_interactables);
     }
 }
 
-// fn setup(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-// ) {
-//
-// }
-//
-// fn spawn_ocean(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-// ) {
-//     commands.spawn((
-//         Name::new("Ocean"),
-//         PbrBundle {
-//             mesh: meshes.add(shape::Circle::new(400.0).into()),
-//             material: materials.add(Color::hex("618f92").unwrap().into()),
-//             transform: Transform::from_rotation(Quat::from_rotation_x(
-//                 -std::f32::consts::FRAC_PI_2,
-//             )),
-//             ..default()
-//         },
-//     ));
-// }
+fn update_water_interactables(
+    water: WaterParam,
+    mut water_interactables: Query<(&WaterInteractable, &mut Transform, &GlobalTransform)>,
+    #[cfg(feature = "debug")] mut lines: ResMut<DebugLines>,
+) {
+    for (water_interactable, mut transform, global) in water_interactables.iter_mut() {
+        let pos = global.translation();
+        #[cfg(not(feature = "debug"))]
+        water_interactable.sync_with_water(&water, pos, &mut transform);
+        #[cfg(feature = "debug")]
+        ship.update(&water, pos, &mut transform, &mut lines);
+    }
+}

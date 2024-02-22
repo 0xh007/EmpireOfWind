@@ -12,9 +12,10 @@ mod npc;
 mod player;
 mod sleep;
 mod sleep_area;
+mod water_interactable;
 
 pub use {
     camera::*, character::*, eat::*, fatigue::*, fatigue_scorer::*, food::*, hunger::*,
     hunger_scorer::*, move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*,
-    sleep_area::*,
+    sleep_area::*, water_interactable::*,
 };
