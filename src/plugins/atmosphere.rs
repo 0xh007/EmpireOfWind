@@ -1,5 +1,8 @@
-use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
+// use bevy::core_pipeline::Skybox;
+use bevy::pbr::CascadeShadowConfigBuilder;
+// use bevy_atmosphere::prelude::*;
+
 pub struct AtmospherePlugin;
 
 impl Plugin for AtmospherePlugin {
