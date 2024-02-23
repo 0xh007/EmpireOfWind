@@ -31,6 +31,17 @@ struct ShipAssets {
     carrack_hull: Handle<Scene>,
 }
 
+fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
+    commands.spawn((
+        SceneBundle {
+            scene: ship_assets.carrack_hull.clone(),
+            ..default()
+        },
+        WaterInteractable::new(-0.4, -8.0, 9.0, -2.0, 2.0),
+    ));
+}
+
+// TODO: Eviction notice
 fn spawn_furniture(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -53,6 +64,7 @@ fn spawn_furniture(
     ));
 }
 
+// TODO: Eviction notice
 fn spawn_food(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -71,17 +83,10 @@ fn spawn_food(
                 .unwrap(),
             ),
             material: materials.add(Color::RED.into()),
-            transform: Transform::from_xyz(13.167, 6.1885, 0.0),
+            transform: Transform::from_xyz(13.167, 7.1885, 0.0),
             ..default()
         },
+        RigidBody::Dynamic,
+        Collider::ball(0.2),
     ));
-}
-
-fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
-    commands.spawn(({
-        SceneBundle {
-            scene: ship_assets.carrack_hull.clone(),
-            ..default()
-        }
-    },));
 }
