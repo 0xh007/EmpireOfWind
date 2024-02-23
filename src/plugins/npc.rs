@@ -20,7 +20,8 @@ fn spawn_npc(
     let start_position = Vec3::new(0.0, 8.0, -4.0);
     let spacing = 1.0; // Spacing between each NPC.
 
-    for i in 0..9 {
+    let num_npcs = 3;
+    for i in 0..num_npcs {
         let move_and_eat = Steps::build()
             .label("MoveAndEat")
             .step(MoveToNearest::<Food> {
