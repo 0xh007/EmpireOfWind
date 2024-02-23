@@ -1,37 +1,60 @@
-use bevy::prelude::*;
-// use bevy::core_pipeline::Skybox;
+use bevy::core_pipeline::Skybox;
 use bevy::pbr::CascadeShadowConfigBuilder;
-// use bevy_atmosphere::prelude::*;
+use bevy::prelude::*;
+use bevy::render::render_resource::{TextureDescriptor, TextureDimension, TextureViewDescriptor};
+use bevy_asset_loader::prelude::*;
+use bevy_atmosphere::prelude::*;
 
-pub struct AtmospherePlugin;
+const SKYBOX_NAME: &str =
+    "textures/skybox/table_mountain_2_puresky/table_mountain_2_puresky_4k_cubemap.jpg";
 
-impl Plugin for AtmospherePlugin {
+const SPEED_MIN: f32 = 0.05;
+const SPEED_DELTA: f32 = 0.01;
+const SPEED_MAX: f32 = 1.0;
+
+#[derive(AssetCollection, Resource)]
+struct AtmosphereAssets {
+    #[asset(
+        path = "textures/skybox/table_mountain_2_puresky/table_mountain_2_puresky_4k_cubemap.jpg"
+    )]
+    skybox: Handle<TextureDescriptor>,
+}
+
+pub struct GameAtmospherePlugin;
+
+impl Plugin for GameAtmospherePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_atmosphere);
+        app.insert_resource(bevy::pbr::DirectionalLightShadowMap { size: 4 * 1024 })
+            .insert_resource(AtmosphereModel::new(Nishita {
+                sun_position: Vec3::new(0.0, 1.0, 1.0),
+                ..default()
+            }))
+            .add_plugins(AtmospherePlugin);
     }
 }
 
-fn spawn_atmosphere(mut commands: Commands) {
-    let cascade_shadow_config = CascadeShadowConfigBuilder {
-        first_cascade_far_bound: 0.3,
-        maximum_distance: 3.0,
-        ..default()
-    }
-    .build();
-
-    // Sun
-    commands.spawn((
-        Name::new("Sun"),
-        DirectionalLightBundle {
-            directional_light: DirectionalLight {
-                color: Color::rgb(0.98, 0.95, 0.82),
-                shadows_enabled: true,
+fn asset_loaded(
+    asset_server: Res<AssetServer>,
+    mut images: ResMut<Assets<Image>>,
+    mut cubemap: ResMut<Cubemap>,
+) {
+    if !cubemap.is_loaded
+        && asset_server.get_load_state(cubemap.image_handle.clone_weak()) == Some(LoadState::Loaded)
+    {
+        let image = images.get_mut(&cubemap.image_handle).unwrap();
+        // NOTE: PNGs do not have any metadata that could indicate they contain a cubemap texture,
+        // so they appear as one texture. The following code reconfigures the texture as necessary.
+        if image.texture_descriptor.array_layer_count() == 1 {
+            info!("Reinterpret 2D image {} into Cubemap", cubemap.name);
+            image.reinterpret_stacked_2d_as_array(
+                image.texture_descriptor.size.height / image.texture_descriptor.size.width,
+            );
+            image.texture_view_descriptor = Some(TextureViewDescriptor {
+                dimension: Some(TextureViewDimension::Cube),
                 ..default()
-            },
-            transform: Transform::from_xyz(0.0, 0.0, 0.0)
-                .looking_at(Vec3::new(-0.15, -0.05, -0.35), Vec3::Y),
-            cascade_shadow_config,
-            ..default()
-        },
-    ));
+            });
+        }
+
+        cubemap.is_loaded = true;
+    }
 }

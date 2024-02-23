@@ -28,7 +28,7 @@ impl PluginGroup for CorePlugins {
     fn build(self) -> bevy::app::PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
             .add(assets::AssetsPlugin)
-            .add(atmosphere::AtmospherePlugin)
+            .add(atmosphere::GameAtmospherePlugin)
             .add(BigBrainPlugin::new(PreUpdate))
             .add(camera::CameraPlugin)
             .add(ComponentsFromGltfPlugin::default())
