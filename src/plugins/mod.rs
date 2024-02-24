@@ -1,10 +1,12 @@
-use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
+use bevy::{
+    app::{PluginGroup, PluginGroupBuilder, PreUpdate},
+    core_pipeline::experimental::taa::TemporalAntiAliasPlugin,
+};
 use bevy_gltf_components::ComponentsFromGltfPlugin;
 use big_brain::BigBrainPlugin;
 
 pub use assets::AppStates;
 mod assets;
-mod atmosphere;
 mod camera;
 mod eat;
 mod editor_types;
@@ -20,6 +22,7 @@ mod physics;
 mod player;
 mod ship;
 mod ship_builder;
+mod sky;
 mod sleep;
 
 pub struct CorePlugins;
@@ -28,7 +31,6 @@ impl PluginGroup for CorePlugins {
     fn build(self) -> bevy::app::PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
             .add(assets::AssetsPlugin)
-            .add(atmosphere::GameAtmospherePlugin)
             .add(BigBrainPlugin::new(PreUpdate))
             .add(camera::CameraPlugin)
             .add(ComponentsFromGltfPlugin::default())
@@ -46,5 +48,6 @@ impl PluginGroup for CorePlugins {
             .add(player::PlayerPlugin)
             .add(sleep::SleepPlugin)
             .add(ship::ShipPlugin)
+            .add(TemporalAntiAliasPlugin)
     }
 }

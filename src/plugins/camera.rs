@@ -1,7 +1,12 @@
 use crate::prelude::*;
+use bevy::core_pipeline::experimental::taa::{TemporalAntiAliasBundle, TemporalAntiAliasPlugin};
 use bevy::core_pipeline::prepass::DepthPrepass;
+use bevy::core_pipeline::Skybox;
 use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
+use bevy_atmosphere::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
+// TODO: Figure out what this is doing so we're not depending on a water plugin for our main camera
+use bevy_water::ImageReformat;
 use bevy_xpbd_3d::PhysicsSet;
 
 pub struct CameraPlugin;
@@ -20,7 +25,12 @@ impl Plugin for CameraPlugin {
     }
 }
 
-fn setup_camera(mut commands: Commands) {
+fn setup_camera(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // TODO: Move skybox stuff into it's own plugin
+    let skybox_name: &str =
+        "textures/skybox/table_mountain_2_puresky/table_mountain_2_puresky_4k_cubemap.jpg";
+
+    let skybox_handle = ImageReformat::cubemap(&mut commands, &asset_server, skybox_name);
     commands.spawn((
         Name::new("Main Camera"),
         Camera3dBundle {
@@ -31,15 +41,29 @@ fn setup_camera(mut commands: Commands) {
             },
             projection: OrthographicProjection {
                 scale: 25.0,
-                scaling_mode: ScalingMode::FixedVertical(1.0),
+                scaling_mode: ScalingMode::FixedVertical(2.0),
                 ..default()
             }
             .into(),
             transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
+        FogSettings {
+            color: Color::rgba(0.1, 0.2, 0.4, 1.0),
+            //directional_light_color: Color::rgba(1.0, 0.95, 0.75, 0.5),
+            //directional_light_exponent: 30.0,
+            falloff: FogFalloff::from_visibility_colors(
+                400.0, // distance in world units up to which objects retain visibility (>= 5% contrast)
+                Color::rgb(0.35, 0.5, 0.66), // atmospheric extinction color (after light is lost due to absorption by atmospheric particles)
+                Color::rgb(0.8, 0.844, 1.0), // atmospheric inscattering color (light gained due to scattering from the sun)
+            ),
+            ..default()
+        },
+        TemporalAntiAliasBundle::default(),
         MainCamera,
-        DepthPrepass,
+        // DepthPrepass,
+        AtmosphereCamera::default(),
+        Skybox(skybox_handle),
     ));
 
     commands.spawn((
@@ -55,7 +79,6 @@ fn setup_camera(mut commands: Commands) {
         },
         PanOrbitCamera::default(),
         DebugCamera,
-        DepthPrepass,
     ));
 }
 
