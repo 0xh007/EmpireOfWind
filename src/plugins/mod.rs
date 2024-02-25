@@ -48,6 +48,6 @@ impl PluginGroup for CorePlugins {
             .add(player::PlayerPlugin)
             .add(sleep::SleepPlugin)
             .add(ship::ShipPlugin)
-            .add(TemporalAntiAliasPlugin)
+            .add(sky::SkyPlugin)
     }
 }

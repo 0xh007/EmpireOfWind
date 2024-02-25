@@ -1,5 +1,5 @@
 # Empire of Wind
-![Alt text](assets/screenshots/Screenshot_20240211_084452.png)
+![Alt text](assets/screenshots/Screenshot_20240224_080436.png.png)
 
 This is a work in progress open source game. The idea is that it will play something like FTL but in the age of sail instead of space.
 
