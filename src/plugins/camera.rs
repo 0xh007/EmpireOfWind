@@ -1,12 +1,12 @@
 use crate::prelude::*;
-use bevy::core_pipeline::experimental::taa::{TemporalAntiAliasBundle, TemporalAntiAliasPlugin};
+// use bevy::core_pipeline::experimental::taa::{TemporalAntiAliasBundle, TemporalAntiAliasPlugin};
 use bevy::core_pipeline::prepass::DepthPrepass;
 use bevy::core_pipeline::Skybox;
 use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
 use bevy_atmosphere::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 // TODO: Figure out what this is doing so we're not depending on a water plugin for our main camera
-use bevy_water::ImageReformat;
+use bevy_water::{ImageReformat, ImageUtilsPlugin};
 use bevy_xpbd_3d::PhysicsSet;
 
 pub struct CameraPlugin;
@@ -14,6 +14,7 @@ pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_camera)
+            .add_plugins(ImageUtilsPlugin)
             .add_plugins(PanOrbitCameraPlugin)
             .add_systems(Update, camera_switching)
             .add_systems(
@@ -59,9 +60,10 @@ fn setup_camera(mut commands: Commands, asset_server: Res<AssetServer>) {
             ),
             ..default()
         },
-        TemporalAntiAliasBundle::default(),
+        // TemporalAntiAliasBundle::default(),
         MainCamera,
         // DepthPrepass,
+        DepthPrepass,
         AtmosphereCamera::default(),
         Skybox(skybox_handle),
     ));
