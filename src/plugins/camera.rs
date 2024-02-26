@@ -1,12 +1,8 @@
 use crate::prelude::*;
-// use bevy::core_pipeline::experimental::taa::{TemporalAntiAliasBundle, TemporalAntiAliasPlugin};
 use bevy::core_pipeline::prepass::DepthPrepass;
-use bevy::core_pipeline::Skybox;
 use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
 use bevy_atmosphere::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
-// TODO: Figure out what this is doing so we're not depending on a water plugin for our main camera
-use bevy_water::{ImageReformat, ImageUtilsPlugin};
 use bevy_xpbd_3d::PhysicsSet;
 
 pub struct CameraPlugin;
@@ -14,7 +10,6 @@ pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_camera)
-            .add_plugins(ImageUtilsPlugin)
             .add_plugins(PanOrbitCameraPlugin)
             .add_systems(Update, camera_switching)
             .add_systems(
@@ -26,12 +21,7 @@ impl Plugin for CameraPlugin {
     }
 }
 
-fn setup_camera(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // TODO: Move skybox stuff into it's own plugin
-    let skybox_name: &str =
-        "textures/skybox/table_mountain_2_puresky/table_mountain_2_puresky_4k_cubemap.jpg";
-
-    let skybox_handle = ImageReformat::cubemap(&mut commands, &asset_server, skybox_name);
+fn setup_camera(mut commands: Commands) {
     commands.spawn((
         Name::new("Main Camera"),
         Camera3dBundle {
@@ -51,8 +41,6 @@ fn setup_camera(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         FogSettings {
             color: Color::rgba(0.1, 0.2, 0.4, 1.0),
-            //directional_light_color: Color::rgba(1.0, 0.95, 0.75, 0.5),
-            //directional_light_exponent: 30.0,
             falloff: FogFalloff::from_visibility_colors(
                 400.0, // distance in world units up to which objects retain visibility (>= 5% contrast)
                 Color::rgb(0.35, 0.5, 0.66), // atmospheric extinction color (after light is lost due to absorption by atmospheric particles)
@@ -60,12 +48,9 @@ fn setup_camera(mut commands: Commands, asset_server: Res<AssetServer>) {
             ),
             ..default()
         },
-        // TemporalAntiAliasBundle::default(),
         MainCamera,
-        // DepthPrepass,
         DepthPrepass,
         AtmosphereCamera::default(),
-        Skybox(skybox_handle),
     ));
 
     commands.spawn((

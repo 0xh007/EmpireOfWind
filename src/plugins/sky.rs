@@ -3,7 +3,6 @@ use bevy::utils::Duration;
 use bevy_atmosphere::prelude::*;
 
 use bevy::time::Stopwatch;
-// use bevy_water::{ImageReformat, ImageUtilsPlugin};
 
 const SPEED_MIN: f32 = 0.05;
 const SPEED_DELTA: f32 = 0.01;
@@ -18,7 +17,6 @@ impl Plugin for SkyPlugin {
                 sun_position: Vec3::new(0.0, 1.0, 1.0),
                 ..default()
             }))
-            // .add_plugins(ImageUtilsPlugin)
             .add_plugins(AtmospherePlugin)
             .insert_resource(CycleTimer::new(Duration::from_millis(1000), 0.2))
             .add_systems(Startup, setup_atmosphere)
@@ -127,13 +125,7 @@ fn daylight_cycle(
     }
 }
 
-fn setup_atmosphere(
-    // TODO: Use bevy_asset_loader
-    // asset_server: Res<AssetServer>,
-    mut commands: Commands,
-    // mut meshes: ResMut<Assets<Mesh>>,
-    // mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+fn setup_atmosphere(mut commands: Commands) {
     // "Sun"
     commands
         .spawn(DirectionalLightBundle {

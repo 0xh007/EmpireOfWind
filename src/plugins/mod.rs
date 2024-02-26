@@ -1,7 +1,4 @@
-use bevy::{
-    app::{PluginGroup, PluginGroupBuilder, PreUpdate},
-    core_pipeline::experimental::taa::TemporalAntiAliasPlugin,
-};
+use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
 use bevy_gltf_components::ComponentsFromGltfPlugin;
 use big_brain::BigBrainPlugin;
 
