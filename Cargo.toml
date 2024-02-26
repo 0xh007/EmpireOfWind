@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-bevy = { version = "0.12.1", features = ["dynamic_linking", "wayland"] }
+bevy = { version = "0.12.1", features = ["dynamic_linking", "wayland", "jpeg"] }
 bevy_editor_pls = "0.7"
 bevy-inspector-egui = "0.22.0"
 bevy_panorbit_camera = "0.10.0"
@@ -20,6 +20,7 @@ bevy_asset_loader = { version = "0.19.1", features = ["3d"]}
 bevy_gltf_components = { version = "0.3" }
 serde = { version = "1", features = ["derive"] }
 bevy_mod_sysfail = "5"
+bevy_atmosphere = "0.8.1"
 
 [profile.dev]
 opt-level = 1
