@@ -14,7 +14,9 @@ impl Plugin for PhysicsPlugin {
         app.register_type::<AreaMarker>()
             .register_type::<AreaName>()
             .register_type::<ColliderMarker>()
+            .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
+            .add_systems(Update, hide_show_objects)
             .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
@@ -31,6 +33,10 @@ pub struct AreaName(String);
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct ColliderMarker;
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct Hideable(String);
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
@@ -102,4 +108,53 @@ fn find_mesh<'a>(
         }
     }
     None
+}
+
+fn hide_show_objects(
+    mut commands: Commands,
+    mut collision_started: EventReader<CollisionStarted>,
+    mut collision_ended: EventReader<CollisionEnded>,
+    sensor_query: Query<(Entity, &Sensor, &AreaName)>,
+    player_query: Query<&Player>,
+    hideable_query: Query<(Entity, &Hideable)>,
+) {
+    for CollisionStarted(entity1, entity2) in collision_started.iter() {
+        println!("Collision started");
+        let (sensor_entity, player_entity) = if player_query.get(*entity1).is_ok() {
+            (*entity1, *entity2)
+        } else if player_query.get(*entity2).is_ok() {
+            (*entity2, *entity1)
+        } else {
+            continue;
+        };
+
+        if let Ok((_, _, sensor_area_name)) = sensor_query.get(sensor_entity) {
+            for (hideable_entity, hideable) in hideable_query.iter() {
+                if hideable.0 == sensor_area_name.0 {
+                    commands.entity(hideable_entity).insert(Visibility::Hidden);
+                }
+            }
+        }
+    }
+
+    for CollisionEnded(entity1, entity2) in collision_ended.iter() {
+        println!("Collision ended");
+        let (sensor_entity, player_entity) = if player_query.get(*entity1).is_ok() {
+            (*entity1, *entity2)
+        } else if player_query.get(*entity2).is_ok() {
+            (*entity2, *entity1)
+        } else {
+            continue;
+        };
+
+        if let Ok((_, _, sensor_area_name)) = sensor_query.get(sensor_entity) {
+            for (hideable_entity, hideable) in hideable_query.iter() {
+                if hideable.0 == sensor_area_name.0 {
+                    // This line assumes you want to reset to default visibility
+                    // If you have different logic for making it visible again, adjust accordingly
+                    commands.entity(hideable_entity).remove::<Visibility>();
+                }
+            }
+        }
+    }
 }
