@@ -116,43 +116,35 @@ fn hide_show_objects(
     mut collision_ended: EventReader<CollisionEnded>,
     sensor_query: Query<(Entity, &Sensor, &AreaName)>,
     player_query: Query<&Player>,
-    hideable_query: Query<(Entity, &Hideable)>,
+    hideable_query: Query<(Entity, &Hideable, Option<&Visibility>)>,
 ) {
-    for CollisionStarted(entity1, entity2) in collision_started.iter() {
-        println!("Collision started");
-        let (sensor_entity, player_entity) = if player_query.get(*entity1).is_ok() {
-            (*entity1, *entity2)
-        } else if player_query.get(*entity2).is_ok() {
-            (*entity2, *entity1)
-        } else {
-            continue;
-        };
-
-        if let Ok((_, _, sensor_area_name)) = sensor_query.get(sensor_entity) {
-            for (hideable_entity, hideable) in hideable_query.iter() {
-                if hideable.0 == sensor_area_name.0 {
-                    commands.entity(hideable_entity).insert(Visibility::Hidden);
+    for event in collision_started.iter() {
+        if let Ok((_, _, sensor_area_name)) = sensor_query.get(event.0) {
+            if player_query.get(event.1).is_ok() {
+                for (hideable_entity, hideable, visibility) in hideable_query.iter() {
+                    if hideable.0 == sensor_area_name.0 {
+                        // Only hide if not already hidden
+                        if visibility.map_or(true, |v| matches!(v, Visibility::Visible)) {
+                            commands.entity(hideable_entity).insert(Visibility::Hidden);
+                        }
+                    }
                 }
             }
         }
     }
 
-    for CollisionEnded(entity1, entity2) in collision_ended.iter() {
-        println!("Collision ended");
-        let (sensor_entity, player_entity) = if player_query.get(*entity1).is_ok() {
-            (*entity1, *entity2)
-        } else if player_query.get(*entity2).is_ok() {
-            (*entity2, *entity1)
-        } else {
-            continue;
-        };
-
-        if let Ok((_, _, sensor_area_name)) = sensor_query.get(sensor_entity) {
-            for (hideable_entity, hideable) in hideable_query.iter() {
-                if hideable.0 == sensor_area_name.0 {
-                    // This line assumes you want to reset to default visibility
-                    // If you have different logic for making it visible again, adjust accordingly
-                    commands.entity(hideable_entity).remove::<Visibility>();
+    for event in collision_ended.iter() {
+        if let Ok((_, _, sensor_area_name)) = sensor_query.get(event.0) {
+            if player_query.get(event.1).is_ok() {
+                for (hideable_entity, hideable, visibility) in hideable_query.iter() {
+                    if hideable.0 == sensor_area_name.0 {
+                        // Only make visible if currently hidden
+                        if visibility.map_or(false, |v| matches!(v, Visibility::Hidden)) {
+                            // You could choose to remove or explicitly set to visible
+                            // commands.entity(hideable_entity).remove::<Visibility>();
+                            commands.entity(hideable_entity).insert(Visibility::Visible);
+                        }
+                    }
                 }
             }
         }
