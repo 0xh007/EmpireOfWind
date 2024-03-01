@@ -110,8 +110,6 @@ fn find_mesh<'a>(
     None
 }
 
-use bevy::log::info;
-
 fn hide_show_objects(
     mut commands: Commands,
     mut collision_started: EventReader<CollisionStarted>,
@@ -125,25 +123,15 @@ fn hide_show_objects(
             player_query.get(*entity1).is_ok() || player_query.get(*entity2).is_ok();
 
         if player_involved {
-            info!(
-                "Collision Started involving player: {:?} and {:?}",
-                entity1, entity2
-            );
-
-            let (player_entity, other_entity) = if player_query.get(*entity1).is_ok() {
+            let (_, other_entity) = if player_query.get(*entity1).is_ok() {
                 (*entity1, *entity2)
             } else {
                 (*entity2, *entity1)
             };
 
             if let Ok((_, _, sensor_area_name)) = sensor_query.get(other_entity) {
-                info!("Player collided with sensor area: {:?}", sensor_area_name);
                 for (hideable_entity, hideable, _) in hideable_query.iter_mut() {
                     if hideable.0 == sensor_area_name.0 {
-                        info!(
-                            "Hiding entity: {:?} due to collision with sensor area {:?}",
-                            hideable_entity, sensor_area_name
-                        );
                         commands.entity(hideable_entity).insert(Visibility::Hidden);
                     }
                 }
@@ -156,25 +144,15 @@ fn hide_show_objects(
             player_query.get(*entity1).is_ok() || player_query.get(*entity2).is_ok();
 
         if player_involved {
-            info!(
-                "Collision Ended involving player: {:?} and {:?}",
-                entity1, entity2
-            );
-
-            let (player_entity, other_entity) = if player_query.get(*entity1).is_ok() {
+            let (_, other_entity) = if player_query.get(*entity1).is_ok() {
                 (*entity1, *entity2)
             } else {
                 (*entity2, *entity1)
             };
 
             if let Ok((_, _, sensor_area_name)) = sensor_query.get(other_entity) {
-                info!(
-                    "Player ended collision with sensor area: {:?}",
-                    sensor_area_name
-                );
                 for (hideable_entity, hideable, _) in hideable_query.iter_mut() {
                     if hideable.0 == sensor_area_name.0 {
-                        info!("Restoring visibility for entity: {:?} after collision ended with sensor area {:?}", hideable_entity, sensor_area_name);
                         commands.entity(hideable_entity).insert(Visibility::Visible);
                     }
                 }
