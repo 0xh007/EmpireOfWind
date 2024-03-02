@@ -15,7 +15,8 @@ fn main() {
     let default_plugins = DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: "Empire of Wind".into(),
-            resolution: (1920., 1080.).into(),
+            // resolution: (1920., 1080.).into(),
+            resolution: (1280., 800.).into(),
             present_mode: PresentMode::AutoVsync,
             window_theme: Some(WindowTheme::Dark),
             ..default()
