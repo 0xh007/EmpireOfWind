@@ -1,26 +1,27 @@
 [package]
 name = "empire_of_wind"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bevy = { version = "0.13.0", features = ["dynamic_linking", "wayland", "jpeg"] }
+bevy_editor_pls = "0.8"
+bevy-inspector-egui = "0.23.0"
+bevy_panorbit_camera = "0.16"
+bevy_xpbd_3d = { version = "0.4", features = ["debug-plugin"]}
+bevy_water = "0.13"
+big-brain = { git = "https://github.com/zkat/big-brain", rev = "50415e55f0a9937dc99cb8f0b0906e47cb390082" }
+oxidized_navigation = { version = "0.10", features = ["debug_draw", "xpbd"] }
+bevy_asset_loader = { version = "0.20", features = ["3d"]}
+bevy_gltf_components = { version = "0.5" }
+bevy_mod_sysfail = "7.0.0"
+bevy_atmosphere = "0.9"
+
 anyhow = "1"
-bevy = { version = "0.12.1", features = ["dynamic_linking", "wayland", "jpeg"] }
-bevy_editor_pls = "0.7"
-bevy-inspector-egui = "0.22.0"
-bevy_panorbit_camera = "0.10.0"
-bevy_xpbd_3d = { version = "0.3", features = ["debug-plugin"]}
-bevy_water = "0.12"
-big-brain = "0.19.0"
-oxidized_navigation = { version = "0.8.1", features = ["debug_draw", "xpbd"] }
 rand = "0.8.5"
-bevy_asset_loader = { version = "0.19.1", features = ["3d"]}
-bevy_gltf_components = { version = "0.3" }
 serde = { version = "1", features = ["derive"] }
-bevy_mod_sysfail = "5"
-bevy_atmosphere = "0.8.1"
 
 [profile.dev]
 opt-level = 1

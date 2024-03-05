@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use bevy::utils::Duration;
+use bevy::{pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*};
 use bevy_atmosphere::prelude::*;
 
 use bevy::time::Stopwatch;
@@ -83,8 +83,8 @@ impl CycleTimer {
     }
 }
 
-fn timer_control(input: Res<Input<KeyCode>>, mut timer: ResMut<CycleTimer>) {
-    if input.just_pressed(KeyCode::P) {
+fn timer_control(input: Res<ButtonInput<KeyCode>>, mut timer: ResMut<CycleTimer>) {
+    if input.just_pressed(KeyCode::KeyP) {
         timer.toggle_pause();
     }
     if input.pressed(KeyCode::NumpadAdd) {
@@ -120,7 +120,7 @@ fn daylight_cycle(
 
         if let Some((mut light_trans, mut directional)) = query.single_mut().into() {
             light_trans.rotation = Quat::from_rotation_x(-pos.y.atan2(pos.z));
-            directional.illuminance = t.sin().max(0.0).powf(2.0) * 100000.0;
+            directional.illuminance = t.sin().max(0.0).powf(2.0) * AMBIENT_DAYLIGHT;
         }
     }
 }

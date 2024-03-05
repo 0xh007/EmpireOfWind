@@ -49,11 +49,11 @@ fn spawn_npc(
         commands.spawn((
             Name::new("NPC"),
             PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Capsule {
+                mesh: meshes.add(Capsule3d {
                     radius: 0.4,
                     ..default()
-                })),
-                material: materials.add(Color::YELLOW.into()),
+                }),
+                material: materials.add(Color::YELLOW),
                 transform: Transform::from_translation(position),
                 ..default()
             },

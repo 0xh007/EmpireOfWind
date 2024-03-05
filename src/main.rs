@@ -28,6 +28,7 @@ fn main() {
     let default_plugins = default_plugins.set(LogPlugin {
         filter: "info,wgpu_core=warn,wgpu_hal=warn,empire_of_wind=debug".into(),
         level: bevy::log::Level::DEBUG,
+        ..default()
     });
 
     #[cfg(not(debug_assertions))]

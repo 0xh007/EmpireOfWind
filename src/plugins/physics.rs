@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use anyhow::{Context, Result};
+use anyhow::Context;
 use bevy::prelude::*;
-use bevy_mod_sysfail::*;
+use bevy_mod_sysfail::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use oxidized_navigation::NavMeshAffector;
 use serde::{Deserialize, Serialize};
@@ -43,14 +43,14 @@ pub struct Hideable(String);
 pub struct NavMeshMarker;
 
 // TODO: This can probably be combined with read_colliders()
-#[sysfail(log(level = "error"))]
+#[sysfail(Log<anyhow::Error, Error>)]
 pub fn read_area_markers(
     area_marker_query: Query<(Entity, &AreaMarker), Added<AreaMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
-) -> Result<()> {
+) {
     for (entity, _area_marker) in area_marker_query.iter() {
         let mesh = find_mesh(entity, &children, &meshes, &mesh_handles)
             .context("Failed to find mesh for area collider")?;
@@ -62,17 +62,17 @@ pub fn read_area_markers(
             .entity(entity)
             .insert((collider, RigidBody::Static, Sensor, Visibility::Hidden));
     }
-    Ok(())
 }
 
-#[sysfail(log(level = "error"))]
+#[sysfail(Log<anyhow::Error, Error>)]
 pub fn read_colliders(
     collider_marker_query: Query<(Entity, Option<&NavMeshMarker>), Added<ColliderMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
-) -> Result<()> {
+) {
+    // ) -> Result<()> {
     for (entity, nav_mesh_marker_opt) in collider_marker_query.iter() {
         let mesh = find_mesh(entity, &children, &meshes, &mesh_handles)
             .context("Failed to find mesh for collider")?;
@@ -89,7 +89,6 @@ pub fn read_colliders(
             commands.entity(entity).insert(NavMeshAffector);
         }
     }
-    Ok(())
 }
 
 fn find_mesh<'a>(
