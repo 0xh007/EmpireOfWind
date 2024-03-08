@@ -67,8 +67,6 @@ fn setup_camera(mut commands: Commands) {
         PanOrbitCamera::default(),
         DebugCamera,
     ));
-
-    commands.spawn((Camera3dBundle { ..default() }));
 }
 
 fn camera_switching(

@@ -16,7 +16,6 @@ big-brain = { git = "https://github.com/zkat/big-brain", rev = "50415e55f0a9937d
 oxidized_navigation = { version = "0.10", features = ["debug_draw", "xpbd"] }
 bevy_asset_loader = { version = "0.20", features = ["3d"]}
 bevy_gltf_components = { version = "0.5" }
-# bevy_mod_sysfail = "7.0.0"
 bevy_atmosphere = "0.9"
 
 anyhow = "1"
