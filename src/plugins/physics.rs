@@ -53,9 +53,12 @@ pub fn read_area_markers(
         if let Some(mesh) = find_mesh(entity, &children, &meshes, &mesh_handles) {
             if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                 println!("Inserting Sensor");
-                commands
-                    .entity(entity)
-                    .insert((collider, RigidBody::Static, Sensor, Visibility::Hidden));
+                commands.entity(entity).insert((
+                    collider,
+                    RigidBody::Static,
+                    Sensor,
+                    Visibility::Hidden,
+                ));
             } else {
                 log::error!("Failed to create area collider from mesh");
             }
