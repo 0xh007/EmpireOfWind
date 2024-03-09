@@ -51,8 +51,8 @@ fn spawn_furniture(
     commands.spawn((
         Name::new("Bed"),
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 2.0))),
-            material: materials.add(Color::MAROON.into()),
+            mesh: meshes.add(Cuboid::new(5.0, 0.15, 5.0)),
+            material: materials.add(Color::MAROON),
             transform: Transform {
                 translation: Vec3::new(-14.155, 7.8825, -0.147),
                 rotation: Quat::from_rotation_z(-9.8367f32.to_radians()),
@@ -74,19 +74,12 @@ fn spawn_food(
         Name::new("Food"),
         Food,
         PbrBundle {
-            mesh: meshes.add(
-                shape::Icosphere {
-                    radius: 0.2,
-                    subdivisions: 20,
-                }
-                .try_into()
-                .unwrap(),
-            ),
-            material: materials.add(Color::RED.into()),
+            mesh: meshes.add(Sphere::new(0.2).mesh().ico(5).unwrap()),
+            material: materials.add(Color::RED),
             transform: Transform::from_xyz(13.167, 7.1885, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
-        Collider::ball(0.2),
+        Collider::sphere(0.2),
     ));
 }

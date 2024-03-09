@@ -21,11 +21,11 @@ fn spawn_player(
         Name::new("Player"),
         Player,
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Capsule {
+            mesh: meshes.add(Capsule3d {
                 radius: 0.4,
                 ..default()
-            })),
-            material: materials.add(Color::YELLOW.into()),
+            }),
+            material: materials.add(Color::YELLOW),
             transform: Transform::from_xyz(-14.0, 13.5, -0.14),
             ..default()
         },

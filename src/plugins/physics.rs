@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use anyhow::{Context, Result};
+use bevy::log;
 use bevy::prelude::*;
-use bevy_mod_sysfail::*;
 use bevy_xpbd_3d::prelude::*;
 use oxidized_navigation::NavMeshAffector;
 use serde::{Deserialize, Serialize};
@@ -43,53 +42,58 @@ pub struct Hideable(String);
 pub struct NavMeshMarker;
 
 // TODO: This can probably be combined with read_colliders()
-#[sysfail(log(level = "error"))]
 pub fn read_area_markers(
     area_marker_query: Query<(Entity, &AreaMarker), Added<AreaMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
-) -> Result<()> {
+) {
     for (entity, _area_marker) in area_marker_query.iter() {
-        let mesh = find_mesh(entity, &children, &meshes, &mesh_handles)
-            .context("Failed to find mesh for area collider")?;
-        let collider = Collider::trimesh_from_mesh(mesh)
-            .context("Failed to create area collider from mesh")?;
-
-        println!("Inserting Sensor");
-        commands
-            .entity(entity)
-            .insert((collider, RigidBody::Static, Sensor, Visibility::Hidden));
+        if let Some(mesh) = find_mesh(entity, &children, &meshes, &mesh_handles) {
+            if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                println!("Inserting Sensor");
+                commands.entity(entity).insert((
+                    collider,
+                    RigidBody::Static,
+                    Sensor,
+                    Visibility::Hidden,
+                ));
+            } else {
+                log::error!("Failed to create area collider from mesh");
+            }
+        } else {
+            log::error!("Failed to find mesh for area collider");
+        }
     }
-    Ok(())
 }
 
-#[sysfail(log(level = "error"))]
 pub fn read_colliders(
     collider_marker_query: Query<(Entity, Option<&NavMeshMarker>), Added<ColliderMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
-) -> Result<()> {
+) {
     for (entity, nav_mesh_marker_opt) in collider_marker_query.iter() {
-        let mesh = find_mesh(entity, &children, &meshes, &mesh_handles)
-            .context("Failed to find mesh for collider")?;
-        let collider =
-            Collider::trimesh_from_mesh(mesh).context("Failed to create collider from mesh")?;
+        if let Some(mesh) = find_mesh(entity, &children, &meshes, &mesh_handles) {
+            if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                // Insert the common components, including making the collider invisible
+                commands
+                    .entity(entity)
+                    .insert((collider, RigidBody::Static, Visibility::Hidden));
 
-        // Insert the common components, including making the collider invisible
-        commands
-            .entity(entity)
-            .insert((collider, RigidBody::Static, Visibility::Hidden));
-
-        // If the NavMeshMarker is present, also add NavMeshAffector in a separate step
-        if nav_mesh_marker_opt.is_some() {
-            commands.entity(entity).insert(NavMeshAffector);
+                // If the NavMeshMarker is present, also add NavMeshAffector in a separate step
+                if nav_mesh_marker_opt.is_some() {
+                    commands.entity(entity).insert(NavMeshAffector);
+                }
+            } else {
+                log::error!("Failed to create collider from mesh");
+            }
+        } else {
+            log::error!("Failed to find mesh for collider");
         }
     }
-    Ok(())
 }
 
 fn find_mesh<'a>(

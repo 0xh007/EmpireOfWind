@@ -18,7 +18,6 @@ mod pathfinding;
 mod physics;
 mod player;
 mod ship;
-mod ship_builder;
 mod sky;
 mod sleep;
 

@@ -14,12 +14,12 @@ impl Plugin for InputPlugin {
 fn keyboard_input(
     mut movement_event_writer: EventWriter<MovementAction>,
     mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    let up = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]);
-    let down = keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]);
-    let left = keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]);
-    let right = keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]);
+    let up = keyboard_input.any_pressed([KeyCode::KeyW, KeyCode::ArrowUp]);
+    let down = keyboard_input.any_pressed([KeyCode::KeyS, KeyCode::ArrowDown]);
+    let left = keyboard_input.any_pressed([KeyCode::KeyA, KeyCode::ArrowLeft]);
+    let right = keyboard_input.any_pressed([KeyCode::KeyD, KeyCode::ArrowRight]);
 
     let horizontal = right as i8 - left as i8;
     let vertical = up as i8 - down as i8;
@@ -49,7 +49,7 @@ fn keyboard_input(
         movement_event_writer.send(MovementAction::Jump);
     }
 
-    if keyboard_input.just_pressed(KeyCode::M) {
+    if keyboard_input.just_pressed(KeyCode::KeyM) {
         nav_mesh_event_writer.send(NavMeshDebugToggle);
     }
 }

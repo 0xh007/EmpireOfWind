@@ -12,7 +12,7 @@ pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<AppStates>().add_loading_state(
+        app.init_state::<AppStates>().add_loading_state(
             LoadingState::new(AppStates::AssetLoading).continue_to_state(AppStates::Next),
         );
     }
