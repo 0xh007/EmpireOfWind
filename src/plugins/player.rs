@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy_tnua::prelude::*;
+use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
 use bevy_xpbd_3d::{math::*, prelude::*};
 
 use crate::prelude::*;
@@ -26,10 +28,13 @@ fn spawn_player(
                 ..default()
             }),
             material: materials.add(Color::YELLOW),
-            transform: Transform::from_xyz(-14.0, 13.5, -0.14),
+            transform: Transform::from_xyz(-14.0, 14.5, -0.14),
             ..default()
         },
-        CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
-            .with_movement(90.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
+        RigidBody::Dynamic,
+        Collider::capsule(1.0, 0.4),
+        TnuaControllerBundle::default(),
+        TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
+        LockedAxes::ROTATION_LOCKED,
     ));
 }
