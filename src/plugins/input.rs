@@ -23,7 +23,6 @@ fn apply_controls(
     let mut direction = Vec3::ZERO;
 
     if keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp) {
-        println!("W");
         direction -= Vec3::Z;
     }
     if keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown) {
@@ -38,8 +37,14 @@ fn apply_controls(
 
     controller.basis(TnuaBuiltinWalk {
         desired_velocity: direction.normalize_or_zero() * 10.0,
-        float_height: 2.5,
-        ..Default::default()
+        float_height: 1.5, // Example adjustment, set based on your character's size and needs
+        cling_distance: 3.0, // Adjust based on testing
+        spring_strengh: 500.0, // Increased strength for better grounding
+        spring_dampening: 1.2, // Balance to avoid instability
+        acceleration: 60.0, // Keep or adjust based on movement feel
+        air_acceleration: 30.0, // Adjusted for better air control, if necessary
+        free_fall_extra_gravity: 70.0, // Adjust to help with slope sliding
+        ..default()
     });
 
     if keyboard_input.pressed(KeyCode::Space) {

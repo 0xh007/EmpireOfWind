@@ -34,7 +34,7 @@ fn spawn_player(
         RigidBody::Dynamic,
         Collider::capsule(1.0, 0.4),
         TnuaControllerBundle::default(),
-        TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
+        TnuaXpbd3dSensorShape(Collider::cylinder(1.0, 0.49)),
         LockedAxes::ROTATION_LOCKED,
     ));
 }

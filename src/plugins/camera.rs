@@ -39,15 +39,15 @@ fn setup_camera(mut commands: Commands) {
             transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
-        FogSettings {
-            color: Color::rgba(0.1, 0.2, 0.4, 1.0),
-            falloff: FogFalloff::from_visibility_colors(
-                400.0, // distance in world units up to which objects retain visibility (>= 5% contrast)
-                Color::rgb(0.35, 0.5, 0.66), // atmospheric extinction color (after light is lost due to absorption by atmospheric particles)
-                Color::rgb(0.8, 0.844, 1.0), // atmospheric inscattering color (light gained due to scattering from the sun)
-            ),
-            ..default()
-        },
+        // FogSettings {
+        //     color: Color::rgba(0.1, 0.2, 0.4, 1.0),
+        //     falloff: FogFalloff::from_visibility_colors(
+        //         400.0, // distance in world units up to which objects retain visibility (>= 5% contrast)
+        //         Color::rgb(0.35, 0.5, 0.66), // atmospheric extinction color (after light is lost due to absorption by atmospheric particles)
+        //         Color::rgb(0.8, 0.844, 1.0), // atmospheric inscattering color (light gained due to scattering from the sun)
+        //     ),
+        //     ..default()
+        // },
         MainCamera,
         DepthPrepass,
         AtmosphereCamera::default(),
