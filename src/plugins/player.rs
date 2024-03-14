@@ -28,7 +28,8 @@ fn spawn_player(
                 ..default()
             }),
             material: materials.add(Color::YELLOW),
-            transform: Transform::from_xyz(-14.0, 14.5, -0.14),
+            // transform: Transform::from_xyz(-14.0, 14.5, -0.14),
+            transform: Transform::from_xyz(0., 5., 0.),
             ..default()
         },
         RigidBody::Dynamic,

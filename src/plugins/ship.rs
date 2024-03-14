@@ -11,9 +11,10 @@ impl Plugin for ShipPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
-        .add_systems(OnEnter(AppStates::Next), spawn_ship)
-        .add_systems(OnEnter(AppStates::Next), spawn_furniture)
-        .add_systems(OnEnter(AppStates::Next), spawn_food);
+        .add_systems(OnEnter(AppStates::Next), spawn_test_level);
+        // .add_systems(OnEnter(AppStates::Next), spawn_ship)
+        // .add_systems(OnEnter(AppStates::Next), spawn_furniture)
+        // .add_systems(OnEnter(AppStates::Next), spawn_food);
     }
 }
 
@@ -29,6 +30,16 @@ struct ColliderBundle {
 struct ShipAssets {
     #[asset(path = "models/export/ship/carrack.glb#Scene0")]
     carrack_hull: Handle<Scene>,
+
+    #[asset(path = "models/export/ship/test_level.glb#Scene0")]
+    level: Handle<Scene>,
+}
+
+fn spawn_test_level(mut commands: Commands, ship_assets: Res<ShipAssets>) {
+    commands.spawn((SceneBundle {
+        scene: ship_assets.level.clone(),
+        ..default()
+    },));
 }
 
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
