@@ -17,10 +17,7 @@ fn apply_controls(
     mut query: Query<&mut TnuaController>,
 ) {
     let mut controller = match query.get_single_mut() {
-        Ok(controller) => {
-            println!("TnuaController found.");
-            controller
-        }
+        Ok(controller) => controller,
         Err(_) => {
             println!("TnuaController not found.");
             return;
@@ -30,47 +27,47 @@ fn apply_controls(
     let mut direction = Vec3::ZERO;
 
     if keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp) {
-        println!("Moving Up");
-        direction -= Vec3::Z;
+        direction.x -= 1.0;
     }
     if keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown) {
-        println!("Moving Down");
-        direction += Vec3::Z;
+        direction.x += 1.0;
     }
     if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft) {
-        println!("Moving Left");
-        direction -= Vec3::X;
+        direction.z += 1.0;
     }
     if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
-        println!("Moving Right");
-        direction += Vec3::X;
+        direction.z -= 1.0;
     }
 
-    // Check if direction is not Vec3::ZERO, indicating that an input was registered
+    // Normalize the direction vector to ensure consistent movement speed in all directions
     if direction != Vec3::ZERO {
-        println!("Input Direction: {:?}", direction);
+        direction = direction.normalize();
     }
 
-    let desired_velocity = direction.normalize_or_zero() * 10.0;
-    println!("Desired Velocity: {:?}", desired_velocity);
+    // Rotate the direction vector to align with the isometric perspective
+    let rotation_angle = 45.0f32.to_radians(); // Convert 45 degrees to radians for isometric rotation
+    let cos_angle = rotation_angle.cos();
+    let sin_angle = rotation_angle.sin();
+
+    // Rotate direction vector by the camera's rotation angle
+    let rotated_direction = Vec3::new(
+        direction.x * cos_angle - direction.z * sin_angle,
+        0.0, // Y component remains 0 as we're rotating in the XZ plane
+        direction.x * sin_angle + direction.z * cos_angle,
+    );
+
+    let desired_velocity = rotated_direction * 10.0; // Adjust speed as necessary
 
     controller.basis(TnuaBuiltinWalk {
-        desired_velocity: direction.normalize_or_zero() * 10.0,
-        float_height: 1.5,
+        desired_velocity,
+        float_height: 1.2,
         ..Default::default()
     });
 
-    // controller.basis(TnuaBuiltinWalk {
-    //     desired_velocity,
-    //     float_height: 1.5, // Example adjustment, set based on your character's size and needs
-    //     cling_distance: 3.0, // Adjust based on testing
-    //     spring_strengh: 500.0, // Increased strength for better grounding
-    //     spring_dampening: 1.2, // Balance to avoid instability
-    //     acceleration: 60.0, // Keep or adjust based on movement feel
-    //     air_acceleration: 30.0, // Adjusted for better air control, if necessary
-    //     free_fall_extra_gravity: 70.0, // Adjust to help with slope sliding
-    //     ..Default::default()
-    // });
+    // Handle jumping logic here if necessary
+    if keyboard_input.pressed(KeyCode::Space) {
+        // Add jumping logic for TnuaController, if applicable
+    }
 
     if keyboard_input.pressed(KeyCode::Space) {
         println!("Jumping");
@@ -80,46 +77,3 @@ fn apply_controls(
         });
     }
 }
-
-// fn keyboard_input(
-//     mut movement_event_writer: EventWriter<MovementAction>,
-//     mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
-//     keyboard_input: Res<ButtonInput<KeyCode>>,
-// ) {
-//     let up = keyboard_input.any_pressed([KeyCode::KeyW, KeyCode::ArrowUp]);
-//     let down = keyboard_input.any_pressed([KeyCode::KeyS, KeyCode::ArrowDown]);
-//     let left = keyboard_input.any_pressed([KeyCode::KeyA, KeyCode::ArrowLeft]);
-//     let right = keyboard_input.any_pressed([KeyCode::KeyD, KeyCode::ArrowRight]);
-//
-//     let horizontal = right as i8 - left as i8;
-//     let vertical = up as i8 - down as i8;
-//
-//     // Create a direction vector from the input
-//     let mut direction = Vec2::new(horizontal as f32, vertical as f32);
-//
-//     if direction != Vec2::ZERO {
-//         // Normalize the direction to have a maximum length of 1
-//         direction = direction.normalize_or_zero();
-//
-//         // Rotate the direction vector by +45 degrees to align with the isometric perspective
-//         let rotation_angle = 45.0f32.to_radians(); // Convert +45 degrees to radians
-//         let cos_angle = rotation_angle.cos();
-//         let sin_angle = rotation_angle.sin();
-//         let rotated_direction = Vec2::new(
-//             direction.x * cos_angle - direction.y * sin_angle,
-//             direction.x * sin_angle + direction.y * cos_angle,
-//         );
-//
-//         movement_event_writer.send(MovementAction::Move(
-//             rotated_direction.clamp_length_max(1.0),
-//         ));
-//     }
-//
-//     if keyboard_input.just_pressed(KeyCode::Space) {
-//         movement_event_writer.send(MovementAction::Jump);
-//     }
-//
-//     if keyboard_input.just_pressed(KeyCode::KeyM) {
-//         nav_mesh_event_writer.send(NavMeshDebugToggle);
-//     }
-// }
