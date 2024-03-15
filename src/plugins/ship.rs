@@ -11,10 +11,11 @@ impl Plugin for ShipPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
-        .add_systems(OnEnter(AppStates::Next), spawn_test_level);
-        // .add_systems(OnEnter(AppStates::Next), spawn_ship)
-        // .add_systems(OnEnter(AppStates::Next), spawn_furniture)
-        // .add_systems(OnEnter(AppStates::Next), spawn_food);
+        // .add_systems(Startup, setup_level);
+        // .add_systems(OnEnter(AppStates::Next), spawn_test_level);
+        .add_systems(OnEnter(AppStates::Next), spawn_ship)
+        .add_systems(OnEnter(AppStates::Next), spawn_furniture)
+        .add_systems(OnEnter(AppStates::Next), spawn_food);
     }
 }
 
@@ -24,6 +25,35 @@ struct ColliderBundle {
     collider_shape: Collider,
     rigid_body_type: RigidBody,
     transform: TransformBundle,
+}
+
+fn setup_level(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Spawn the ground.
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Plane3d::default().mesh().size(128.0, 128.0)),
+            material: materials.add(Color::WHITE),
+            ..Default::default()
+        },
+        RigidBody::Static,
+        Collider::halfspace(Vec3::Y),
+    ));
+
+    // Spawn a little platform for the player to jump on.
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(4.0, 1.0, 4.0)),
+            material: materials.add(Color::GRAY),
+            transform: Transform::from_xyz(-6.0, 2.0, 0.0),
+            ..Default::default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(4.0, 1.0, 4.0),
+    ));
 }
 
 #[derive(AssetCollection, Resource)]

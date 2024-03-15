@@ -28,14 +28,13 @@ fn spawn_player(
                 ..default()
             }),
             material: materials.add(Color::YELLOW),
-            // transform: Transform::from_xyz(-14.0, 14.5, -0.14),
-            transform: Transform::from_xyz(0., 5., 0.),
+            transform: Transform::from_xyz(-14.0, 14.5, -0.14),
             ..default()
         },
         RigidBody::Dynamic,
-        Collider::capsule(1.0, 0.4),
+        Collider::capsule(1.0, 0.5),
         TnuaControllerBundle::default(),
-        TnuaXpbd3dSensorShape(Collider::cylinder(1.0, 0.49)),
+        TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
         LockedAxes::ROTATION_LOCKED,
     ));
 }

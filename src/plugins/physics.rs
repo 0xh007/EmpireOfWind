@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use bevy::log;
 use bevy::prelude::*;
+use bevy_tnua::prelude::*;
+use bevy_tnua_xpbd3d::*;
 use bevy_xpbd_3d::prelude::*;
 use oxidized_navigation::NavMeshAffector;
 use serde::{Deserialize, Serialize};
@@ -10,7 +12,9 @@ pub struct PhysicsPlugin;
 impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         // TODO: Add xpbd in here
-        app.register_type::<AreaMarker>()
+        app.add_plugins(TnuaControllerPlugin)
+            .add_plugins(TnuaXpbd3dPlugin)
+            .register_type::<AreaMarker>()
             .register_type::<AreaName>()
             .register_type::<ColliderMarker>()
             .register_type::<Hideable>()

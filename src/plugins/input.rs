@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_tnua::prelude::*;
+use bevy_tnua_xpbd3d::*;
 
 use crate::prelude::*;
 
@@ -7,7 +8,7 @@ pub struct InputPlugin;
 
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, apply_controls);
+        app.add_systems(Update, apply_controls.in_set(TnuaUserControlsSystemSet));
     }
 }
 
@@ -16,38 +17,63 @@ fn apply_controls(
     mut query: Query<&mut TnuaController>,
 ) {
     let mut controller = match query.get_single_mut() {
-        Ok(controller) => controller,
-        Err(_) => return,
+        Ok(controller) => {
+            println!("TnuaController found.");
+            controller
+        }
+        Err(_) => {
+            println!("TnuaController not found.");
+            return;
+        }
     };
 
     let mut direction = Vec3::ZERO;
 
     if keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp) {
+        println!("Moving Up");
         direction -= Vec3::Z;
     }
     if keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown) {
+        println!("Moving Down");
         direction += Vec3::Z;
     }
     if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft) {
+        println!("Moving Left");
         direction -= Vec3::X;
     }
     if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
+        println!("Moving Right");
         direction += Vec3::X;
     }
 
+    // Check if direction is not Vec3::ZERO, indicating that an input was registered
+    if direction != Vec3::ZERO {
+        println!("Input Direction: {:?}", direction);
+    }
+
+    let desired_velocity = direction.normalize_or_zero() * 10.0;
+    println!("Desired Velocity: {:?}", desired_velocity);
+
     controller.basis(TnuaBuiltinWalk {
         desired_velocity: direction.normalize_or_zero() * 10.0,
-        float_height: 1.5, // Example adjustment, set based on your character's size and needs
-        cling_distance: 3.0, // Adjust based on testing
-        spring_strengh: 500.0, // Increased strength for better grounding
-        spring_dampening: 1.2, // Balance to avoid instability
-        acceleration: 60.0, // Keep or adjust based on movement feel
-        air_acceleration: 30.0, // Adjusted for better air control, if necessary
-        free_fall_extra_gravity: 70.0, // Adjust to help with slope sliding
-        ..default()
+        float_height: 1.5,
+        ..Default::default()
     });
 
+    // controller.basis(TnuaBuiltinWalk {
+    //     desired_velocity,
+    //     float_height: 1.5, // Example adjustment, set based on your character's size and needs
+    //     cling_distance: 3.0, // Adjust based on testing
+    //     spring_strengh: 500.0, // Increased strength for better grounding
+    //     spring_dampening: 1.2, // Balance to avoid instability
+    //     acceleration: 60.0, // Keep or adjust based on movement feel
+    //     air_acceleration: 30.0, // Adjusted for better air control, if necessary
+    //     free_fall_extra_gravity: 70.0, // Adjust to help with slope sliding
+    //     ..Default::default()
+    // });
+
     if keyboard_input.pressed(KeyCode::Space) {
+        println!("Jumping");
         controller.action(TnuaBuiltinJump {
             height: 4.0,
             ..Default::default()
