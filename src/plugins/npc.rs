@@ -1,5 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
+use bevy_tnua::controller::TnuaControllerBundle;
+use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
 use bevy_xpbd_3d::{math::*, prelude::*};
 use big_brain::prelude::*;
 
@@ -57,8 +59,11 @@ fn spawn_npc(
                 transform: Transform::from_translation(position),
                 ..default()
             },
-            CharacterControllerBundle::new(Collider::capsule(1.0, 0.4), Vector::NEG_Y * 9.81 * 2.0)
-                .with_movement(90.0, 0.92, 7.0, (30.0 as Scalar).to_radians()),
+            RigidBody::Dynamic,
+            Collider::capsule(0.5, 0.5),
+            TnuaControllerBundle::default(),
+            TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
+            LockedAxes::ROTATION_LOCKED,
             Npc,
             Hunger {
                 is_eating: false,

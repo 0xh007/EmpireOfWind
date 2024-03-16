@@ -3,6 +3,7 @@ use bevy::core_pipeline::prepass::DepthPrepass;
 use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
 use bevy_atmosphere::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
+use bevy_tnua::prelude::*;
 use bevy_xpbd_3d::PhysicsSet;
 
 pub struct CameraPlugin;
@@ -86,8 +87,8 @@ fn camera_switching(
 }
 
 fn move_camera(
-    query: Query<&Transform, (With<CharacterController>, With<Player>)>,
-    mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<CharacterController>)>,
+    query: Query<&Transform, (With<TnuaController>, With<Player>)>,
+    mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<TnuaController>)>,
     time: Res<Time>,
 ) {
     if let Ok(player_transform) = query.get_single() {
