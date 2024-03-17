@@ -305,6 +305,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-tnua"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e79dea24f40fa0a93c82a1f5a9a08e3cdfb64488ca28e5faafbe365c8c19e836"
+dependencies = [
+ "bevy",
+ "bevy-tnua-physics-integration-layer",
+ "thiserror",
+]
+
+[[package]]
+name = "bevy-tnua-physics-integration-layer"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2116c25ee9f769b3c5f82951634dfca780f919e03ff85fdbd43384e13d7df469"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
+name = "bevy-tnua-xpbd3d"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a3cb35478ca0d02bf043ed6f198e5081664d7a9138da4d9ef29c73f7e9824946"
+dependencies = [
+ "bevy",
+ "bevy-tnua-physics-integration-layer",
+ "bevy_xpbd_3d",
+]
+
+[[package]]
 name = "bevy_a11y"
 version = "0.13.0"
 source = "git+https://github.com/bevyengine/bevy.git?branch=release-0.13.1#6e6e99efddac113aa6616f25529d906bec582470"
@@ -1708,6 +1739,8 @@ version = "0.1.1"
 dependencies = [
  "anyhow",
  "bevy",
+ "bevy-tnua",
+ "bevy-tnua-xpbd3d",
  "bevy_asset_loader",
  "bevy_atmosphere",
  "bevy_gltf_components",

@@ -1,5 +1,4 @@
 mod camera;
-mod character;
 mod eat;
 mod fatigue;
 mod fatigue_scorer;
@@ -15,7 +14,7 @@ mod sleep_area;
 mod water_interactable;
 
 pub use {
-    camera::*, character::*, eat::*, fatigue::*, fatigue_scorer::*, food::*, hunger::*,
-    hunger_scorer::*, move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*,
-    sleep_area::*, water_interactable::*,
+    camera::*, eat::*, fatigue::*, fatigue_scorer::*, food::*, hunger::*, hunger_scorer::*,
+    move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*, sleep_area::*,
+    water_interactable::*,
 };

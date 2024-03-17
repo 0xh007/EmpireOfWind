@@ -10,7 +10,6 @@ mod editor_types;
 mod fatigue;
 mod hunger;
 mod input;
-mod movement;
 mod navmesh;
 mod npc;
 mod ocean;
@@ -35,7 +34,6 @@ impl PluginGroup for CorePlugins {
             .add(fatigue::FatiguePlugin)
             .add(hunger::HungerPlugin)
             .add(input::InputPlugin)
-            .add(movement::MovementPlugin)
             .add(navmesh::NavMeshPlugin)
             .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
