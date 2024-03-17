@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use bevy_tnua::controller::TnuaControllerBundle;
 use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
-use bevy_xpbd_3d::{math::*, prelude::*};
+use bevy_xpbd_3d::prelude::*;
 use big_brain::prelude::*;
 
 pub struct NpcPlugin;
