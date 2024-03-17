@@ -61,7 +61,7 @@ fn spawn_npc(
             },
             RigidBody::Dynamic,
             Collider::capsule(0.5, 0.5),
-            TnuaControllerBundle::default(),
+            // TnuaControllerBundle::default(),
             TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
             LockedAxes::ROTATION_LOCKED,
             Npc,
