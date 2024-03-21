@@ -85,7 +85,7 @@ pub fn read_colliders(
                 // Insert the common components, including making the collider invisible
                 commands
                     .entity(entity)
-                    .insert((collider, RigidBody::Static, Visibility::Hidden));
+                    .insert((collider, RigidBody::Static, Visibility::Visible));
 
                 // If the NavMeshMarker is present, also add NavMeshAffector in a separate step
                 if nav_mesh_marker_opt.is_some() {
