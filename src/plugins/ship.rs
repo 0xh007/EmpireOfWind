@@ -32,23 +32,68 @@ struct ShipAssets {
     carrack_hull: Handle<Scene>,
 }
 
+#[derive(Component)]
+struct Buoyancy {
+    voxels: Vec<Voxel>,
+    cube_size: f32,
+    // Add other relevant fields as necessary.
+}
+
+impl Buoyancy {
+    fn new(cube_size: f32, voxels_per_axis: usize) -> Self {
+        let voxels = subdivide_cube_into_voxels(cube_size, voxels_per_axis);
+        Self { voxels, cube_size }
+    }
+}
+
+struct Voxel {
+    position: Vec3,
+    is_receiver: bool,
+}
+
+fn subdivide_cube_into_voxels(cube_size: f32, voxels_per_axis: usize) -> Vec<Voxel> {
+    let voxel_size = cube_size / voxels_per_axis as f32;
+    let mut voxels = Vec::new();
+
+    for x in 0..voxels_per_axis {
+        for y in 0..voxels_per_axis {
+            for z in 0..voxels_per_axis {
+                let position = Vec3::new(
+                    (x as f32 + 0.5) * voxel_size - cube_size / 2.0,
+                    (y as f32 + 0.5) * voxel_size - cube_size / 2.0,
+                    (z as f32 + 0.5) * voxel_size - cube_size / 2.0,
+                );
+                voxels.push(Voxel {
+                    position,
+                    is_receiver: true, // Initially set all voxels as receivers.
+                });
+            }
+        }
+    }
+    voxels
+}
+
 fn spawn_cube(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    let cube_mesh = meshes.add(Cuboid::default());
-    let cube_size = 2.0;
+    let cube_size = 2.0; // Make sure this matches the size used for the Collider::cuboid
+    let voxels_per_axis = 5; // This is an arbitrary choice; adjust based on desired detail level.
+
+    let cube_mesh = meshes.add(Mesh::from(shape::Cube { size: cube_size }));
+    let buoyancy_component = Buoyancy::new(cube_size, voxels_per_axis);
 
     commands.spawn((
         PbrBundle {
-            mesh: cube_mesh.clone(),
-            material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            mesh: cube_mesh,
+            material: materials.add(Color::rgb(0.2, 0.7, 0.9).into()),
+            transform: Transform::from_xyz(0.0, 20.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
-        Collider::cuboid(1.0, 1.0, 1.0),
+        Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0), // Adjust accordingly
+        buoyancy_component,
     ));
 }
 

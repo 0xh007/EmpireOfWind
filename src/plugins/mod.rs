@@ -36,7 +36,7 @@ impl PluginGroup for CorePlugins {
             .add(input::InputPlugin)
             // .add(navmesh::NavMeshPlugin)
             // .add(npc::NpcPlugin)
-            // .add(ocean::OceanPlugin)
+            .add(ocean::OceanPlugin)
             // .add(pathfinding::PathfindingPlugin)
             .add(physics::PhysicsPlugin)
             // .add(player::PlayerPlugin)
