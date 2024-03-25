@@ -8,10 +8,11 @@ pub struct ShipPlugin;
 
 impl Plugin for ShipPlugin {
     fn build(&self, app: &mut App) {
-        app.configure_loading_state(
-            LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
-        )
-        .add_systems(OnEnter(AppStates::Next), spawn_ship);
+        app.add_systems(OnEnter(AppStates::Next), spawn_cube);
+        // app.configure_loading_state(
+        //     LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
+        // )
+        // .add_systems(OnEnter(AppStates::Next), spawn_ship);
         // .add_systems(OnEnter(AppStates::Next), spawn_furniture)
         // .add_systems(OnEnter(AppStates::Next), spawn_food);
     }
@@ -29,6 +30,26 @@ struct ColliderBundle {
 struct ShipAssets {
     #[asset(path = "models/export/ship/carrack_b.glb#Scene0")]
     carrack_hull: Handle<Scene>,
+}
+
+fn spawn_cube(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
+    let cube_mesh = meshes.add(Cuboid::default());
+    let cube_size = 2.0;
+
+    commands.spawn((
+        PbrBundle {
+            mesh: cube_mesh.clone(),
+            material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            ..default()
+        },
+        RigidBody::Dynamic,
+        Collider::cuboid(1.0, 1.0, 1.0),
+    ));
 }
 
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
