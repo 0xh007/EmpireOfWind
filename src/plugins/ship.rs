@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
+use bevy_water::WaterParam;
+use bevy_xpbd_3d::components::ExternalForce;
 use bevy_xpbd_3d::prelude::*;
 
 use crate::prelude::*;
@@ -8,7 +10,8 @@ pub struct ShipPlugin;
 
 impl Plugin for ShipPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppStates::Next), spawn_cube);
+        app.add_systems(OnEnter(AppStates::Next), spawn_cube)
+            .add_systems(Update, calculate_and_apply_buoyancy);
         // app.configure_loading_state(
         //     LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         // )
@@ -36,13 +39,18 @@ struct ShipAssets {
 struct Buoyancy {
     voxels: Vec<Voxel>,
     cube_size: f32,
-    // Add other relevant fields as necessary.
+    voxel_size: f32,
 }
 
 impl Buoyancy {
     fn new(cube_size: f32, voxels_per_axis: usize) -> Self {
-        let voxels = subdivide_cube_into_voxels(cube_size, voxels_per_axis);
-        Self { voxels, cube_size }
+        let voxel_size = cube_size / voxels_per_axis as f32;
+        let voxels = subdivide_cube_into_voxels(cube_size, voxels_per_axis, voxel_size);
+        Self {
+            voxels,
+            cube_size,
+            voxel_size,
+        }
     }
 }
 
@@ -51,8 +59,62 @@ struct Voxel {
     is_receiver: bool,
 }
 
-fn subdivide_cube_into_voxels(cube_size: f32, voxels_per_axis: usize) -> Vec<Voxel> {
-    let voxel_size = cube_size / voxels_per_axis as f32;
+fn calculate_and_apply_buoyancy(
+    water: WaterParam,
+    mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce)>,
+) {
+    for (buoyancy, transform, mut external_force) in query.iter_mut() {
+        let mut total_buoyancy_force = Vec3::ZERO;
+
+        for voxel in &buoyancy.voxels {
+            let world_position = transform.translation + voxel.position;
+            let water_height = get_water_height_at_position(world_position, &water);
+            let submerged_volume =
+                calculate_submerged_volume(world_position, water_height, buoyancy.voxel_size);
+            let buoyancy_force = Vec3::new(0.0, 9.81 * submerged_volume, 0.0);
+
+            // println!(
+            //     "Voxel at {:?}, Water Height: {}, Submerged Volume: {}, Buoyancy Force: {:?}",
+            //     world_position, water_height, submerged_volume, buoyancy_force
+            // );
+
+            total_buoyancy_force += buoyancy_force;
+        }
+
+        println!("Total Buoyancy Force: {:?}", total_buoyancy_force);
+        external_force.apply_force(total_buoyancy_force);
+    }
+}
+
+fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
+    let bottom_of_voxel = world_position.y - voxel_size / 2.0;
+    let top_of_voxel = world_position.y + voxel_size / 2.0;
+
+    // If the top of the voxel is below the water, it's fully submerged
+    if top_of_voxel <= water_height {
+        return voxel_size.powi(3); // The volume of the voxel
+    }
+    // If the bottom of the voxel is above the water, it's not submerged
+    else if bottom_of_voxel >= water_height {
+        return 0.0;
+    }
+    // Otherwise, it's partially submerged
+    else {
+        let submerged_height = water_height - bottom_of_voxel;
+        return submerged_height * voxel_size * voxel_size; // The submerged volume
+    }
+}
+
+fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
+    let water_height = water.wave_point(pos).y;
+    water_height
+}
+
+fn subdivide_cube_into_voxels(
+    cube_size: f32,
+    voxels_per_axis: usize,
+    voxel_size: f32,
+) -> Vec<Voxel> {
     let mut voxels = Vec::new();
 
     for x in 0..voxels_per_axis {
@@ -65,7 +127,7 @@ fn subdivide_cube_into_voxels(cube_size: f32, voxels_per_axis: usize) -> Vec<Vox
                 );
                 voxels.push(Voxel {
                     position,
-                    is_receiver: true, // Initially set all voxels as receivers.
+                    is_receiver: true,
                 });
             }
         }
@@ -78,21 +140,23 @@ fn spawn_cube(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    let cube_size = 2.0; // Make sure this matches the size used for the Collider::cuboid
-    let voxels_per_axis = 5; // This is an arbitrary choice; adjust based on desired detail level.
+    let cube_size = 2.0;
+    let voxels_per_axis = 5;
 
-    let cube_mesh = meshes.add(Mesh::from(shape::Cube { size: cube_size }));
+    let cube_mesh = meshes.add(Cuboid::new(cube_size, cube_size, cube_size));
     let buoyancy_component = Buoyancy::new(cube_size, voxels_per_axis);
 
     commands.spawn((
         PbrBundle {
             mesh: cube_mesh,
-            material: materials.add(Color::rgb(0.2, 0.7, 0.9).into()),
+            material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
             transform: Transform::from_xyz(0.0, 20.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
-        Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0), // Adjust accordingly
+        LinearDamping(0.5),
+        AngularDamping(0.5),
+        Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0),
         buoyancy_component,
     ));
 }

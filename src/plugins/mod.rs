@@ -33,7 +33,7 @@ impl PluginGroup for CorePlugins {
             .add(editor_types::EditorTypesPlugin)
             // .add(fatigue::FatiguePlugin)
             // .add(hunger::HungerPlugin)
-            .add(input::InputPlugin)
+            // .add(input::InputPlugin)
             // .add(navmesh::NavMeshPlugin)
             // .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
