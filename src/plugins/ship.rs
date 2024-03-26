@@ -61,26 +61,36 @@ struct Voxel {
 
 fn calculate_and_apply_buoyancy(
     water: WaterParam,
-    mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce)>,
+    mut query: Query<(
+        &Buoyancy,
+        &Transform,
+        &mut ExternalForce,
+        &ColliderDensity,
+        &Collider,
+    )>,
 ) {
-    for (buoyancy, transform, mut external_force) in query.iter_mut() {
+    for (buoyancy, transform, mut external_force, collider_density, collider) in query.iter_mut() {
         let mut total_buoyancy_force = Vec3::ZERO;
+        let gravity = 9.81;
+        let cube_volume = buoyancy.cube_size.powi(3);
+        let cube_weight = cube_volume * collider_density.0 * gravity;
 
         for voxel in &buoyancy.voxels {
             let world_position = transform.translation + voxel.position;
             let water_height = get_water_height_at_position(world_position, &water);
             let submerged_volume =
                 calculate_submerged_volume(world_position, water_height, buoyancy.voxel_size);
-            let buoyancy_force = Vec3::new(0.0, 9.81 * submerged_volume, 0.0);
-
-            // println!(
-            //     "Voxel at {:?}, Water Height: {}, Submerged Volume: {}, Buoyancy Force: {:?}",
-            //     world_position, water_height, submerged_volume, buoyancy_force
-            // );
+            let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume, 0.0);
 
             total_buoyancy_force += buoyancy_force;
         }
 
+        // Limit the buoyancy force to not exceed the cube's weight
+        if total_buoyancy_force.y > cube_weight {
+            total_buoyancy_force.y = cube_weight;
+        }
+
+        println!("Cube Weight: {:?}", cube_weight);
         println!("Total Buoyancy Force: {:?}", total_buoyancy_force);
         external_force.apply_force(total_buoyancy_force);
     }
@@ -145,6 +155,7 @@ fn spawn_cube(
 
     let cube_mesh = meshes.add(Cuboid::new(cube_size, cube_size, cube_size));
     let buoyancy_component = Buoyancy::new(cube_size, voxels_per_axis);
+    let cube_density = 0.8;
 
     commands.spawn((
         PbrBundle {
@@ -154,9 +165,11 @@ fn spawn_cube(
             ..default()
         },
         RigidBody::Dynamic,
-        LinearDamping(0.5),
-        AngularDamping(0.5),
+        LinearDamping(1.8),
+        AngularDamping(1.8),
+        ExternalForce::new(Vec3::ZERO).with_persistence(false),
         Collider::cuboid(cube_size / 2.0, cube_size / 2.0, cube_size / 2.0),
+        ColliderDensity(cube_density),
         buoyancy_component,
     ));
 }
