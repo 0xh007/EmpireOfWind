@@ -11,15 +11,19 @@ pub struct ShipPlugin;
 impl Plugin for ShipPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppStates::Next), spawn_cube)
-            .add_systems(Update, calculate_and_apply_buoyancy);
-        // app.configure_loading_state(
-        //     LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
-        // )
-        // .add_systems(OnEnter(AppStates::Next), spawn_ship);
+            .add_systems(Update, calculate_and_apply_buoyancy)
+            .configure_loading_state(
+                LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
+            )
+            .add_systems(OnEnter(AppStates::Next), spawn_ship);
         // .add_systems(OnEnter(AppStates::Next), spawn_furniture)
         // .add_systems(OnEnter(AppStates::Next), spawn_food);
     }
 }
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct BuoyancyMarker;
 
 #[derive(Bundle, Debug)]
 struct ColliderBundle {
@@ -54,9 +58,66 @@ impl Buoyancy {
     }
 }
 
+impl Buoyancy {
+    fn new_from_mesh(mesh: &Mesh, voxels_per_axis: usize) -> Self {
+        // Pseudo-code to generate voxels based on mesh bounds and internal volume
+        let voxels = generate_voxels_from_mesh(mesh, voxels_per_axis);
+        Self { voxels }
+    }
+}
+
 struct Voxel {
     position: Vec3,
     is_receiver: bool,
+}
+
+// Pseudo-function to demonstrate concept
+fn generate_voxels_from_mesh(mesh: &Mesh, voxels_per_axis: usize) -> Vec<Voxel> {
+    let mut voxels = Vec::new();
+    // voxel generation logic, based on the mesh geometry
+    voxels
+}
+
+pub fn read_buoyancy_objects(
+    buoyancy_marker_query: Query<(Entity, &BuoyancyMarker), Added<BuoyancyMarker>>,
+    mut commands: Commands,
+    children: Query<&Children>,
+    meshes: Res<Assets<Mesh>>,
+    mesh_handles: Query<&Handle<Mesh>>,
+) {
+    for (entity, _) in buoyancy_marker_query.iter() {
+        if let Some(mesh) = find_mesh(entity, &children, &meshes, &mesh_handles) {
+            // Here you would call a function to convert the mesh to a voxel representation
+            // for buoyancy calculations, rather than creating a collider.
+            let buoyancy_voxels = generate_voxels_from_mesh(mesh);
+
+            // Insert buoyancy component with the generated voxels
+            commands.entity(entity).insert(Buoyancy {
+                voxels: buoyancy_voxels,
+                // You might need to adjust the struct to fit this new approach
+            });
+        } else {
+            log::error!("Failed to find mesh for buoyancy object");
+        }
+    }
+}
+
+fn find_mesh<'a>(
+    parent: Entity,
+    children_query: &'a Query<&Children>,
+    meshes: &'a Assets<Mesh>,
+    mesh_handles: &'a Query<&Handle<Mesh>>,
+) -> Option<&'a Mesh> {
+    if let Ok(children) = children_query.get(parent) {
+        for child in children.iter() {
+            if let Ok(mesh_handle) = mesh_handles.get(*child) {
+                if let Some(mesh) = meshes.get(mesh_handle) {
+                    return Some(mesh);
+                }
+            }
+        }
+    }
+    None
 }
 
 fn calculate_and_apply_buoyancy(
@@ -90,8 +151,6 @@ fn calculate_and_apply_buoyancy(
             total_buoyancy_force.y = cube_weight;
         }
 
-        println!("Cube Weight: {:?}", cube_weight);
-        println!("Total Buoyancy Force: {:?}", total_buoyancy_force);
         external_force.apply_force(total_buoyancy_force);
     }
 }
