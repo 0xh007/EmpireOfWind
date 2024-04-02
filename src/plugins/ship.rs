@@ -66,9 +66,47 @@ impl Buoyancy {
     }
 }
 
+#[derive(Component)]
+struct VoxelizedMesh {
+    voxel_positions: Vec<Vec3>, // Positions of voxels in world space
+    voxel_size: f32,            // Uniform size of each voxel (assuming cubic voxels)
+}
+
 struct Voxel {
     position: Vec3,
-    is_receiver: bool,
+    is_solid: bool,
+}
+
+fn generate_voxel_grid(commands: &mut Commands, mesh: &Mesh, voxel_size: f32) {
+    let bounds = calculate_mesh_bounds(mesh);
+    let grid_size = calculate_grid_size(&bounds, voxel_size);
+
+    let mut voxel_positions = Vec::new();
+
+    // Generate grid positions
+    for x in 0..grid_size.x {
+        for y in 0..grid_size.y {
+            for z in 0..grid_size.z {
+                let position = Vec3::new(
+                    x as f32 * voxel_size + bounds.min.x,
+                    y as f32 * voxel_size + bounds.min.y,
+                    z as f32 * voxel_size + bounds.min.z,
+                );
+                voxel_positions.push(position);
+
+                commands.spawn().insert(Voxel {
+                    position: Vec3I::new(x, y, z),
+                    is_solid: false, // Initial state, to be updated based on mesh intersection
+                });
+            }
+        }
+    }
+
+    // Create an entity with the VoxelizedMesh component
+    commands.spawn().insert(VoxelizedMesh {
+        voxel_positions,
+        voxel_size,
+    });
 }
 
 // Pseudo-function to demonstrate concept
