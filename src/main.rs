@@ -39,7 +39,7 @@ fn main() {
     });
 
     app.add_plugins(default_plugins)
-        .add_plugins(PhysicsDebugPlugin::default())
+        // .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins(PhysicsPlugins::default())
         // .add_plugins(EditorPlugin::default())
         .add_plugins(CorePlugins)
