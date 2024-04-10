@@ -20,6 +20,7 @@ impl Plugin for ShipPlugin {
                 Update,
                 read_buoyancy_objects.run_if(in_state(AppStates::Next)),
             )
+            .add_systems(Update, visualize_voxels.run_if(in_state(AppStates::Next)))
             .configure_loading_state(
                 LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
             )
@@ -99,45 +100,79 @@ struct Voxel {
     is_solid: bool,
 }
 
-fn generate_voxel_grid(
-    commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    mesh_handle: &Handle<Mesh>,
-    voxel_size: f32,
+// fn update_voxel_solidity(
+//     mut commands: Commands,
+//     mesh_query: Query<&Handle<Mesh>, With<ShipHull>>, // Assuming ShipHull is your marker component
+//     voxel_query: Query<(Entity, &Transform, &Voxel)>, // Assuming Voxel is your voxel component
+//     meshes: Res<Assets<Mesh>>,
+//     mut spatial_query: ResMut<SpatialQuery>,
+// ) {
+//     // Ensure the spatial query pipeline is up to date
+//     spatial_query.update_pipeline();
+
+//     // Optionally, retrieve the ship hull mesh for more complex operations
+
+//     for (voxel_entity, voxel_transform, voxel) in voxel_query.iter() {
+//         // Represent each voxel by a Collider or an AABB
+//         let voxel_collider = Collider::cuboid(voxel.size / 2.0, voxel.size / 2.0, voxel.size / 2.0);
+
+//         // Perform spatial query to check intersection with the ship hull
+//         let intersects = spatial_query.shape_intersections(
+//             &voxel_collider,
+//             voxel_transform.translation,
+//             voxel_transform.rotation,
+//             SpatialQueryFilter::default(), // Customize this as needed
+//         );
+
+//         if !intersects.is_empty() {
+//             // Voxel intersects with the ship hull, mark it as solid
+//             commands.entity(voxel_entity).insert(Solid); // Assuming Solid is a marker component for solid voxels
+//         }
+//     }
+// }
+
+fn visualize_voxels(
+    mut commands: Commands,
+    query: Query<(Entity, &Voxel), Added<Voxel>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    if let Some(mesh) = meshes.get(mesh_handle) {
-        let bounds = calculate_mesh_bounds(mesh);
-        let grid_size = calculate_grid_size(&bounds, voxel_size);
+    let voxel_visual_size = 0.5 * 0.95; // Example size and reduction to make gaps between voxels
 
-        // Adjust the voxel visual size if necessary (e.g., to make gaps between voxels)
-        let voxel_visual_size = voxel_size * 0.95;
+    for (entity, voxel) in query.iter() {
+        commands.entity(entity).insert(PbrBundle {
+            mesh: meshes.add(Cuboid::new(
+                voxel_visual_size,
+                voxel_visual_size,
+                voxel_visual_size,
+            )),
+            material: materials.add(Color::rgb_u8(124, 144, 255)),
+            transform: Transform::from_translation(voxel.position),
+            ..default()
+        });
+    }
+}
 
-        for x in 0..grid_size.x {
-            for y in 0..grid_size.y {
-                for z in 0..grid_size.z {
-                    let position = Vec3::new(
-                        x as f32 * voxel_size + bounds.0.x + voxel_size / 2.0 - bounds.1.x / 2.0,
-                        y as f32 * voxel_size + bounds.0.y + voxel_size / 2.0 - bounds.1.y / 2.0,
-                        z as f32 * voxel_size + bounds.0.z + voxel_size / 2.0 - bounds.1.z / 2.0,
-                    );
+fn generate_voxel_grid(commands: &mut Commands, mesh: &Mesh, voxel_size: f32) {
+    let bounds = calculate_mesh_bounds(mesh);
+    let grid_size = calculate_grid_size(&bounds, voxel_size);
 
-                    // Spawn a cube for each voxel position
-                    commands.spawn(PbrBundle {
-                        mesh: meshes.add(Cuboid::new(
-                            voxel_visual_size,
-                            voxel_visual_size,
-                            voxel_visual_size,
-                        )),
-                        material: materials.add(Color::rgb_u8(124, 144, 255)),
-                        transform: Transform::from_translation(position),
-                        ..default()
-                    });
-                }
+    for x in 0..grid_size.x {
+        for y in 0..grid_size.y {
+            for z in 0..grid_size.z {
+                let position = Vec3::new(
+                    x as f32 * voxel_size + bounds.0.x + voxel_size / 2.0 - bounds.1.x / 2.0,
+                    y as f32 * voxel_size + bounds.0.y + voxel_size / 2.0 - bounds.1.y / 2.0,
+                    z as f32 * voxel_size + bounds.0.z + voxel_size / 2.0 - bounds.1.z / 2.0,
+                );
+
+                // Spawn entities with Voxel components only
+                commands.spawn((Voxel {
+                    position,
+                    is_solid: true, // This will be updated based on spatial queries later
+                },));
             }
         }
-    } else {
-        // error
     }
 }
 
@@ -177,7 +212,7 @@ pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker), Added<BuoyancyMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    mut meshes: ResMut<Assets<Mesh>>, // Asset storage for Meshes
     mesh_handles: Query<&Handle<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
@@ -185,13 +220,27 @@ pub fn read_buoyancy_objects(
 
     for (entity, _) in buoyancy_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            generate_voxel_grid(
-                &mut commands,
-                &mut meshes,
-                &mut materials,
-                &mesh_handle,
-                voxel_size,
-            );
+            // Retrieve the actual Mesh from the Assets<Mesh> using the Handle<Mesh>
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                generate_voxel_grid(
+                    &mut commands,
+                    mesh, // Pass the actual Mesh to the function
+                    voxel_size,
+                );
+
+                // Attempt to create a collider directly from the Mesh
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    commands.entity(entity).insert((
+                        collider,
+                        RigidBody::Static,
+                        Visibility::Visible,
+                    ));
+                }
+            } else {
+                eprintln!(
+                    "Failed to retrieve mesh from handle for entity marked with BuoyancyMarker"
+                );
+            }
         } else {
             eprintln!("Mesh not found for entity marked with BuoyancyMarker");
         }
