@@ -34,7 +34,7 @@ impl Plugin for ShipPlugin {
     }
 }
 
-const VOXEL_SIZE: f32 = 0.8;
+const VOXEL_SIZE: f32 = 1.0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Vec3I {
@@ -48,6 +48,9 @@ impl Vec3I {
         Vec3I { x, y, z }
     }
 }
+
+#[derive(Component)]
+struct VoxelVisual;
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
@@ -102,30 +105,29 @@ struct Voxel {
 
 fn update_voxel_solidity(
     mut commands: Commands,
-    mut voxel_query: Query<(Entity, &Transform, &mut Voxel)>,
+    mut voxel_query: Query<(Entity, &Transform, &mut Voxel), Without<VoxelVisual>>, // Only consider voxels without a visual representation
     mut spatial_query: SpatialQuery,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // Ensure the spatial query pipeline is up to date
     spatial_query.update_pipeline();
 
-    let voxel_visual_size = VOXEL_SIZE * 0.95; // Example size and reduction to make gaps between voxels
+    let voxel_visual_size = VOXEL_SIZE * 0.95;
 
     for (voxel_entity, voxel_transform, mut voxel) in voxel_query.iter_mut() {
         let voxel_collider = Collider::cuboid(VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0);
-
         let intersects = spatial_query.shape_intersections(
             &voxel_collider,
             voxel_transform.translation,
             voxel_transform.rotation,
-            SpatialQueryFilter::default(), // Customize this as needed
+            SpatialQueryFilter::default(),
         );
 
         voxel.is_solid = !intersects.is_empty();
 
-        // If the voxel is solid, spawn a visual representation for it
+        // Only spawn visual representation for solid voxels that have not been visualized before
         if voxel.is_solid {
+            commands.entity(voxel_entity).insert(VoxelVisual); // Mark the voxel as visualized
             commands.spawn(PbrBundle {
                 mesh: meshes.add(Cuboid::new(
                     voxel_visual_size,
@@ -136,8 +138,6 @@ fn update_voxel_solidity(
                 transform: Transform::from_translation(voxel_transform.translation),
                 ..default()
             });
-            // .insert(VoxelVisual); // Optional: Tag visual voxels with a marker component for easy identification
-        } else {
         }
     }
 }
