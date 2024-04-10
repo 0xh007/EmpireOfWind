@@ -7,14 +7,14 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.13.2", features = ["dynamic_linking", "wayland", "jpeg"] }
-bevy_panorbit_camera = "0.16"
+bevy_panorbit_camera = "0.17"
 bevy_xpbd_3d = { version = "0.4", features = ["debug-plugin"] }
 bevy_water = "0.13"
 big-brain = { git = "https://github.com/zkat/big-brain", rev = "50415e55f0a9937dc99cb8f0b0906e47cb390082" }
 oxidized_navigation = { version = "0.10", features = ["debug_draw", "xpbd"] }
 bevy_asset_loader = { version = "0.20", features = ["3d"] }
 bevy_gltf_components = { version = "0.5" }
-bevy_atmosphere = "0.9"
+bevy_atmosphere = "0.9.1"
 bevy-tnua = "0.15"
 bevy-tnua-xpbd3d = "0.2.0"
 anyhow = "1"
