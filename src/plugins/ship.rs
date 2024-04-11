@@ -34,7 +34,7 @@ impl Plugin for ShipPlugin {
     }
 }
 
-const VOXEL_SIZE: f32 = 1.0;
+const VOXEL_SIZE: f32 = 0.8;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Vec3I {
@@ -115,7 +115,8 @@ fn update_voxel_solidity(
     let voxel_visual_size = VOXEL_SIZE * 0.95;
 
     for (voxel_entity, voxel_transform, mut voxel) in voxel_query.iter_mut() {
-        let voxel_collider = Collider::cuboid(VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0);
+        // let voxel_collider = Collider::cuboid(VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0);
+        let voxel_collider = Collider::cuboid(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
         let intersects = spatial_query.shape_intersections(
             &voxel_collider,
             voxel_transform.translation,
@@ -124,6 +125,7 @@ fn update_voxel_solidity(
         );
 
         voxel.is_solid = !intersects.is_empty();
+        // voxel.is_solid = true;
 
         // Only spawn visual representation for solid voxels that have not been visualized before
         if voxel.is_solid {
@@ -164,26 +166,57 @@ fn update_voxel_solidity(
 //     }
 // }
 
-fn generate_voxel_grid(commands: &mut Commands, mesh: &Mesh) {
+fn visualize_bounds(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    bounds: (Vec3, Vec3),
+) {
+    let bbox_size = bounds.1 - bounds.0;
+    let bbox_position = (bounds.0 + bounds.1) * 0.5;
+
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Box::new(
+            bbox_size.x,
+            bbox_size.y,
+            bbox_size.z,
+        ))),
+        material: materials.add(Color::rgb(1.0, 0.0, 0.0)),
+        transform: Transform::from_translation(bbox_position),
+        ..default()
+    });
+}
+
+fn generate_voxel_grid(
+    commands: &mut Commands,
+    mesh: &Mesh,
+    mesh_transform: &Transform,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) {
     let bounds = calculate_mesh_bounds(mesh);
     let grid_size = calculate_grid_size(&bounds);
+
+    // visualize_bounds(commands, meshes, materials, bounds);
+
+    let start_position = bounds.0 + mesh_transform.translation;
 
     for x in 0..grid_size.x {
         for y in 0..grid_size.y {
             for z in 0..grid_size.z {
-                let position = Vec3::new(
-                    x as f32 * VOXEL_SIZE + bounds.0.x + VOXEL_SIZE / 2.0 - bounds.1.x / 2.0,
-                    y as f32 * VOXEL_SIZE + bounds.0.y + VOXEL_SIZE / 2.0 - bounds.1.y / 2.0,
-                    z as f32 * VOXEL_SIZE + bounds.0.z + VOXEL_SIZE / 2.0 - bounds.1.z / 2.0,
-                );
+                let position = start_position
+                    + Vec3::new(
+                        x as f32 * VOXEL_SIZE,
+                        y as f32 * VOXEL_SIZE,
+                        z as f32 * VOXEL_SIZE,
+                    );
 
-                // Now also spawn entities with a Transform component
                 commands.spawn((
                     Voxel {
                         position,
-                        is_solid: false, // This will be updated based on spatial queries later
+                        is_solid: false,
                     },
-                    Transform::from_translation(position), // Use the position for the Transform component
+                    Transform::from_translation(position),
                     GlobalTransform::default(),
                 ));
             }
@@ -208,7 +241,7 @@ fn calculate_mesh_bounds(mesh: &Mesh) -> (Vec3, Vec3) {
         min = min.min(Vec3::from(vertex));
         max = max.max(Vec3::from(vertex));
     }
-
+    println!("Calculated Bounds: Min: {:?}, Max: {:?}", min, max);
     (min, max)
 }
 
@@ -224,30 +257,42 @@ fn calculate_grid_size(bounds: &(Vec3, Vec3)) -> Vec3I {
 }
 
 pub fn read_buoyancy_objects(
-    buoyancy_marker_query: Query<(Entity, &BuoyancyMarker), Added<BuoyancyMarker>>,
+    buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
-    mut meshes: ResMut<Assets<Mesh>>, // Asset storage for Meshes
+    mut meshes: ResMut<Assets<Mesh>>, // Changed from `mut` to allow borrowing
     mesh_handles: Query<&Handle<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for (entity, _) in buoyancy_marker_query.iter() {
+    for (entity, _, mesh_transform) in buoyancy_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            // Retrieve the actual Mesh from the Assets<Mesh> using the Handle<Mesh>
-            if let Some(mesh) = meshes.get(mesh_handle) {
+            // Temporarily clone the mesh if necessary or retrieve a reference to pass along
+            let mesh = meshes.get(mesh_handle).cloned(); // Clone the mesh to avoid borrowing issues
+
+            if let Some(mesh) = mesh {
                 generate_voxel_grid(
                     &mut commands,
-                    mesh, // Pass the actual Mesh to the function
+                    &mesh, // Pass the cloned mesh
+                    mesh_transform,
+                    &mut meshes,
+                    &mut materials,
                 );
 
-                // Attempt to create a collider directly from the Mesh
-                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                // No borrowing conflict because `mesh` is now cloned
+                if let Some(collider) = Collider::trimesh_from_mesh(&mesh) {
                     commands.entity(entity).insert((
                         collider,
                         RigidBody::Static,
                         Visibility::Visible,
                     ));
                 }
+                // if let Some(collider) = Collider::trimesh_from_mesh(&mesh) {
+                //     commands.entity(entity).insert((
+                //         collider,
+                //         RigidBody::Static,
+                //         Visibility::Visible,
+                //     ));
+                // }
             } else {
                 eprintln!(
                     "Failed to retrieve mesh from handle for entity marked with BuoyancyMarker"
