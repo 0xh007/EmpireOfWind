@@ -14,7 +14,7 @@ impl Plugin for ShipPlugin {
     fn build(&self, app: &mut App) {
         app
             // .add_systems(OnEnter(AppStates::Next), spawn_cube)
-            // .add_systems(Update, calculate_and_apply_buoyancy)
+            .add_systems(Update, calculate_and_apply_buoyancy)
             .register_type::<BuoyancyMarker>()
             .add_systems(
                 Update,
@@ -52,6 +52,17 @@ impl Vec3I {
 #[derive(Component)]
 struct VoxelVisual;
 
+#[derive(Component)]
+struct Buoyancy {
+    voxels: Vec<Voxel>, // List of voxel data, possibly pulled from generate_voxel_grid
+}
+
+impl Buoyancy {
+    fn from_voxels(voxels: Vec<Voxel>) -> Self {
+        Self { voxels }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct BuoyancyMarker;
@@ -66,36 +77,9 @@ struct ColliderBundle {
 
 #[derive(AssetCollection, Resource)]
 struct ShipAssets {
-    #[asset(path = "models/export/ship/carrack_b.glb#Scene0")]
+    #[asset(path = "models/export/ship/hull.glb#Scene0")]
     carrack_hull: Handle<Scene>,
 }
-
-// #[derive(Component)]
-// struct Buoyancy {
-//     voxels: Vec<Voxel>,
-//     cube_size: f32,
-//     voxel_size: f32,
-// }
-
-// impl Buoyancy {
-//     fn new(cube_size: f32, voxels_per_axis: usize) -> Self {
-//         let voxel_size = cube_size / voxels_per_axis as f32;
-//         let voxels = subdivide_cube_into_voxels(cube_size, voxels_per_axis, voxel_size);
-//         Self {
-//             voxels,
-//             cube_size,
-//             voxel_size,
-//         }
-//     }
-// }
-
-// impl Buoyancy {
-//     fn new_from_mesh(mesh: &Mesh, voxels_per_axis: usize) -> Self {
-//         // Pseudo-code to generate voxels based on mesh bounds and internal volume
-//         let voxels = generate_voxels_from_mesh(mesh, voxels_per_axis);
-//         Self { voxels }
-//     }
-// }
 
 #[derive(Component)]
 struct Voxel {
@@ -144,28 +128,6 @@ fn update_voxel_solidity(
     }
 }
 
-// fn visualize_voxels(
-//     mut commands: Commands,
-//     query: Query<(Entity, &Voxel), Added<Voxel>>,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-// ) {
-//     let voxel_visual_size = 0.5 * 0.95; // Example size and reduction to make gaps between voxels
-
-//     for (entity, voxel) in query.iter() {
-//         commands.entity(entity).insert(PbrBundle {
-//             mesh: meshes.add(Cuboid::new(
-//                 voxel_visual_size,
-//                 voxel_visual_size,
-//                 voxel_visual_size,
-//             )),
-//             material: materials.add(Color::rgb_u8(124, 144, 255)),
-//             transform: Transform::from_translation(voxel.position),
-//             ..default()
-//         });
-//     }
-// }
-
 fn visualize_bounds(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
@@ -187,41 +149,29 @@ fn visualize_bounds(
     });
 }
 
-fn generate_voxel_grid(
-    commands: &mut Commands,
-    mesh: &Mesh,
-    mesh_transform: &Transform,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-) {
+fn generate_voxel_grid(mesh: &Mesh, mesh_transform: &Transform) -> Vec<Voxel> {
     let bounds = calculate_mesh_bounds(mesh);
     let grid_size = calculate_grid_size(&bounds);
-
-    // visualize_bounds(commands, meshes, materials, bounds);
-
-    let start_position = bounds.0 + mesh_transform.translation;
+    let mut voxels = Vec::new();
 
     for x in 0..grid_size.x {
         for y in 0..grid_size.y {
             for z in 0..grid_size.z {
-                let position = start_position
-                    + Vec3::new(
-                        x as f32 * VOXEL_SIZE,
-                        y as f32 * VOXEL_SIZE,
-                        z as f32 * VOXEL_SIZE,
-                    );
+                let position = Vec3::new(
+                    x as f32 * VOXEL_SIZE + bounds.0.x + VOXEL_SIZE / 2.0 - bounds.1.x / 2.0,
+                    y as f32 * VOXEL_SIZE + bounds.0.y + VOXEL_SIZE / 2.0 - bounds.1.y / 2.0,
+                    z as f32 * VOXEL_SIZE + bounds.0.z + VOXEL_SIZE / 2.0 - bounds.1.z / 2.0,
+                ) + mesh_transform.translation;
 
-                commands.spawn((
-                    Voxel {
-                        position,
-                        is_solid: false,
-                    },
-                    Transform::from_translation(position),
-                    GlobalTransform::default(),
-                ));
+                voxels.push(Voxel {
+                    position,
+                    is_solid: false, // This will be set based on spatial queries in another system
+                });
             }
         }
     }
+
+    voxels
 }
 
 fn calculate_mesh_bounds(mesh: &Mesh) -> (Vec3, Vec3) {
@@ -260,39 +210,31 @@ pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
-    mut meshes: ResMut<Assets<Mesh>>, // Changed from `mut` to allow borrowing
+    meshes: Res<Assets<Mesh>>, // No need to mutate meshes here
     mesh_handles: Query<&Handle<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (entity, _, mesh_transform) in buoyancy_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            // Temporarily clone the mesh if necessary or retrieve a reference to pass along
-            let mesh = meshes.get(mesh_handle).cloned(); // Clone the mesh to avoid borrowing issues
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                let voxels = generate_voxel_grid(mesh, mesh_transform);
 
-            if let Some(mesh) = mesh {
-                generate_voxel_grid(
-                    &mut commands,
-                    &mesh, // Pass the cloned mesh
-                    mesh_transform,
-                    &mut meshes,
-                    &mut materials,
-                );
+                // Attach the Buoyancy component with the generated voxels
+                commands
+                    .entity(entity)
+                    .insert(Buoyancy::from_voxels(voxels));
 
-                // No borrowing conflict because `mesh` is now cloned
-                if let Some(collider) = Collider::trimesh_from_mesh(&mesh) {
+                // Optionally create a collider from the mesh
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                     commands.entity(entity).insert((
                         collider,
-                        RigidBody::Static,
+                        // RigidBody::Static,
+                        RigidBody::Dynamic,
+                        LinearDamping(0.8),
+                        AngularDamping(0.8),
+                        ExternalForce::new(Vec3::ZERO).with_persistence(false),
                         Visibility::Visible,
                     ));
                 }
-                // if let Some(collider) = Collider::trimesh_from_mesh(&mesh) {
-                //     commands.entity(entity).insert((
-                //         collider,
-                //         RigidBody::Static,
-                //         Visibility::Visible,
-                //     ));
-                // }
             } else {
                 eprintln!(
                     "Failed to retrieve mesh from handle for entity marked with BuoyancyMarker"
@@ -319,73 +261,16 @@ fn find_mesh(
     None
 }
 
-// fn calculate_and_apply_buoyancy(
-//     water: WaterParam,
-//     mut query: Query<(
-//         &Buoyancy,
-//         &Transform,
-//         &mut ExternalForce,
-//         &ColliderDensity,
-//         &Collider,
-//     )>,
-// ) {
-//     for (buoyancy, transform, mut external_force, collider_density, collider) in query.iter_mut() {
-//         let mut total_buoyancy_force = Vec3::ZERO;
-//         let gravity = 9.81;
-//         let cube_volume = buoyancy.cube_size.powi(3);
-//         let cube_weight = cube_volume * collider_density.0 * gravity;
-
-//         for voxel in &buoyancy.voxels {
-//             let world_position = transform.translation + voxel.position;
-//             let water_height = get_water_height_at_position(world_position, &water);
-//             let submerged_volume =
-//                 calculate_submerged_volume(world_position, water_height, buoyancy.voxel_size);
-//             let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume, 0.0);
-
-//             total_buoyancy_force += buoyancy_force;
-//         }
-
-//         // Limit the buoyancy force to not exceed the cube's weight
-//         if total_buoyancy_force.y > cube_weight {
-//             total_buoyancy_force.y = cube_weight;
-//         }
-
-//         external_force.apply_force(total_buoyancy_force);
-//     }
-// }
-
-// fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
-//     let bottom_of_voxel = world_position.y - voxel_size / 2.0;
-//     let top_of_voxel = world_position.y + voxel_size / 2.0;
-
-//     // If the top of the voxel is below the water, it's fully submerged
-//     if top_of_voxel <= water_height {
-//         return voxel_size.powi(3); // The volume of the voxel
-//     }
-//     // If the bottom of the voxel is above the water, it's not submerged
-//     else if bottom_of_voxel >= water_height {
-//         return 0.0;
-//     }
-//     // Otherwise, it's partially submerged
-//     else {
-//         let submerged_height = water_height - bottom_of_voxel;
-//         return submerged_height * voxel_size * voxel_size; // The submerged volume
-//     }
-// }
-
 fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
     let water_height = water.wave_point(pos).y;
     water_height
 }
 
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
-    commands.spawn((
-        SceneBundle {
-            scene: ship_assets.carrack_hull.clone(),
-            ..default()
-        },
-        // WaterInteractable::new(-0.4, -8.0, 9.0, -2.0, 2.0),
-    ));
+    commands.spawn((SceneBundle {
+        scene: ship_assets.carrack_hull.clone(),
+        ..default()
+    },));
 }
 
 // TODO: Eviction notice
@@ -430,3 +315,91 @@ fn spawn_food(
         Collider::sphere(0.2),
     ));
 }
+
+// #[derive(Component)]
+// struct Buoyancy {
+//     voxels: Vec<Voxel>,
+//     cube_size: f32,
+//     voxel_size: f32,
+// }
+
+// impl Buoyancy {
+//     fn new(cube_size: f32, voxels_per_axis: usize) -> Self {
+//         let voxel_size = cube_size / voxels_per_axis as f32;
+//         let voxels = subdivide_cube_into_voxels(cube_size, voxels_per_axis, voxel_size);
+//         Self {
+//             voxels,
+//             cube_size,
+//             voxel_size,
+//         }
+//     }
+// }
+
+// impl Buoyancy {
+//     fn new_from_mesh(mesh: &Mesh, voxels_per_axis: usize) -> Self {
+//         // Pseudo-code to generate voxels based on mesh bounds and internal volume
+//         let voxels = generate_voxels_from_mesh(mesh, voxels_per_axis);
+//         Self { voxels }
+//     }
+// }
+
+fn calculate_and_apply_buoyancy(
+    water: WaterParam,
+    mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce, &ColliderDensity)>,
+) {
+    let gravity = 9.81; // Acceleration due to gravity in m/s^2
+
+    for (buoyancy, transform, mut external_force, collider_density) in query.iter_mut() {
+        let mut total_buoyancy_force = Vec3::ZERO;
+
+        for voxel in &buoyancy.voxels {
+            let world_position = transform.translation + voxel.position;
+            let water_height = get_water_height_at_position(world_position, &water);
+            let submerged_volume =
+                calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
+            let buoyancy_force =
+                Vec3::new(0.0, gravity * submerged_volume * collider_density.0, 0.0);
+
+            total_buoyancy_force += buoyancy_force;
+        }
+
+        external_force.apply_force(total_buoyancy_force);
+    }
+}
+
+fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
+    let water_height = water_height - 6.0;
+    let bottom_of_voxel = world_position.y - voxel_size / 2.0;
+    let top_of_voxel = world_position.y + voxel_size / 2.0;
+
+    if top_of_voxel <= water_height {
+        voxel_size.powi(3) // Fully submerged
+    } else if bottom_of_voxel >= water_height {
+        0.0 // Not submerged
+    } else {
+        let submerged_height = water_height - bottom_of_voxel;
+        submerged_height * voxel_size * voxel_size // Partially submerged volume
+    }
+}
+
+// fn visualize_voxels(
+//     mut commands: Commands,
+//     query: Query<(Entity, &Voxel), Added<Voxel>>,
+//     mut meshes: ResMut<Assets<Mesh>>,
+//     mut materials: ResMut<Assets<StandardMaterial>>,
+// ) {
+//     let voxel_visual_size = 0.5 * 0.95; // Example size and reduction to make gaps between voxels
+
+//     for (entity, voxel) in query.iter() {
+//         commands.entity(entity).insert(PbrBundle {
+//             mesh: meshes.add(Cuboid::new(
+//                 voxel_visual_size,
+//                 voxel_visual_size,
+//                 voxel_visual_size,
+//             )),
+//             material: materials.add(Color::rgb_u8(124, 144, 255)),
+//             transform: Transform::from_translation(voxel.position),
+//             ..default()
+//         });
+//     }
+// }
