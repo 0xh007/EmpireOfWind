@@ -89,41 +89,45 @@ struct Voxel {
 
 fn update_voxel_solidity(
     mut commands: Commands,
-    mut voxel_query: Query<(Entity, &Transform, &mut Voxel), Without<VoxelVisual>>, // Only consider voxels without a visual representation
+    mut voxel_query: Query<(Entity, &Transform, &mut Voxel, Option<&VoxelVisual>), Added<Buoyancy>>, // Using Added<Buoyancy> filter
     mut spatial_query: SpatialQuery,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    println!("RUNNING - Buoyancy component added");
+
     spatial_query.update_pipeline();
 
     let voxel_visual_size = VOXEL_SIZE * 0.95;
 
-    for (voxel_entity, voxel_transform, mut voxel) in voxel_query.iter_mut() {
-        // let voxel_collider = Collider::cuboid(VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0, VOXEL_SIZE / 2.0);
-        let voxel_collider = Collider::cuboid(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
-        let intersects = spatial_query.shape_intersections(
-            &voxel_collider,
-            voxel_transform.translation,
-            voxel_transform.rotation,
-            SpatialQueryFilter::default(),
-        );
+    for (voxel_entity, voxel_transform, mut voxel, voxel_visual) in voxel_query.iter_mut() {
+        println!("Processing Voxel Entity: {:?}", voxel_entity);
 
-        voxel.is_solid = !intersects.is_empty();
-        // voxel.is_solid = true;
+        if voxel_visual.is_none() {
+            let voxel_collider = Collider::cuboid(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
+            let intersects = spatial_query.shape_intersections(
+                &voxel_collider,
+                voxel_transform.translation,
+                voxel_transform.rotation,
+                SpatialQueryFilter::default(),
+            );
 
-        // Only spawn visual representation for solid voxels that have not been visualized before
-        if voxel.is_solid {
-            commands.entity(voxel_entity).insert(VoxelVisual); // Mark the voxel as visualized
-            commands.spawn(PbrBundle {
-                mesh: meshes.add(Cuboid::new(
-                    voxel_visual_size,
-                    voxel_visual_size,
-                    voxel_visual_size,
-                )),
-                material: materials.add(Color::rgb_u8(124, 144, 255)),
-                transform: Transform::from_translation(voxel_transform.translation),
-                ..default()
-            });
+            voxel.is_solid = !intersects.is_empty();
+
+            if voxel.is_solid {
+                println!("SPAWNING VOXEL MESH for Entity: {:?}", voxel_entity);
+                commands.entity(voxel_entity).insert(VoxelVisual); // Mark the voxel as visualized
+                commands.spawn(PbrBundle {
+                    mesh: meshes.add(Cuboid::new(
+                        voxel_visual_size,
+                        voxel_visual_size,
+                        voxel_visual_size,
+                    )),
+                    material: materials.add(Color::rgb_u8(124, 144, 255)),
+                    transform: Transform::from_translation(voxel_transform.translation),
+                    ..default()
+                });
+            }
         }
     }
 }
@@ -316,33 +320,6 @@ fn spawn_food(
     ));
 }
 
-// #[derive(Component)]
-// struct Buoyancy {
-//     voxels: Vec<Voxel>,
-//     cube_size: f32,
-//     voxel_size: f32,
-// }
-
-// impl Buoyancy {
-//     fn new(cube_size: f32, voxels_per_axis: usize) -> Self {
-//         let voxel_size = cube_size / voxels_per_axis as f32;
-//         let voxels = subdivide_cube_into_voxels(cube_size, voxels_per_axis, voxel_size);
-//         Self {
-//             voxels,
-//             cube_size,
-//             voxel_size,
-//         }
-//     }
-// }
-
-// impl Buoyancy {
-//     fn new_from_mesh(mesh: &Mesh, voxels_per_axis: usize) -> Self {
-//         // Pseudo-code to generate voxels based on mesh bounds and internal volume
-//         let voxels = generate_voxels_from_mesh(mesh, voxels_per_axis);
-//         Self { voxels }
-//     }
-// }
-
 fn calculate_and_apply_buoyancy(
     water: WaterParam,
     mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce, &ColliderDensity)>,
@@ -368,7 +345,6 @@ fn calculate_and_apply_buoyancy(
 }
 
 fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
-    let water_height = water_height - 6.0;
     let bottom_of_voxel = world_position.y - voxel_size / 2.0;
     let top_of_voxel = world_position.y + voxel_size / 2.0;
 
@@ -381,25 +357,3 @@ fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_siz
         submerged_height * voxel_size * voxel_size // Partially submerged volume
     }
 }
-
-// fn visualize_voxels(
-//     mut commands: Commands,
-//     query: Query<(Entity, &Voxel), Added<Voxel>>,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-// ) {
-//     let voxel_visual_size = 0.5 * 0.95; // Example size and reduction to make gaps between voxels
-
-//     for (entity, voxel) in query.iter() {
-//         commands.entity(entity).insert(PbrBundle {
-//             mesh: meshes.add(Cuboid::new(
-//                 voxel_visual_size,
-//                 voxel_visual_size,
-//                 voxel_visual_size,
-//             )),
-//             material: materials.add(Color::rgb_u8(124, 144, 255)),
-//             transform: Transform::from_translation(voxel.position),
-//             ..default()
-//         });
-//     }
-// }
