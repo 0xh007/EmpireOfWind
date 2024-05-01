@@ -271,10 +271,11 @@ pub fn read_buoyancy_objects(
                     commands.entity(entity).insert((
                         collider,
                         // RigidBody::Static,
+                        // CenterOfMass(mesh_transform.clone().translation),
                         RigidBody::Dynamic,
-                        Mass(700.0),
-                        LinearDamping(0.8),
-                        AngularDamping(0.8),
+                        Mass(1500.0),
+                        // LinearDamping(0.8),
+                        // AngularDamping(0.8),
                         ExternalForce::new(Vec3::ZERO).with_persistence(false),
                         Visibility::Visible,
                     ));
