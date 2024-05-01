@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy_water::*;
 
 const WATER_HEIGHT: f32 = 2.0;
-const WAVE_AMPLITUDE: f32 = 1.0;
+const WAVE_AMPLITUDE: f32 = 2.0;
 
 pub struct OceanPlugin;
 

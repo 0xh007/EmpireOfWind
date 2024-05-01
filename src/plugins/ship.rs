@@ -88,7 +88,8 @@ struct ColliderBundle {
 
 #[derive(AssetCollection, Resource)]
 struct ShipAssets {
-    #[asset(path = "models/export/ship/hull.glb#Scene0")]
+    // #[asset(path = "models/export/ship/hull.glb#Scene0")]
+    #[asset(path = "models/export/ship/carrack.glb#Scene0")]
     carrack_hull: Handle<Scene>,
 }
 
@@ -254,12 +255,30 @@ pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
+    parent_query: Query<&Parent>,
     meshes: Res<Assets<Mesh>>, // No need to mutate meshes here
     mesh_handles: Query<&Handle<Mesh>>,
 ) {
     for (entity, _, mesh_transform) in buoyancy_marker_query.iter() {
+        println!(
+            "Processing Entity: {:?}, Transform: {:?}",
+            entity, mesh_transform
+        );
+
+        // Check if the entity has children (useful for checking if collider is a separate child)
+        if let Ok(children) = children.get(entity) {
+            println!("Children of Entity {:?}: {:?}", entity, children);
+            for child in children.iter() {
+                if let Ok(parent) = parent_query.get(*child) {
+                    println!("Child {:?} is a child of {:?}", child, parent);
+                }
+            }
+        }
+
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            println!("Mesh handle found: {:?}", mesh_handle);
             if let Some(mesh) = meshes.get(mesh_handle) {
+                println!("Generating voxel grid for mesh.");
                 let voxels = generate_voxel_grid(mesh, mesh_transform);
 
                 // Attach the Buoyancy component with the generated voxels
@@ -268,16 +287,15 @@ pub fn read_buoyancy_objects(
                     .insert(Buoyancy::from_voxels(voxels, true));
 
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    println!("Inserting collider and dynamics components.");
                     commands.entity(entity).insert((
                         collider,
-                        // RigidBody::Static,
-                        // CenterOfMass(mesh_transform.clone().translation),
                         RigidBody::Dynamic,
-                        Mass(1500.0),
-                        // LinearDamping(0.8),
-                        // AngularDamping(0.8),
+                        Mass(2000.0),
+                        LinearDamping(0.8),
+                        AngularDamping(0.8),
                         ExternalForce::new(Vec3::ZERO).with_persistence(false),
-                        Visibility::Visible,
+                        Visibility::Hidden,
                     ));
                 }
             } else {
@@ -334,7 +352,7 @@ fn calculate_and_apply_buoyancy(
                 Vec3::new(0.0, gravity * submerged_volume * collider_density.0, 0.0);
 
             // Applying the force at the voxel's position relative to the ship's center of mass
-            external_force.apply_force_at_point(buoyancy_force, voxel.position, Vec3::ZERO);
+            external_force.apply_force_at_point(buoyancy_force, voxel.position, voxel.position);
         }
     }
 }
