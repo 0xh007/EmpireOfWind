@@ -1,5 +1,4 @@
-use crate::plugins::ship;
-use crate::prelude::*;
+use bevy::ecs::system::ParamSet;
 use bevy::log;
 use bevy::prelude::*;
 use bevy::render::mesh::VertexAttributeValues;
@@ -7,8 +6,16 @@ use bevy_tnua::prelude::*;
 use bevy_tnua_xpbd3d::*;
 use bevy_water::WaterParam;
 use bevy_xpbd_3d::prelude::*;
+use bevy_xpbd_3d::SubstepSchedule;
 use oxidized_navigation::NavMeshAffector;
 use serde::{Deserialize, Serialize};
+
+use crate::plugins::ship;
+use crate::plugins::ship::{Ship, ShipAssets};
+use crate::prelude::*;
+use crate::prelude::*;
+
+const VOXEL_SIZE: f32 = 0.8;
 
 pub struct PhysicsPlugin;
 
@@ -36,9 +43,50 @@ impl Plugin for PhysicsPlugin {
             .add_systems(
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
-            )
-            .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
+            );
+        // .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Vec3I {
+    x: i32,
+    y: i32,
+    z: i32,
+}
+
+impl Vec3I {
+    fn new(x: i32, y: i32, z: i32) -> Self {
+        Vec3I { x, y, z }
+    }
+}
+
+#[derive(Component)]
+struct VoxelVisual;
+
+#[derive(Component)]
+struct Buoyancy {
+    voxels: Vec<Voxel>, // List of voxel data, possibly pulled from generate_voxel_grid
+    needs_update: bool,
+}
+
+impl Buoyancy {
+    fn from_voxels(voxels: Vec<Voxel>, needs_update: bool) -> Self {
+        Self {
+            voxels,
+            needs_update,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct BuoyancyMarker;
+
+#[derive(Debug, Clone, PartialEq)]
+struct Voxel {
+    position: Vec3,
+    is_solid: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
@@ -60,104 +108,6 @@ pub struct Hideable(String);
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
-
-// TODO: This can probably be combined with read_colliders()
-pub fn read_area_markers(
-    area_marker_query: Query<(Entity, &AreaMarker), Added<AreaMarker>>,
-    mut commands: Commands,
-    children: Query<&Children>,
-    meshes: Res<Assets<Mesh>>,
-    mesh_handles: Query<&Handle<Mesh>>,
-) {
-    for (entity, _area_marker) in area_marker_query.iter() {
-        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            if let Some(mesh) = meshes.get(mesh_handle) {
-                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
-                    println!("Inserting Sensor");
-                    commands.entity(entity).insert((
-                        collider,
-                        RigidBody::Static,
-                        Sensor,
-                        Visibility::Hidden,
-                    ));
-                } else {
-                    error!("Failed to create area collider from mesh");
-                }
-            } else {
-                error!("Failed to get mesh from mesh handle");
-            }
-        } else {
-            error!("Failed to find mesh for area collider");
-        }
-    }
-}
-
-pub fn read_colliders(
-    collider_marker_query: Query<(Entity, Option<&NavMeshMarker>), Added<ColliderMarker>>,
-    mut commands: Commands,
-    children: Query<&Children>,
-    meshes: Res<Assets<Mesh>>,
-    mesh_handles: Query<&Handle<Mesh>>,
-) {
-    for (entity, nav_mesh_marker_opt) in collider_marker_query.iter() {
-        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            if let Some(mesh) = meshes.get(mesh_handle) {
-                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
-                    // Insert the common components, including making the collider invisible
-                    commands.entity(entity).insert((
-                        collider,
-                        RigidBody::Static,
-                        Visibility::Hidden,
-                    ));
-
-                    // If the NavMeshMarker is present, also add NavMeshAffector in a separate step
-                    if nav_mesh_marker_opt.is_some() {
-                        commands.entity(entity).insert(NavMeshAffector);
-                    }
-                } else {
-                    error!("Failed to create collider from mesh");
-                }
-            } else {
-                error!("Failed to get mesh from mesh handle");
-            }
-        } else {
-            error!("Failed to find mesh handle for collider");
-        }
-    }
-}
-
-fn find_mesh(
-    parent: Entity,
-    children_query: &Query<&Children>,
-    mesh_handles: &Query<&Handle<Mesh>>,
-) -> Option<Handle<Mesh>> {
-    if let Ok(children) = children_query.get(parent) {
-        for child in children.iter() {
-            if let Ok(mesh_handle) = mesh_handles.get(*child) {
-                return Some(mesh_handle.clone());
-            }
-        }
-    }
-    None
-}
-
-// fn find_mesh<'a>(
-//     parent: Entity,
-//     children_query: &'a Query<&Children>,
-//     meshes: &'a Assets<Mesh>,
-//     mesh_handles: &'a Query<&Handle<Mesh>>,
-// ) -> Option<&'a Mesh> {
-//     if let Ok(children) = children_query.get(parent) {
-//         for child in children.iter() {
-//             if let Ok(mesh_handle) = mesh_handles.get(*child) {
-//                 if let Some(mesh) = meshes.get(mesh_handle) {
-//                     return Some(mesh);
-//                 }
-//             }
-//         }
-//     }
-//     None
-// }
 
 fn hide_show_objects(
     mut commands: Commands,
@@ -210,47 +160,84 @@ fn hide_show_objects(
     }
 }
 
-const VOXEL_SIZE: f32 = 0.8;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct Vec3I {
-    x: i32,
-    y: i32,
-    z: i32,
-}
-
-impl Vec3I {
-    fn new(x: i32, y: i32, z: i32) -> Self {
-        Vec3I { x, y, z }
-    }
-}
-
-#[derive(Component)]
-struct VoxelVisual;
-
-#[derive(Component)]
-struct Buoyancy {
-    voxels: Vec<Voxel>, // List of voxel data, possibly pulled from generate_voxel_grid
-    needs_update: bool,
-}
-
-impl Buoyancy {
-    fn from_voxels(voxels: Vec<Voxel>, needs_update: bool) -> Self {
-        Self {
-            voxels,
-            needs_update,
+// TODO: This can probably be combined with read_colliders()
+pub fn read_area_markers(
+    area_marker_query: Query<(Entity, &AreaMarker), Added<AreaMarker>>,
+    mut commands: Commands,
+    children: Query<&Children>,
+    meshes: Res<Assets<Mesh>>,
+    mesh_handles: Query<&Handle<Mesh>>,
+) {
+    for (entity, _area_marker) in area_marker_query.iter() {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    println!("Inserting Sensor");
+                    commands.entity(entity).insert((
+                        collider,
+                        RigidBody::Dynamic,
+                        Sensor,
+                        Visibility::Hidden,
+                    ));
+                } else {
+                    error!("Failed to create area collider from mesh");
+                }
+            } else {
+                error!("Failed to get mesh from mesh handle");
+            }
+        } else {
+            error!("Failed to find mesh for area collider");
         }
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
-pub struct BuoyancyMarker;
+pub fn read_colliders(
+    collider_marker_query: Query<(Entity, Option<&NavMeshMarker>), Added<ColliderMarker>>,
+    mut commands: Commands,
+    children: Query<&Children>,
+    meshes: Res<Assets<Mesh>>,
+    mesh_handles: Query<&Handle<Mesh>>,
+) {
+    for (entity, nav_mesh_marker_opt) in collider_marker_query.iter() {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    // Insert the common components, including making the collider invisible
+                    commands.entity(entity).insert((
+                        collider,
+                        RigidBody::Kinematic,
+                        Visibility::Hidden,
+                    ));
 
-#[derive(Debug, Clone, PartialEq)]
-struct Voxel {
-    position: Vec3,
-    is_solid: bool,
+                    // If the NavMeshMarker is present, also add NavMeshAffector in a separate step
+                    if nav_mesh_marker_opt.is_some() {
+                        commands.entity(entity).insert(NavMeshAffector);
+                    }
+                } else {
+                    error!("Failed to create collider from mesh");
+                }
+            } else {
+                error!("Failed to get mesh from mesh handle");
+            }
+        } else {
+            error!("Failed to find mesh handle for collider");
+        }
+    }
+}
+
+fn find_mesh(
+    parent: Entity,
+    children_query: &Query<&Children>,
+    mesh_handles: &Query<&Handle<Mesh>>,
+) -> Option<Handle<Mesh>> {
+    if let Ok(children) = children_query.get(parent) {
+        for child in children.iter() {
+            if let Ok(mesh_handle) = mesh_handles.get(*child) {
+                return Some(mesh_handle.clone());
+            }
+        }
+    }
+    None
 }
 
 pub fn update_voxel_solidity(
@@ -279,35 +266,35 @@ pub fn update_voxel_solidity(
     }
 }
 
-// fn visualize_voxel_grid(
-//     mut commands: Commands,
-//     query: Query<(Entity, &Transform, &Buoyancy), Changed<Buoyancy>>,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-// ) {
-//     let voxel_visual_size = VOXEL_SIZE * 0.95; // Adjust size for visual gaps
-//
-//     for (entity, transform, buoyancy) in query.iter() {
-//         for voxel in &buoyancy.voxels {
-//             if voxel.is_solid {
-//                 // Transform for each voxel based on its position relative to the parent entity
-//                 let voxel_position = transform.translation + voxel.position;
-//
-//                 // Spawn visual representation for each solid voxel
-//                 commands
-//                     .spawn(PbrBundle {
-//                         mesh: meshes.add(Mesh::from(shape::Cube {
-//                             size: voxel_visual_size,
-//                         })),
-//                         material: materials.add(Color::rgb(0.5, 0.5, 1.0)), // Custom color
-//                         transform: Transform::from_translation(voxel_position),
-//                         ..default()
-//                     })
-//                     .insert(VoxelVisual {}); // Mark it visually if needed for tracking/deletion
-//             }
-//         }
-//     }
-// }
+fn visualize_voxel_grid(
+    mut commands: Commands,
+    query: Query<(Entity, &Transform, &Buoyancy), Changed<Buoyancy>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let voxel_visual_size = VOXEL_SIZE * 0.95; // Adjust size for visual gaps
+
+    for (entity, transform, buoyancy) in query.iter() {
+        for voxel in &buoyancy.voxels {
+            if voxel.is_solid {
+                // Transform for each voxel based on its position relative to the parent entity
+                let voxel_position = transform.translation + voxel.position;
+
+                // Spawn visual representation for each solid voxel
+                commands
+                    .spawn(PbrBundle {
+                        mesh: meshes.add(Mesh::from(shape::Cube {
+                            size: voxel_visual_size,
+                        })),
+                        material: materials.add(Color::rgb(0.5, 0.5, 1.0)), // Custom color
+                        transform: Transform::from_translation(voxel_position),
+                        ..default()
+                    })
+                    .insert(VoxelVisual {}); // Mark it visually if needed for tracking/deletion
+            }
+        }
+    }
+}
 
 fn visualize_ship_bounds(
     mut commands: Commands,
@@ -412,6 +399,7 @@ pub fn read_buoyancy_objects(
     parent_query: Query<&Parent>,
     meshes: Res<Assets<Mesh>>, // No need to mutate meshes here
     mesh_handles: Query<&Handle<Mesh>>,
+    ship_assets: Res<ShipAssets>,
 ) {
     for (entity, _, mesh_transform) in buoyancy_marker_query.iter() {
         println!(
@@ -442,6 +430,11 @@ pub fn read_buoyancy_objects(
 
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                     println!("Inserting collider and dynamics components.");
+                    commands.entity(entity).insert((SceneBundle {
+                        scene: ship_assets.carrack_hull.clone(),
+                        ..default()
+                    }, ));
+
                     commands.entity(entity).insert((
                         collider,
                         RigidBody::Dynamic,

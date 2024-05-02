@@ -25,18 +25,27 @@ struct ColliderBundle {
     transform: TransformBundle,
 }
 
+#[derive(Component)]
+pub struct Ship;
+
 #[derive(AssetCollection, Resource)]
-struct ShipAssets {
+pub struct ShipAssets {
     #[asset(path = "models/export/ship/hull.glb#Scene0")]
-    // #[asset(path = "models/export/ship/carrack.glb#Scene0")]
-    carrack_hull: Handle<Scene>,
+    pub carrack_buoyancy: Handle<Scene>,
+    #[asset(path = "models/export/ship/carrack.glb#Scene0")]
+    pub carrack_hull: Handle<Scene>,
 }
 
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
-    commands.spawn((SceneBundle {
-        scene: ship_assets.carrack_hull.clone(),
-        ..default()
-    },));
+    commands.spawn((
+        // Ship, // Add this marker component
+        // Name::new("Ship"),
+        SceneBundle {
+            // scene: ship_assets.carrack_hull.clone(),
+            scene: ship_assets.carrack_buoyancy.clone(),
+            ..default()
+        },
+    ));
 }
 
 // TODO: Eviction notice
