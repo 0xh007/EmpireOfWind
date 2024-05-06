@@ -1,5 +1,3 @@
-use crate::plugins::physics;
-use crate::plugins::physics::BuoyancyMarker;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_xpbd_3d::prelude::*;
@@ -13,7 +11,7 @@ impl Plugin for ShipPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
-        .add_systems(OnEnter(AppStates::Next), spawn_ship);
+            .add_systems(OnEnter(AppStates::Next), spawn_ship);
     }
 }
 
@@ -30,19 +28,16 @@ pub struct Ship;
 
 #[derive(AssetCollection, Resource)]
 pub struct ShipAssets {
-    #[asset(path = "models/export/ship/hull.glb#Scene0")]
-    pub carrack_buoyancy: Handle<Scene>,
-    #[asset(path = "models/export/ship/carrack.glb#Scene0")]
-    pub carrack_hull: Handle<Scene>,
+    #[asset(path = "models/export/ship/carrack_2.glb#Scene0")]
+    pub ship: Handle<Scene>,
 }
 
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
     commands.spawn((
-        // Ship, // Add this marker component
-        // Name::new("Ship"),
+        Ship, // Add this marker component
+        Name::new("Ship"),
         SceneBundle {
-            // scene: ship_assets.carrack_hull.clone(),
-            scene: ship_assets.carrack_buoyancy.clone(),
+            scene: ship_assets.ship.clone(),
             ..default()
         },
     ));

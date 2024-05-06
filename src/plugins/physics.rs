@@ -15,7 +15,8 @@ use crate::plugins::ship::{Ship, ShipAssets};
 use crate::prelude::*;
 use crate::prelude::*;
 
-const VOXEL_SIZE: f32 = 0.8;
+// const VOXEL_SIZE: f32 = 0.8;
+const VOXEL_SIZE: f32 = 2.0;
 
 pub struct PhysicsPlugin;
 
@@ -31,7 +32,7 @@ impl Plugin for PhysicsPlugin {
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
-            .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
+            // .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
                 read_buoyancy_objects.run_if(in_state(AppStates::Next)),
@@ -44,6 +45,11 @@ impl Plugin for PhysicsPlugin {
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
             );
+        // .add_systems(
+        //     Update,
+        //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
+        // )
+
         // .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
 }
@@ -175,7 +181,7 @@ pub fn read_area_markers(
                     println!("Inserting Sensor");
                     commands.entity(entity).insert((
                         collider,
-                        RigidBody::Dynamic,
+                        RigidBody::Static,
                         Sensor,
                         Visibility::Hidden,
                     ));
@@ -192,20 +198,33 @@ pub fn read_area_markers(
 }
 
 pub fn read_colliders(
-    collider_marker_query: Query<(Entity, Option<&NavMeshMarker>), Added<ColliderMarker>>,
+    collider_marker_query: Query<(Entity, Option<&NavMeshMarker>, &Transform), Added<ColliderMarker>>,
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
+    parent_query: Query<&Transform, With<Ship>>, // Assuming the Ship component is correctly set up
 ) {
-    for (entity, nav_mesh_marker_opt) in collider_marker_query.iter() {
+    for (entity, nav_mesh_marker_opt, transform) in collider_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
             if let Some(mesh) = meshes.get(mesh_handle) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    // Update transform to follow the ship if needed
+                    if let Ok(ship_transform) = parent_query.get_single() {
+                        commands.entity(entity).insert((
+                            Transform {
+                                translation: ship_transform.translation + transform.translation, // Adjust as necessary
+                                rotation: ship_transform.rotation * transform.rotation,
+                                scale: ship_transform.scale * transform.scale,
+                            },
+                            GlobalTransform::default(),
+                        ));
+                    }
+
                     // Insert the common components, including making the collider invisible
                     commands.entity(entity).insert((
                         collider,
-                        RigidBody::Kinematic,
+                        RigidBody::Kinematic, // Change to Kinematic
                         Visibility::Hidden,
                     ));
 
@@ -224,6 +243,7 @@ pub fn read_colliders(
         }
     }
 }
+
 
 fn find_mesh(
     parent: Entity,
@@ -395,60 +415,55 @@ fn calculate_grid_size(bounds: &(Vec3, Vec3)) -> Vec3I {
 pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
     mut commands: Commands,
-    children: Query<&Children>,
-    parent_query: Query<&Parent>,
-    meshes: Res<Assets<Mesh>>, // No need to mutate meshes here
+    children_query: Query<&Children>,
+    parent_query: Query<&Parent>, // Query to navigate up the hierarchy
+    ship_query: Query<Entity, With<Ship>>, // Query for the top-level Ship entity
+    meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
-    ship_assets: Res<ShipAssets>,
 ) {
     for (entity, _, mesh_transform) in buoyancy_marker_query.iter() {
-        println!(
-            "Processing Entity: {:?}, Transform: {:?}",
-            entity, mesh_transform
-        );
+        println!("Processing Entity: {:?}, Transform: {:?}", entity, mesh_transform);
 
-        // Check if the entity has children (useful for checking if collider is a separate child)
-        if let Ok(children) = children.get(entity) {
-            println!("Children of Entity {:?}: {:?}", entity, children);
-            for child in children.iter() {
-                if let Ok(parent) = parent_query.get(*child) {
-                    println!("Child {:?} is a child of {:?}", child, parent);
-                }
-            }
-        }
-
-        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+        if let Some(mesh_handle) = find_mesh(entity, &children_query, &mesh_handles) {
             println!("Mesh handle found: {:?}", mesh_handle);
             if let Some(mesh) = meshes.get(mesh_handle) {
                 println!("Generating voxel grid for mesh.");
                 let voxels = generate_voxel_grid(mesh, mesh_transform);
 
-                // Attach the Buoyancy component with the generated voxels
-                commands
-                    .entity(entity)
-                    .insert(Buoyancy::from_voxels(voxels, true));
+                // Find the top-level Ship entity
+                let mut current_parent = entity;
+                let mut ship_entity = None;
+                while let Ok(parent) = parent_query.get(current_parent) {
+                    if ship_query.get(parent.get()).is_ok() {
+                        ship_entity = Some(parent.get());
+                        break;
+                    }
+                    current_parent = parent.get();
+                }
 
-                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
-                    println!("Inserting collider and dynamics components.");
-                    commands.entity(entity).insert((SceneBundle {
-                        scene: ship_assets.carrack_hull.clone(),
-                        ..default()
-                    }, ));
-
-                    commands.entity(entity).insert((
-                        collider,
-                        RigidBody::Dynamic,
-                        Mass(2000.0),
-                        LinearDamping(0.8),
-                        AngularDamping(0.8),
-                        ExternalForce::new(Vec3::ZERO).with_persistence(false),
-                        Visibility::Hidden,
-                    ));
+                if let Some(ship) = ship_entity {
+                    // Attach the Buoyancy component and collider to the Ship entity
+                    println!("Inserting collider and dynamics components to the Ship entity.");
+                    if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                        commands.entity(ship).insert((
+                            Buoyancy::from_voxels(voxels, true),
+                            collider,
+                            RigidBody::Dynamic,
+                            Mass(100.0),
+                            LinearDamping(0.4),
+                            AngularDamping(0.4),
+                            ExternalForce::new(Vec3::ZERO).with_persistence(false),
+                            Visibility::Visible,
+                            NavMeshAffector,
+                        ));
+                        // Optionally despawn the original buoyancy marker entity
+                        commands.entity(entity).despawn_recursive();
+                    }
+                } else {
+                    println!("No Ship entity found for the buoyancy component.");
                 }
             } else {
-                eprintln!(
-                    "Failed to retrieve mesh from handle for entity marked with BuoyancyMarker"
-                );
+                eprintln!("Failed to retrieve mesh from handle for entity marked with BuoyancyMarker");
             }
         } else {
             eprintln!("Mesh not found for entity marked with BuoyancyMarker");
@@ -456,31 +471,56 @@ pub fn read_buoyancy_objects(
     }
 }
 
+
 fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
     let water_height = water.wave_point(pos).y;
     water_height
 }
 
 pub fn calculate_and_apply_buoyancy(
+    mut gizmos: Gizmos,
     water: WaterParam,
-    mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce, &ColliderDensity)>,
+    mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce, &ColliderDensity, &CenterOfMass)>,
 ) {
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
 
-    for (buoyancy, transform, mut external_force, collider_density) in query.iter_mut() {
+    for (buoyancy, transform, mut external_force, collider_density, center_of_mass) in query.iter_mut() {
         for voxel in &buoyancy.voxels {
-            let world_position = transform.translation + voxel.position;
-            let water_height = get_water_height_at_position(world_position, &water);
-            let submerged_volume =
-                calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
-            let buoyancy_force =
-                Vec3::new(0.0, gravity * submerged_volume * collider_density.0, 0.0);
+            if voxel.is_solid {
+                // Apply the ship's rotation to the voxel's position relative to the ship's center of mass
+                let rotated_position = transform.rotation.mul_vec3(voxel.position);
+                let world_position = transform.translation + rotated_position;
 
-            // Applying the force at the voxel's position relative to the ship's center of mass
-            external_force.apply_force_at_point(buoyancy_force, voxel.position, voxel.position);
+                let water_height = get_water_height_at_position(world_position, &water);
+                let submerged_volume = calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
+                let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume * collider_density.0, 0.0);
+
+                // Lever arm calculation must also consider rotation
+                let lever_arm = rotated_position - center_of_mass.0;
+
+                // Apply the force at the voxel's rotated position, creating torque around the center of mass
+                external_force.apply_force_at_point(buoyancy_force, world_position, center_of_mass.0);
+
+                gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
+
+                // Visualize the buoyancy force as an arrow
+                gizmos.arrow(
+                    world_position, // Start point of the arrow
+                    world_position + buoyancy_force * 0.1, // End point scaled for visibility
+                    Color::BLUE, // Color of the arrow
+                );
+
+                // Optionally visualize the lever arm
+                gizmos.line(
+                    center_of_mass.0,
+                    world_position,
+                    Color::YELLOW,
+                );
+            }
         }
     }
 }
+
 
 fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
     let bottom_of_voxel = world_position.y - voxel_size / 2.0;
@@ -495,3 +535,4 @@ fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_siz
         submerged_height * voxel_size * voxel_size // Partially submerged volume
     }
 }
+

@@ -1,6 +1,7 @@
-use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_water::*;
+
+use crate::prelude::*;
 
 const WATER_HEIGHT: f32 = 2.0;
 const WAVE_AMPLITUDE: f32 = 2.0;
@@ -14,8 +15,8 @@ impl Plugin for OceanPlugin {
             amplitude: WAVE_AMPLITUDE,
             ..default()
         })
-        .add_plugins(WaterPlugin)
-        .add_systems(Update, update_water_interactables);
+            .add_plugins(WaterPlugin)
+            .add_systems(Update, update_water_interactables);
     }
 }
 

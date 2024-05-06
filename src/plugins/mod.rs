@@ -1,8 +1,8 @@
 use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
 use bevy_gltf_components::ComponentsFromGltfPlugin;
-use big_brain::BigBrainPlugin;
 
 pub use assets::AppStates;
+
 mod assets;
 mod camera;
 mod eat;
@@ -34,7 +34,7 @@ impl PluginGroup for CorePlugins {
             // .add(fatigue::FatiguePlugin)
             // .add(hunger::HungerPlugin)
             // .add(input::InputPlugin)
-            // .add(navmesh::NavMeshPlugin)
+            .add(navmesh::NavMeshPlugin)
             // .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
             // .add(pathfinding::PathfindingPlugin)
