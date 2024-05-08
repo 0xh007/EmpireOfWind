@@ -5,6 +5,7 @@ use bevy::render::mesh::VertexAttributeValues;
 use bevy_tnua::prelude::*;
 use bevy_tnua_xpbd3d::*;
 use bevy_water::WaterParam;
+use bevy_xpbd_3d::parry::transformation::vhacd::VHACD;
 use bevy_xpbd_3d::prelude::*;
 use bevy_xpbd_3d::SubstepSchedule;
 use oxidized_navigation::NavMeshAffector;
@@ -29,6 +30,7 @@ impl Plugin for PhysicsPlugin {
             .register_type::<AreaName>()
             .register_type::<BuoyancyMarker>()
             .register_type::<ColliderMarker>()
+            .register_type::<COMMarker>()
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
@@ -41,6 +43,10 @@ impl Plugin for PhysicsPlugin {
                 Update,
                 update_voxel_solidity.run_if(in_state(AppStates::Next)),
             )
+            // .add_systems(
+            //     Update,
+            //     update_mass.run_if(in_state(AppStates::Next)),
+            // )
             .add_systems(
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
@@ -109,6 +115,10 @@ pub struct ColliderMarker;
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
+pub struct COMMarker;
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct Hideable(String);
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
@@ -165,6 +175,7 @@ fn hide_show_objects(
         }
     }
 }
+
 
 // TODO: This can probably be combined with read_colliders()
 pub fn read_area_markers(
@@ -259,6 +270,29 @@ fn find_mesh(
     }
     None
 }
+
+
+pub fn update_mass(
+    mut query: Query<(&mut CenterOfMass, &mut Mass, &RigidBody), With<Ship>>,
+) {
+    for (mut com, mut mass, _rb) in query.iter_mut() {
+        let target_mass = Mass(1400.0); // Define the target mass as a Mass type
+        let target_com = CenterOfMass(Vec3::new(-4.0, 0.0, 0.0)); // Define the target center of mass
+
+        // Compare and adjust Mass
+        if *mass != target_mass {
+            println!("Correcting mass from {:?} to {:?}", *mass, target_mass);
+            *mass = target_mass;
+        }
+
+        // Compare and adjust Center of Mass
+        if *com != target_com {
+            println!("Correcting Center of Mass from {:?} to {:?}", *com, target_com);
+            *com = target_com;
+        }
+    }
+}
+
 
 pub fn update_voxel_solidity(
     mut commands: Commands,
@@ -448,14 +482,19 @@ pub fn read_buoyancy_objects(
                         commands.entity(ship).insert((
                             Buoyancy::from_voxels(voxels, true),
                             collider,
+                            ColliderDensity(1.0),
                             RigidBody::Dynamic,
-                            Mass(100.0),
-                            LinearDamping(0.4),
-                            AngularDamping(0.4),
+                            LinearDamping(0.8),
+                            AngularDamping(0.8),
                             ExternalForce::new(Vec3::ZERO).with_persistence(false),
                             Visibility::Visible,
                             NavMeshAffector,
-                        ));
+                        )).with_children(|children| {
+                            children.spawn((
+                                Collider::sphere(5.0), Transform::from_xyz(-4.0, 0.0, 0.0),
+                                ColliderDensity(1.0),
+                            ));
+                        });
                         // Optionally despawn the original buoyancy marker entity
                         commands.entity(entity).despawn_recursive();
                     }
@@ -477,6 +516,14 @@ fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
     water_height
 }
 
+/// Calculates and applies the buoyancy force to gizmos submerged in water based on their density.
+///
+/// # Arguments
+///
+/// * `gizmos` - The collection of gizmos.
+/// * `water` - The water parameters.
+/// * `query` - The query to retrieve gizmos with buoyancy components.
+///
 pub fn calculate_and_apply_buoyancy(
     mut gizmos: Gizmos,
     water: WaterParam,
@@ -496,21 +543,21 @@ pub fn calculate_and_apply_buoyancy(
                 let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume * collider_density.0, 0.0);
 
                 // Lever arm calculation must also consider rotation
-                let lever_arm = rotated_position - center_of_mass.0;
+                // let lever_arm = rotated_position - center_of_mass.0;
 
                 // Apply the force at the voxel's rotated position, creating torque around the center of mass
                 external_force.apply_force_at_point(buoyancy_force, world_position, center_of_mass.0);
 
                 gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
-
-                // Visualize the buoyancy force as an arrow
-                gizmos.arrow(
-                    world_position, // Start point of the arrow
-                    world_position + buoyancy_force * 0.1, // End point scaled for visibility
-                    Color::BLUE, // Color of the arrow
-                );
-
-                // Optionally visualize the lever arm
+                //
+                // // Visualize the buoyancy force as an arrow
+                // gizmos.arrow(
+                //     world_position, // Start point of the arrow
+                //     world_position + buoyancy_force * 0.1, // End point scaled for visibility
+                //     Color::BLUE, // Color of the arrow
+                // );
+                //
+                // // Optionally visualize the lever arm
                 gizmos.line(
                     center_of_mass.0,
                     world_position,
