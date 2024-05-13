@@ -5,6 +5,7 @@ use bevy::render::mesh::VertexAttributeValues;
 use bevy_tnua::prelude::*;
 use bevy_tnua_xpbd3d::*;
 use bevy_water::WaterParam;
+use bevy_xpbd_3d::math::Matrix3;
 use bevy_xpbd_3d::parry::transformation::vhacd::VHACD;
 use bevy_xpbd_3d::prelude::*;
 use bevy_xpbd_3d::SubstepSchedule;
@@ -43,10 +44,6 @@ impl Plugin for PhysicsPlugin {
                 Update,
                 update_voxel_solidity.run_if(in_state(AppStates::Next)),
             )
-            // .add_systems(
-            //     Update,
-            //     update_mass.run_if(in_state(AppStates::Next)),
-            // )
             .add_systems(
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
@@ -54,7 +51,7 @@ impl Plugin for PhysicsPlugin {
         // .add_systems(
         //     Update,
         //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
-        // )
+        // );
 
         // .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
@@ -482,20 +479,21 @@ pub fn read_buoyancy_objects(
                         commands.entity(ship).insert((
                             Buoyancy::from_voxels(voxels, true),
                             collider,
-                            ColliderDensity(1.0),
+                            ColliderDensity(0.0),
                             RigidBody::Dynamic,
                             LinearDamping(0.8),
                             AngularDamping(0.8),
                             ExternalForce::new(Vec3::ZERO).with_persistence(false),
                             Visibility::Visible,
                             NavMeshAffector,
-                        )).with_children(|children| {
-                            children.spawn((
-                                Collider::sphere(5.0), Transform::from_xyz(-4.0, 0.0, 0.0),
-                                ColliderDensity(1.0),
-                            ));
-                        });
-                        // Optionally despawn the original buoyancy marker entity
+                            CenterOfMass(Vec3::new(-2.0, 0.0, 0.2)),
+                            Mass(2000.0),
+                            Inertia(Matrix3::from_cols(
+                                Vec3::new(126395.3, -28743.2, 16967.54),
+                                Vec3::new(-28743.2, 259213.7, -6361.74),
+                                Vec3::new(16967.54, -6361.74, 246570.2),
+                            ))
+                        ));
                         commands.entity(entity).despawn_recursive();
                     }
                 } else {
@@ -516,20 +514,25 @@ fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
     water_height
 }
 
-/// Calculates and applies the buoyancy force to gizmos submerged in water based on their density.
+/// Calculates and applies the buoyancy force to gizmos submerged in water based on their density,
+/// taking into account the elapsed time since the last frame.
 ///
 /// # Arguments
 ///
+/// * `time` - The game's time resource, providing delta time.
 /// * `gizmos` - The collection of gizmos.
 /// * `water` - The water parameters.
 /// * `query` - The query to retrieve gizmos with buoyancy components.
 ///
 pub fn calculate_and_apply_buoyancy(
+    time: Res<Time>,
     mut gizmos: Gizmos,
     water: WaterParam,
     mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce, &ColliderDensity, &CenterOfMass)>,
 ) {
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
+    // TODO: Fix delta time calculations. Maybe they aren't necessary here? Adding them in causes ship to sink
+    // let delta_time = time.delta_seconds(); // Delta time in seconds
 
     for (buoyancy, transform, mut external_force, collider_density, center_of_mass) in query.iter_mut() {
         for voxel in &buoyancy.voxels {
@@ -540,34 +543,30 @@ pub fn calculate_and_apply_buoyancy(
 
                 let water_height = get_water_height_at_position(world_position, &water);
                 let submerged_volume = calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
-                let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume * collider_density.0, 0.0);
-
-                // Lever arm calculation must also consider rotation
-                // let lever_arm = rotated_position - center_of_mass.0;
+                let hull_density = 1.0;
+                let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume * hull_density, 0.0);
 
                 // Apply the force at the voxel's rotated position, creating torque around the center of mass
                 external_force.apply_force_at_point(buoyancy_force, world_position, center_of_mass.0);
 
                 gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
-                //
-                // // Visualize the buoyancy force as an arrow
+
+                // Visualize the buoyancy force as an arrow
                 // gizmos.arrow(
                 //     world_position, // Start point of the arrow
                 //     world_position + buoyancy_force * 0.1, // End point scaled for visibility
                 //     Color::BLUE, // Color of the arrow
                 // );
-                //
-                // // Optionally visualize the lever arm
-                gizmos.line(
-                    center_of_mass.0,
-                    world_position,
-                    Color::YELLOW,
-                );
+                // Optionally visualize the lever arm
+                // gizmos.line(
+                //     center_of_mass.0,
+                //     world_position,
+                //     Color::YELLOW,
+                // );
             }
         }
     }
 }
-
 
 fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
     let bottom_of_voxel = world_position.y - voxel_size / 2.0;
