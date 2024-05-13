@@ -1,23 +1,16 @@
-use bevy::ecs::system::ParamSet;
-use bevy::log;
 use bevy::prelude::*;
 use bevy::render::mesh::VertexAttributeValues;
 use bevy_tnua::prelude::*;
 use bevy_tnua_xpbd3d::*;
 use bevy_water::WaterParam;
 use bevy_xpbd_3d::math::Matrix3;
-use bevy_xpbd_3d::parry::transformation::vhacd::VHACD;
 use bevy_xpbd_3d::prelude::*;
-use bevy_xpbd_3d::SubstepSchedule;
 use oxidized_navigation::NavMeshAffector;
 use serde::{Deserialize, Serialize};
 
-use crate::plugins::ship;
-use crate::plugins::ship::{Ship, ShipAssets};
-use crate::prelude::*;
+use crate::plugins::ship::Ship;
 use crate::prelude::*;
 
-// const VOXEL_SIZE: f32 = 0.8;
 const VOXEL_SIZE: f32 = 2.0;
 
 pub struct PhysicsPlugin;
@@ -47,13 +40,13 @@ impl Plugin for PhysicsPlugin {
             .add_systems(
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
-            );
-        // .add_systems(
-        //     Update,
-        //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
-        // );
+            )
+            // .add_systems(
+            //     Update,
+            //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
+            // );
 
-        // .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
+            .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
 }
 
@@ -71,10 +64,10 @@ impl Vec3I {
 }
 
 #[derive(Component)]
-struct VoxelVisual;
+pub struct VoxelVisual;
 
 #[derive(Component)]
-struct Buoyancy {
+pub struct Buoyancy {
     voxels: Vec<Voxel>, // List of voxel data, possibly pulled from generate_voxel_grid
     needs_update: bool,
 }
@@ -269,36 +262,13 @@ fn find_mesh(
 }
 
 
-pub fn update_mass(
-    mut query: Query<(&mut CenterOfMass, &mut Mass, &RigidBody), With<Ship>>,
-) {
-    for (mut com, mut mass, _rb) in query.iter_mut() {
-        let target_mass = Mass(1400.0); // Define the target mass as a Mass type
-        let target_com = CenterOfMass(Vec3::new(-4.0, 0.0, 0.0)); // Define the target center of mass
-
-        // Compare and adjust Mass
-        if *mass != target_mass {
-            println!("Correcting mass from {:?} to {:?}", *mass, target_mass);
-            *mass = target_mass;
-        }
-
-        // Compare and adjust Center of Mass
-        if *com != target_com {
-            println!("Correcting Center of Mass from {:?} to {:?}", *com, target_com);
-            *com = target_com;
-        }
-    }
-}
-
-
 pub fn update_voxel_solidity(
-    mut commands: Commands,
     mut query: Query<(Entity, &Transform, &mut Buoyancy)>,
     mut spatial_query: SpatialQuery,
 ) {
     spatial_query.update_pipeline();
 
-    for (entity, transform, mut buoyancy) in query.iter_mut() {
+    for (_entity, transform, mut buoyancy) in query.iter_mut() {
         if buoyancy.needs_update {
             for voxel in buoyancy.voxels.iter_mut() {
                 let world_position = transform.translation + voxel.position;
@@ -317,74 +287,76 @@ pub fn update_voxel_solidity(
     }
 }
 
-fn visualize_voxel_grid(
-    mut commands: Commands,
-    query: Query<(Entity, &Transform, &Buoyancy), Changed<Buoyancy>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    let voxel_visual_size = VOXEL_SIZE * 0.95; // Adjust size for visual gaps
+// TODO: Make this into a toggle debug system
+// fn visualize_voxel_grid(
+//     mut commands: Commands,
+//     query: Query<(Entity, &Transform, &Buoyancy), Changed<Buoyancy>>,
+//     mut meshes: ResMut<Assets<Mesh>>,
+//     mut materials: ResMut<Assets<StandardMaterial>>,
+// ) {
+//     let voxel_visual_size = VOXEL_SIZE * 0.95; // Adjust size for visual gaps
+//
+//     for (_entity, transform, buoyancy) in query.iter() {
+//         for voxel in &buoyancy.voxels {
+//             if voxel.is_solid {
+//                 // Transform for each voxel based on its position relative to the parent entity
+//                 let voxel_position = transform.translation + voxel.position;
+//
+//                 // Spawn visual representation for each solid voxel
+//                 commands
+//                     .spawn(PbrBundle {
+//                         mesh: meshes.add(Cuboid::new(voxel_visual_size, voxel_visual_size, voxel_visual_size)),
+//                         material: materials.add(Color::rgb(0.5, 0.5, 1.0)), // Custom color
+//                         transform: Transform::from_translation(voxel_position),
+//                         ..default()
+//                     })
+//                     .insert(VoxelVisual {}); // Mark it visually if needed for tracking/deletion
+//             }
+//         }
+//     }
+// }
 
-    for (entity, transform, buoyancy) in query.iter() {
-        for voxel in &buoyancy.voxels {
-            if voxel.is_solid {
-                // Transform for each voxel based on its position relative to the parent entity
-                let voxel_position = transform.translation + voxel.position;
+// TODO: Make this into a toggle debug system
+// fn visualize_ship_bounds(
+//     mut commands: Commands,
+//     mut meshes: ResMut<Assets<Mesh>>,
+//     mut materials: ResMut<Assets<StandardMaterial>>,
+//     query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
+//     children: Query<&Children>,
+//     mesh_handles: Query<&Handle<Mesh>>,
+// ) {
+//     for (entity, _, _mesh_transform) in query.iter() {
+//         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+//             if let Some(mesh) = meshes.get(mesh_handle) {
+//                 let bounds = calculate_mesh_bounds(mesh);
+//                 visualize_bounds(&mut commands, &mut meshes, &mut materials, bounds);
+//             }
+//         }
+//     }
+// }
 
-                // Spawn visual representation for each solid voxel
-                commands
-                    .spawn(PbrBundle {
-                        mesh: meshes.add(Mesh::from(shape::Cube {
-                            size: voxel_visual_size,
-                        })),
-                        material: materials.add(Color::rgb(0.5, 0.5, 1.0)), // Custom color
-                        transform: Transform::from_translation(voxel_position),
-                        ..default()
-                    })
-                    .insert(VoxelVisual {}); // Mark it visually if needed for tracking/deletion
-            }
-        }
-    }
-}
 
-fn visualize_ship_bounds(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
-    children: Query<&Children>,
-    mesh_handles: Query<&Handle<Mesh>>,
-) {
-    for (entity, _, mesh_transform) in query.iter() {
-        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            if let Some(mesh) = meshes.get(mesh_handle) {
-                let bounds = calculate_mesh_bounds(mesh);
-                visualize_bounds(&mut commands, &mut meshes, &mut materials, bounds);
-            }
-        }
-    }
-}
-
-fn visualize_bounds(
-    commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    bounds: (Vec3, Vec3),
-) {
-    let bbox_size = bounds.1 - bounds.0;
-    let bbox_position = (bounds.0 + bounds.1) * 0.5;
-
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(
-            bbox_size.x,
-            bbox_size.y,
-            bbox_size.z,
-        ))),
-        material: materials.add(Color::rgb(1.0, 0.0, 0.0)),
-        transform: Transform::from_translation(bbox_position),
-        ..default()
-    });
-}
+// TODO: Make this into a toggle debug system
+// fn visualize_bounds(
+//     commands: &mut Commands,
+//     meshes: &mut ResMut<Assets<Mesh>>,
+//     materials: &mut ResMut<Assets<StandardMaterial>>,
+//     bounds: (Vec3, Vec3),
+// ) {
+//     let bbox_size = bounds.1 - bounds.0;
+//     let bbox_position = (bounds.0 + bounds.1) * 0.5;
+//
+//     commands.spawn(PbrBundle {
+//         mesh: meshes.add(Cuboid::new(
+//             bbox_size.x,
+//             bbox_size.y,
+//             bbox_size.z,
+//         )),
+//         material: materials.add(Color::rgb(1.0, 0.0, 0.0)),
+//         transform: Transform::from_translation(bbox_position),
+//         ..default()
+//     });
+// }
 
 fn generate_voxel_grid(mesh: &Mesh, mesh_transform: &Transform) -> Vec<Voxel> {
     let bounds = calculate_mesh_bounds(mesh);
@@ -525,16 +497,12 @@ fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
 /// * `query` - The query to retrieve gizmos with buoyancy components.
 ///
 pub fn calculate_and_apply_buoyancy(
-    time: Res<Time>,
-    mut gizmos: Gizmos,
     water: WaterParam,
     mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce, &ColliderDensity, &CenterOfMass)>,
 ) {
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
-    // TODO: Fix delta time calculations. Maybe they aren't necessary here? Adding them in causes ship to sink
-    // let delta_time = time.delta_seconds(); // Delta time in seconds
 
-    for (buoyancy, transform, mut external_force, collider_density, center_of_mass) in query.iter_mut() {
+    for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in query.iter_mut() {
         for voxel in &buoyancy.voxels {
             if voxel.is_solid {
                 // Apply the ship's rotation to the voxel's position relative to the ship's center of mass
