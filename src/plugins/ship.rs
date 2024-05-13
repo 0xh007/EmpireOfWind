@@ -1,3 +1,4 @@
+use bevy::math::primitives::Cuboid;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_xpbd_3d::prelude::*;
@@ -11,33 +12,29 @@ impl Plugin for ShipPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
-        .add_systems(OnEnter(AppStates::Next), spawn_ship)
-        .add_systems(OnEnter(AppStates::Next), spawn_furniture)
-        .add_systems(OnEnter(AppStates::Next), spawn_food);
+            .add_systems(OnEnter(AppStates::Next), spawn_ship)
+            .add_systems(OnEnter(AppStates::Next), spawn_food)
+            .add_systems(OnEnter(AppStates::Next), spawn_furniture);
     }
 }
 
-#[derive(Bundle, Debug)]
-struct ColliderBundle {
-    name: Name,
-    collider_shape: Collider,
-    rigid_body_type: RigidBody,
-    transform: TransformBundle,
-}
+#[derive(Component)]
+pub struct Ship;
 
 #[derive(AssetCollection, Resource)]
-struct ShipAssets {
-    #[asset(path = "models/export/ship/carrack.glb#Scene0")]
-    carrack_hull: Handle<Scene>,
+pub struct ShipAssets {
+    #[asset(path = "models/export/ship/carrack_2.glb#Scene0")]
+    pub ship: Handle<Scene>,
 }
 
 fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
     commands.spawn((
+        Ship, // Add this marker component
+        Name::new("Ship"),
         SceneBundle {
-            scene: ship_assets.carrack_hull.clone(),
+            scene: ship_assets.ship.clone(),
             ..default()
         },
-        WaterInteractable::new(-0.4, -8.0, 9.0, -2.0, 2.0),
     ));
 }
 
@@ -47,20 +44,24 @@ fn spawn_furniture(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    println!("delete this println");
     // Create a bed
     commands.spawn((
         Name::new("Bed"),
         PbrBundle {
-            mesh: meshes.add(Cuboid::new(5.0, 0.15, 5.0)),
-            material: materials.add(Color::MAROON),
+            mesh: meshes.add(Cuboid::new(4.0, 1.0, 2.0)),
+            material: materials.add(Color::BLUE),
             transform: Transform {
-                translation: Vec3::new(-14.155, 7.8825, -0.147),
+                translation: Vec3::new(-14.155, 8.4, -0.147),
                 rotation: Quat::from_rotation_z(-9.8367f32.to_radians()),
                 scale: Vec3::ONE,
             },
             ..default()
         },
         SleepArea,
+        RigidBody::Dynamic,
+        Friction::new(1.0),
+        Collider::cuboid(5.0, 1.0, 5.0),
     ));
 }
 
@@ -80,6 +81,7 @@ fn spawn_food(
             ..default()
         },
         RigidBody::Dynamic,
+        Friction::new(1.0),
         Collider::sphere(0.2),
     ));
 }

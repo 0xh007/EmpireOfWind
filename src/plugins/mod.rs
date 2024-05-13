@@ -1,8 +1,8 @@
 use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
 use bevy_gltf_components::ComponentsFromGltfPlugin;
-use big_brain::BigBrainPlugin;
 
 pub use assets::AppStates;
+
 mod assets;
 mod camera;
 mod eat;
@@ -26,7 +26,7 @@ impl PluginGroup for CorePlugins {
     fn build(self) -> bevy::app::PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
             .add(assets::AssetsPlugin)
-            .add(BigBrainPlugin::new(PreUpdate))
+            .add(big_brain::BigBrainPlugin::new(PreUpdate))
             .add(camera::CameraPlugin)
             .add(ComponentsFromGltfPlugin::default())
             .add(eat::EatPlugin)

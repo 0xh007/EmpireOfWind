@@ -5,6 +5,7 @@ use bevy::{
     window::{PresentMode, WindowTheme},
 };
 // use bevy_editor_pls::EditorPlugin;
+use bevy_editor_pls::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 
 use empire_of_wind::prelude::*;
@@ -26,22 +27,24 @@ fn main() {
     });
 
     #[cfg(debug_assertions)]
-    let default_plugins = default_plugins.set(LogPlugin {
+        let default_plugins = default_plugins.set(LogPlugin {
         filter: "info,wgpu_core=warn,wgpu_hal=warn,empire_of_wind=debug".into(),
         level: bevy::log::Level::DEBUG,
         ..default()
     });
 
-    #[cfg(not(debug_assertions))]
-    let default_plugins = default_plugins.set(LogPlugin {
-        filter: "warn".into(),
-        level: bevy::log::Level::WARN,
-    });
+    // TODO: Fix this
+    // #[cfg(not(debug_assertions))]
+    // let default_plugins = default_plugins.set(LogPlugin {
+    //     filter: "warn".into(),
+    //     level: bevy::log::Level::WARN,
+    // });
 
     app.add_plugins(default_plugins)
+        // .add_systems(Startup, simple_editor_setup)
         // .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins(PhysicsPlugins::default())
-        // .add_plugins(EditorPlugin::default())
+        .add_plugins(EditorPlugin::default())
         .add_plugins(CorePlugins)
         .add_plugins(LogDiagnosticsPlugin::default());
 
