@@ -35,7 +35,7 @@ impl Plugin for PhysicsPlugin {
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
-            // .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
+            .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
                 read_buoyancy_objects.run_if(in_state(AppStates::Next)),
@@ -549,7 +549,7 @@ pub fn calculate_and_apply_buoyancy(
                 // Apply the force at the voxel's rotated position, creating torque around the center of mass
                 external_force.apply_force_at_point(buoyancy_force, world_position, center_of_mass.0);
 
-                gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
+                // gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
 
                 // Visualize the buoyancy force as an arrow
                 // gizmos.arrow(

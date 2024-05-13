@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_tnua::prelude::*;
 
+use crate::events::NavMeshDebugToggle;
+
 pub struct InputPlugin;
 
 impl Plugin for InputPlugin {
@@ -11,6 +13,7 @@ impl Plugin for InputPlugin {
 
 fn apply_controls(
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
     mut query: Query<&mut TnuaController>,
 ) {
     let mut controller = match query.get_single_mut() {
@@ -61,16 +64,15 @@ fn apply_controls(
         ..Default::default()
     });
 
-    // Handle jumping logic here if necessary
-    if keyboard_input.pressed(KeyCode::Space) {
-        // Add jumping logic for TnuaController, if applicable
-    }
-
     if keyboard_input.pressed(KeyCode::Space) {
         println!("Jumping");
         controller.action(TnuaBuiltinJump {
             height: 4.0,
             ..Default::default()
         });
+    }
+
+    if keyboard_input.pressed(KeyCode::KeyM) {
+        nav_mesh_event_writer.send(NavMeshDebugToggle);
     }
 }

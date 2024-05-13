@@ -1,3 +1,4 @@
+use bevy::math::primitives::Cuboid;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_xpbd_3d::prelude::*;
@@ -11,16 +12,10 @@ impl Plugin for ShipPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
-            .add_systems(OnEnter(AppStates::Next), spawn_ship);
+            .add_systems(OnEnter(AppStates::Next), spawn_ship)
+            .add_systems(OnEnter(AppStates::Next), spawn_food)
+            .add_systems(OnEnter(AppStates::Next), spawn_furniture);
     }
-}
-
-#[derive(Bundle, Debug)]
-struct ColliderBundle {
-    name: Name,
-    collider_shape: Collider,
-    rigid_body_type: RigidBody,
-    transform: TransformBundle,
 }
 
 #[derive(Component)]
@@ -54,16 +49,19 @@ fn spawn_furniture(
     commands.spawn((
         Name::new("Bed"),
         PbrBundle {
-            mesh: meshes.add(Cuboid::new(5.0, 0.15, 5.0)),
-            material: materials.add(Color::MAROON),
+            mesh: meshes.add(Cuboid::new(4.0, 1.0, 2.0)),
+            material: materials.add(Color::BLUE),
             transform: Transform {
-                translation: Vec3::new(-14.155, 7.8825, -0.147),
+                translation: Vec3::new(-14.155, 8.4, -0.147),
                 rotation: Quat::from_rotation_z(-9.8367f32.to_radians()),
                 scale: Vec3::ONE,
             },
             ..default()
         },
         SleepArea,
+        RigidBody::Dynamic,
+        Friction::new(1.0),
+        Collider::cuboid(5.0, 1.0, 5.0),
     ));
 }
 
@@ -83,6 +81,7 @@ fn spawn_food(
             ..default()
         },
         RigidBody::Dynamic,
+        Friction::new(1.0),
         Collider::sphere(0.2),
     ));
 }

@@ -1,8 +1,9 @@
-use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
 use bevy_xpbd_3d::prelude::*;
 use big_brain::prelude::*;
+
+use crate::prelude::*;
 
 pub struct NpcPlugin;
 
@@ -21,7 +22,7 @@ fn spawn_npc(
     let start_position = Vec3::new(0.0, 8.0, -4.0);
     let spacing = 1.0; // Spacing between each NPC.
 
-    let num_npcs = 3;
+    let num_npcs = 8;
     for i in 0..num_npcs {
         let move_and_eat = Steps::build()
             .label("MoveAndEat")
