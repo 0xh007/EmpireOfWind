@@ -16,4 +16,3 @@ mod npc;
 mod player;
 mod sleep;
 mod sleep_area;
-

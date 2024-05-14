@@ -13,7 +13,6 @@ impl Plugin for OceanPlugin {
             amplitude: WAVE_AMPLITUDE,
             ..default()
         })
-            .add_plugins(WaterPlugin);
+        .add_plugins(WaterPlugin);
     }
 }
-
