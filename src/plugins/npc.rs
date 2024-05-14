@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_tnua::prelude::*;
 use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
 use bevy_xpbd_3d::prelude::*;
 use big_brain::prelude::*;
@@ -61,7 +62,7 @@ fn spawn_npc(
             },
             RigidBody::Dynamic,
             Collider::capsule(0.5, 0.5),
-            // TnuaControllerBundle::default(),
+            TnuaControllerBundle::default(),
             TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
             LockedAxes::ROTATION_LOCKED,
             Npc,
