@@ -172,18 +172,40 @@ pub fn read_area_markers(
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
+    parent_query: Query<&Parent>, // Query to navigate up the hierarchy
+    ship_query: Query<Entity, With<Ship>>, // Query for the Ship entity
 ) {
     for (entity, _area_marker) in area_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
             if let Some(mesh) = meshes.get(mesh_handle) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
-                    println!("Inserting Sensor");
-                    commands.entity(entity).insert((
-                        collider,
-                        RigidBody::Static,
-                        Sensor,
-                        Visibility::Hidden,
-                    ));
+                    // Find the top-level Ship entity
+                    let mut current_parent = entity;
+                    let mut ship_entity = None;
+                    while let Ok(parent) = parent_query.get(current_parent) {
+                        if ship_query.get(parent.get()).is_ok() {
+                            ship_entity = Some(parent.get());
+                            break;
+                        }
+                        current_parent = parent.get();
+                    }
+
+                    if let Some(ship) = ship_entity {
+                        // Reparent the sensor to the Ship entity
+                        commands.entity(ship).add_child(entity);
+
+                        // Insert the components to ensure it follows the parent
+                        commands.entity(entity).insert((
+                            collider,
+                            Sensor,
+                            Visibility::Hidden,
+                        ));
+
+                        // Ensure the transform is properly set to follow the ship
+                        commands.entity(entity).insert(TransformBundle::from_transform(Transform::default()));
+                    } else {
+                        error!("No Ship entity found for the area marker");
+                    }
                 } else {
                     error!("Failed to create area collider from mesh");
                 }
@@ -195,6 +217,7 @@ pub fn read_area_markers(
         }
     }
 }
+
 
 pub fn read_colliders(
     collider_marker_query: Query<
@@ -510,7 +533,7 @@ pub fn calculate_and_apply_buoyancy(
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
 
     for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in
-        query.iter_mut()
+    query.iter_mut()
     {
         for voxel in &buoyancy.voxels {
             if voxel.is_solid {
