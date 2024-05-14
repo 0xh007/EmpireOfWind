@@ -15,8 +15,8 @@ impl Plugin for OceanPlugin {
             amplitude: WAVE_AMPLITUDE,
             ..default()
         })
-            .add_plugins(WaterPlugin)
-            .add_systems(Update, update_water_interactables);
+        .add_plugins(WaterPlugin)
+        .add_systems(Update, update_water_interactables);
     }
 }
 

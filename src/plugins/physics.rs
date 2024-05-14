@@ -45,7 +45,6 @@ impl Plugin for PhysicsPlugin {
             //     Update,
             //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
             // );
-
             .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
 }
@@ -63,8 +62,8 @@ impl Vec3I {
     }
 }
 
-#[derive(Component)]
-pub struct VoxelVisual;
+// #[derive(Component)]
+// pub struct VoxelVisual;
 
 #[derive(Component)]
 pub struct Buoyancy {
@@ -166,7 +165,6 @@ fn hide_show_objects(
     }
 }
 
-
 // TODO: This can probably be combined with read_colliders()
 pub fn read_area_markers(
     area_marker_query: Query<(Entity, &AreaMarker), Added<AreaMarker>>,
@@ -199,7 +197,10 @@ pub fn read_area_markers(
 }
 
 pub fn read_colliders(
-    collider_marker_query: Query<(Entity, Option<&NavMeshMarker>, &Transform), Added<ColliderMarker>>,
+    collider_marker_query: Query<
+        (Entity, Option<&NavMeshMarker>, &Transform),
+        Added<ColliderMarker>,
+    >,
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
@@ -245,7 +246,6 @@ pub fn read_colliders(
     }
 }
 
-
 fn find_mesh(
     parent: Entity,
     children_query: &Query<&Children>,
@@ -260,7 +260,6 @@ fn find_mesh(
     }
     None
 }
-
 
 pub fn update_voxel_solidity(
     mut query: Query<(Entity, &Transform, &mut Buoyancy)>,
@@ -334,7 +333,6 @@ pub fn update_voxel_solidity(
 //         }
 //     }
 // }
-
 
 // TODO: Make this into a toggle debug system
 // fn visualize_bounds(
@@ -425,7 +423,10 @@ pub fn read_buoyancy_objects(
     mesh_handles: Query<&Handle<Mesh>>,
 ) {
     for (entity, _, mesh_transform) in buoyancy_marker_query.iter() {
-        println!("Processing Entity: {:?}, Transform: {:?}", entity, mesh_transform);
+        println!(
+            "Processing Entity: {:?}, Transform: {:?}",
+            entity, mesh_transform
+        );
 
         if let Some(mesh_handle) = find_mesh(entity, &children_query, &mesh_handles) {
             println!("Mesh handle found: {:?}", mesh_handle);
@@ -464,7 +465,7 @@ pub fn read_buoyancy_objects(
                                 Vec3::new(126395.3, -28743.2, 16967.54),
                                 Vec3::new(-28743.2, 259213.7, -6361.74),
                                 Vec3::new(16967.54, -6361.74, 246570.2),
-                            ))
+                            )),
                         ));
                         commands.entity(entity).despawn_recursive();
                     }
@@ -472,7 +473,9 @@ pub fn read_buoyancy_objects(
                     println!("No Ship entity found for the buoyancy component.");
                 }
             } else {
-                eprintln!("Failed to retrieve mesh from handle for entity marked with BuoyancyMarker");
+                eprintln!(
+                    "Failed to retrieve mesh from handle for entity marked with BuoyancyMarker"
+                );
             }
         } else {
             eprintln!("Mesh not found for entity marked with BuoyancyMarker");
@@ -480,10 +483,8 @@ pub fn read_buoyancy_objects(
     }
 }
 
-
 fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
-    let water_height = water.wave_point(pos).y;
-    water_height
+    water.wave_point(pos).y
 }
 
 /// Calculates and applies the buoyancy force to gizmos submerged in water based on their density,
@@ -498,11 +499,19 @@ fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
 ///
 pub fn calculate_and_apply_buoyancy(
     water: WaterParam,
-    mut query: Query<(&Buoyancy, &Transform, &mut ExternalForce, &ColliderDensity, &CenterOfMass)>,
+    mut query: Query<(
+        &Buoyancy,
+        &Transform,
+        &mut ExternalForce,
+        &ColliderDensity,
+        &CenterOfMass,
+    )>,
 ) {
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
 
-    for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in query.iter_mut() {
+    for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in
+        query.iter_mut()
+    {
         for voxel in &buoyancy.voxels {
             if voxel.is_solid {
                 // Apply the ship's rotation to the voxel's position relative to the ship's center of mass
@@ -510,12 +519,17 @@ pub fn calculate_and_apply_buoyancy(
                 let world_position = transform.translation + rotated_position;
 
                 let water_height = get_water_height_at_position(world_position, &water);
-                let submerged_volume = calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
+                let submerged_volume =
+                    calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
                 let hull_density = 1.0;
                 let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume * hull_density, 0.0);
 
                 // Apply the force at the voxel's rotated position, creating torque around the center of mass
-                external_force.apply_force_at_point(buoyancy_force, world_position, center_of_mass.0);
+                external_force.apply_force_at_point(
+                    buoyancy_force,
+                    world_position,
+                    center_of_mass.0,
+                );
 
                 // gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
 
@@ -549,4 +563,3 @@ fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_siz
         submerged_height * voxel_size * voxel_size // Partially submerged volume
     }
 }
-
