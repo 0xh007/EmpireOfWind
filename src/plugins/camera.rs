@@ -1,5 +1,5 @@
-use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
 use bevy::core_pipeline::prepass::DepthPrepass;
+use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
 use bevy_atmosphere::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_tnua::prelude::*;
@@ -37,7 +37,7 @@ fn setup_camera(mut commands: Commands) {
                 scaling_mode: ScalingMode::FixedVertical(2.0),
                 ..default()
             }
-                .into(),
+            .into(),
             transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
