@@ -20,15 +20,15 @@ impl Plugin for PhysicsPlugin {
         // TODO: Add xpbd in here
         app.add_plugins(TnuaControllerPlugin)
             .add_plugins(TnuaXpbd3dPlugin)
-            .register_type::<AreaMarker>()
             .register_type::<AreaName>()
+            .register_type::<AreaEnterMarker>()
+            .register_type::<AreaExitMarker>()
             .register_type::<BuoyancyMarker>()
             .register_type::<ColliderMarker>()
             .register_type::<COMMarker>()
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
-            .add_systems(Update, continuous_visibility_check.run_if(in_state(AppStates::Next)))
             .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
@@ -93,7 +93,11 @@ struct Voxel {
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
-pub struct AreaMarker;
+pub struct AreaEnterMarker;
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct AreaExitMarker;
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
@@ -115,24 +119,24 @@ pub struct Hideable(String);
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
 
-#[derive(Component, Default)]
-pub struct SensorState {
-    players: Vec<Entity>,
-}
-
 fn hide_show_objects(
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
-    mut sensor_query: Query<(Entity, &Sensor, &AreaName, &mut SensorState)>,
+    sensor_query: Query<(
+        Entity,
+        &Sensor,
+        Option<&AreaEnterMarker>,
+        Option<&AreaExitMarker>,
+    )>,
     player_query: Query<&Player>,
-    mut hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
+    hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
 ) {
-    // Handle collision events to update sensor states
     for Collision(contacts) in collision_event_reader.read() {
         let entity1 = contacts.entity1;
         let entity2 = contacts.entity2;
 
-        let player_involved = player_query.get(entity1).is_ok() || player_query.get(entity2).is_ok();
+        let player_involved =
+            player_query.get(entity1).is_ok() || player_query.get(entity2).is_ok();
         if player_involved {
             let (player_entity, other_entity) = if player_query.get(entity1).is_ok() {
                 (entity1, entity2)
@@ -140,81 +144,40 @@ fn hide_show_objects(
                 (entity2, entity1)
             };
 
-            if let Ok((sensor_entity, _, _, mut sensor_state)) = sensor_query.get_mut(other_entity) {
-                if !sensor_state.players.contains(&player_entity) {
-                    sensor_state.players.push(player_entity);
-                    println!("Player {:?} entered sensor area: {:?}", player_entity, sensor_entity);
-                    update_visibility(&mut commands, &sensor_state, &hideable_query, Visibility::Hidden);
+            if let Ok((sensor_entity, _, enter_marker, exit_marker)) =
+                sensor_query.get(other_entity)
+            {
+                if enter_marker.is_some() {
+                    println!(
+                        "Player {:?} entered area: {:?}",
+                        player_entity, sensor_entity
+                    );
+                    update_visibility(&mut commands, &hideable_query, Visibility::Hidden);
+                } else if exit_marker.is_some() {
+                    println!(
+                        "Player {:?} exited area: {:?}",
+                        player_entity, sensor_entity
+                    );
+                    update_visibility(&mut commands, &hideable_query, Visibility::Visible);
                 }
             }
-        }
-    }
-
-    // Collect players to remove outside the retain call
-    let mut players_to_remove = Vec::new();
-
-    for (sensor_entity, _, _, mut sensor_state) in sensor_query.iter_mut() {
-        for &player_entity in sensor_state.players.iter() {
-            if !is_colliding(sensor_entity, player_entity, &mut collision_event_reader) {
-                println!("Player {:?} exited sensor area: {:?}", player_entity, sensor_entity);
-                players_to_remove.push((sensor_entity, player_entity));
-            }
-        }
-    }
-
-    // Update visibility and remove players from sensor states
-    for (sensor_entity, player_entity) in players_to_remove {
-        if let Ok((_, _, _, mut sensor_state)) = sensor_query.get_mut(sensor_entity) {
-            sensor_state.players.retain(|&e| e != player_entity);
-            update_visibility(&mut commands, &sensor_state, &hideable_query, Visibility::Visible);
         }
     }
 }
 
 fn update_visibility(
     commands: &mut Commands,
-    sensor_state: &SensorState,
     hideable_query: &Query<(Entity, &Hideable, &mut Visibility)>,
     visibility: Visibility,
 ) {
-    for (hideable_entity, hideable, _) in hideable_query.iter() {
+    for (hideable_entity, _hideable, _) in hideable_query.iter() {
         commands.entity(hideable_entity).insert(visibility);
     }
 }
 
-
-fn is_colliding(sensor_entity: Entity, player_entity: Entity, collision_event_reader: &mut EventReader<Collision>) -> bool {
-    for Collision(contacts) in collision_event_reader.read() {
-        if (contacts.entity1 == sensor_entity && contacts.entity2 == player_entity) ||
-            (contacts.entity2 == sensor_entity && contacts.entity1 == player_entity) {
-            return true;
-        }
-    }
-    false
-}
-
-
-fn continuous_visibility_check(
-    mut commands: Commands,
-    sensor_query: Query<(&Sensor, &AreaName, &SensorState)>,
-    mut hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
-) {
-    for (_, sensor_area_name, sensor_state) in sensor_query.iter() {
-        let visibility = if sensor_state.players.is_empty() {
-            Visibility::Visible
-        } else {
-            Visibility::Hidden
-        };
-
-        println!("Continuous check - Updating visibility for sensor area: {:?}, Visibility: {:?}", sensor_area_name, visibility);
-        update_visibility(&mut commands, sensor_state, &hideable_query, visibility);
-    }
-}
-
-
-// TODO: This can probably be combined with read_colliders()
 pub fn read_area_markers(
-    area_marker_query: Query<(Entity, &AreaMarker), Added<AreaMarker>>,
+    enter_marker_query: Query<(Entity, &Transform), Added<AreaEnterMarker>>, // Query for AreaEnterMarker
+    exit_marker_query: Query<(Entity, &Transform), Added<AreaExitMarker>>, // Query for AreaExitMarker
     mut commands: Commands,
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
@@ -222,7 +185,8 @@ pub fn read_area_markers(
     parent_query: Query<&Parent>, // Query to navigate up the hierarchy
     ship_query: Query<Entity, With<Ship>>, // Query for the Ship entity
 ) {
-    for (entity, _area_marker) in area_marker_query.iter() {
+    // Process AreaEnterMarkers
+    for (entity, transform) in enter_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
             if let Some(mesh) = meshes.get(mesh_handle) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
@@ -241,17 +205,64 @@ pub fn read_area_markers(
                         // Reparent the sensor to the Ship entity
                         commands.entity(ship).add_child(entity);
 
-                        // Insert the components to ensure it follows the parent
+                        // Insert components for AreaEnterMarker
+                        let entry_position = transform.translation; // Use the current position
                         commands.entity(entity).insert((
                             collider,
-                            ColliderDensity(0.0),
                             Sensor,
-                            SensorState::default(),
+                            Transform {
+                                translation: entry_position,
+                                ..Default::default()
+                            },
+                            GlobalTransform::default(),
                             Visibility::Hidden,
                         ));
+                    } else {
+                        error!("No Ship entity found for the area marker");
+                    }
+                } else {
+                    error!("Failed to create area collider from mesh");
+                }
+            } else {
+                error!("Failed to get mesh from mesh handle");
+            }
+        } else {
+            error!("Failed to find mesh for area collider");
+        }
+    }
 
-                        // Ensure the transform is properly set to follow the ship
-                        commands.entity(entity).insert(TransformBundle::from_transform(Transform::default()));
+    // Process AreaExitMarkers
+    for (entity, transform) in exit_marker_query.iter() {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    // Find the top-level Ship entity
+                    let mut current_parent = entity;
+                    let mut ship_entity = None;
+                    while let Ok(parent) = parent_query.get(current_parent) {
+                        if ship_query.get(parent.get()).is_ok() {
+                            ship_entity = Some(parent.get());
+                            break;
+                        }
+                        current_parent = parent.get();
+                    }
+
+                    if let Some(ship) = ship_entity {
+                        // Reparent the sensor to the Ship entity
+                        commands.entity(ship).add_child(entity);
+
+                        // Insert components for AreaExitMarker
+                        let exit_position = transform.translation; // Use the current position
+                        commands.entity(entity).insert((
+                            collider,
+                            Sensor,
+                            Transform {
+                                translation: exit_position,
+                                ..Default::default()
+                            },
+                            GlobalTransform::default(),
+                            Visibility::Hidden,
+                        ));
                     } else {
                         error!("No Ship entity found for the area marker");
                     }
@@ -267,7 +278,6 @@ pub fn read_area_markers(
     }
 }
 
-
 pub fn read_colliders(
     collider_marker_query: Query<
         (Entity, Option<&NavMeshMarker>, &Transform),
@@ -277,7 +287,7 @@ pub fn read_colliders(
     children: Query<&Children>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
-    parent_query: Query<&Transform, With<Ship>>, // Assuming the Ship component is correctly set up
+    parent_query: Query<&Transform, With<Ship>>,
 ) {
     for (entity, nav_mesh_marker_opt, transform) in collider_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
@@ -287,7 +297,7 @@ pub fn read_colliders(
                     if let Ok(ship_transform) = parent_query.get_single() {
                         commands.entity(entity).insert((
                             Transform {
-                                translation: ship_transform.translation + transform.translation, // Adjust as necessary
+                                translation: ship_transform.translation + transform.translation,
                                 rotation: ship_transform.rotation * transform.rotation,
                                 scale: ship_transform.scale * transform.scale,
                             },
@@ -295,14 +305,12 @@ pub fn read_colliders(
                         ));
                     }
 
-                    // Insert the common components, including making the collider invisible
                     commands.entity(entity).insert((
                         collider,
                         RigidBody::Kinematic, // Change to Kinematic
                         Visibility::Hidden,
                     ));
 
-                    // If the NavMeshMarker is present, also add NavMeshAffector in a separate step
                     if nav_mesh_marker_opt.is_some() {
                         commands.entity(entity).insert(NavMeshAffector);
                     }
@@ -347,13 +355,13 @@ pub fn update_voxel_solidity(
                 let intersects = spatial_query.shape_intersections(
                     &voxel_collider,
                     world_position,
-                    Quat::IDENTITY, // Assuming no rotation for simplicity
+                    Quat::IDENTITY,
                     SpatialQueryFilter::default(),
                 );
 
                 voxel.is_solid = !intersects.is_empty();
             }
-            buoyancy.needs_update = false; // Reset update flag after processing
+            buoyancy.needs_update = false;
         }
     }
 }
@@ -489,8 +497,8 @@ pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
     mut commands: Commands,
     children_query: Query<&Children>,
-    parent_query: Query<&Parent>, // Query to navigate up the hierarchy
-    ship_query: Query<Entity, With<Ship>>, // Query for the top-level Ship entity
+    parent_query: Query<&Parent>,
+    ship_query: Query<Entity, With<Ship>>,
     meshes: Res<Assets<Mesh>>,
     mesh_handles: Query<&Handle<Mesh>>,
 ) {
@@ -582,7 +590,7 @@ pub fn calculate_and_apply_buoyancy(
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
 
     for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in
-    query.iter_mut()
+        query.iter_mut()
     {
         for voxel in &buoyancy.voxels {
             if voxel.is_solid {
