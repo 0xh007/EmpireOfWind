@@ -119,7 +119,7 @@ pub struct Hideable(String);
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
 
-fn hide_show_objects(
+fn hide_show_objects(r
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
     sensor_query: Query<(
@@ -175,6 +175,7 @@ fn update_visibility(
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn read_area_markers(
     enter_marker_query: Query<(Entity, &Transform), Added<AreaEnterMarker>>, // Query for AreaEnterMarker
     exit_marker_query: Query<(Entity, &Transform), Added<AreaExitMarker>>, // Query for AreaExitMarker
