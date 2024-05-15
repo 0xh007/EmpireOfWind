@@ -119,7 +119,7 @@ pub struct Hideable(String);
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
 
-fn hide_show_objects(r
+fn hide_show_objects(
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
     sensor_query: Query<(
@@ -591,7 +591,7 @@ pub fn calculate_and_apply_buoyancy(
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
 
     for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in
-        query.iter_mut()
+    query.iter_mut()
     {
         for voxel in &buoyancy.voxels {
             if voxel.is_solid {
