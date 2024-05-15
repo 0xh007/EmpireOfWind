@@ -28,6 +28,7 @@ impl Plugin for PhysicsPlugin {
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
+            .add_systems(Update, continuous_visibility_check.run_if(in_state(AppStates::Next)))
             .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
@@ -114,56 +115,102 @@ pub struct Hideable(String);
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
 
+#[derive(Component, Default)]
+pub struct SensorState {
+    players: Vec<Entity>,
+}
+
 fn hide_show_objects(
     mut commands: Commands,
-    mut collision_started: EventReader<CollisionStarted>,
-    mut collision_ended: EventReader<CollisionEnded>,
-    sensor_query: Query<(Entity, &Sensor, &AreaName)>,
+    mut collision_event_reader: EventReader<Collision>,
+    mut sensor_query: Query<(Entity, &Sensor, &AreaName, &mut SensorState)>,
     player_query: Query<&Player>,
     mut hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
 ) {
-    for CollisionStarted(entity1, entity2) in collision_started.read() {
-        let player_involved =
-            player_query.get(*entity1).is_ok() || player_query.get(*entity2).is_ok();
+    // Handle collision events to update sensor states
+    for Collision(contacts) in collision_event_reader.read() {
+        let entity1 = contacts.entity1;
+        let entity2 = contacts.entity2;
 
+        let player_involved = player_query.get(entity1).is_ok() || player_query.get(entity2).is_ok();
         if player_involved {
-            let (_, other_entity) = if player_query.get(*entity1).is_ok() {
-                (*entity1, *entity2)
+            let (player_entity, other_entity) = if player_query.get(entity1).is_ok() {
+                (entity1, entity2)
             } else {
-                (*entity2, *entity1)
+                (entity2, entity1)
             };
 
-            if let Ok((_, _, sensor_area_name)) = sensor_query.get(other_entity) {
-                for (hideable_entity, hideable, _) in hideable_query.iter_mut() {
-                    if hideable.0 == sensor_area_name.0 {
-                        commands.entity(hideable_entity).insert(Visibility::Hidden);
-                    }
+            if let Ok((sensor_entity, _, _, mut sensor_state)) = sensor_query.get_mut(other_entity) {
+                if !sensor_state.players.contains(&player_entity) {
+                    sensor_state.players.push(player_entity);
+                    println!("Player {:?} entered sensor area: {:?}", player_entity, sensor_entity);
+                    update_visibility(&mut commands, &sensor_state, &hideable_query, Visibility::Hidden);
                 }
             }
         }
     }
 
-    for CollisionEnded(entity1, entity2) in collision_ended.read() {
-        let player_involved =
-            player_query.get(*entity1).is_ok() || player_query.get(*entity2).is_ok();
+    // Collect players to remove outside the retain call
+    let mut players_to_remove = Vec::new();
 
-        if player_involved {
-            let (_, other_entity) = if player_query.get(*entity1).is_ok() {
-                (*entity1, *entity2)
-            } else {
-                (*entity2, *entity1)
-            };
-
-            if let Ok((_, _, sensor_area_name)) = sensor_query.get(other_entity) {
-                for (hideable_entity, hideable, _) in hideable_query.iter_mut() {
-                    if hideable.0 == sensor_area_name.0 {
-                        commands.entity(hideable_entity).insert(Visibility::Visible);
-                    }
-                }
+    for (sensor_entity, _, _, mut sensor_state) in sensor_query.iter_mut() {
+        for &player_entity in sensor_state.players.iter() {
+            if !is_colliding(sensor_entity, player_entity, &mut collision_event_reader) {
+                println!("Player {:?} exited sensor area: {:?}", player_entity, sensor_entity);
+                players_to_remove.push((sensor_entity, player_entity));
             }
+        }
+    }
+
+    // Update visibility and remove players from sensor states
+    for (sensor_entity, player_entity) in players_to_remove {
+        if let Ok((_, _, _, mut sensor_state)) = sensor_query.get_mut(sensor_entity) {
+            sensor_state.players.retain(|&e| e != player_entity);
+            update_visibility(&mut commands, &sensor_state, &hideable_query, Visibility::Visible);
         }
     }
 }
+
+fn update_visibility(
+    commands: &mut Commands,
+    sensor_state: &SensorState,
+    hideable_query: &Query<(Entity, &Hideable, &mut Visibility)>,
+    visibility: Visibility,
+) {
+    for (hideable_entity, hideable, _) in hideable_query.iter() {
+        commands.entity(hideable_entity).insert(visibility);
+    }
+}
+
+
+fn is_colliding(sensor_entity: Entity, player_entity: Entity, collision_event_reader: &mut EventReader<Collision>) -> bool {
+    for Collision(contacts) in collision_event_reader.read() {
+        if (contacts.entity1 == sensor_entity && contacts.entity2 == player_entity) ||
+            (contacts.entity2 == sensor_entity && contacts.entity1 == player_entity) {
+            return true;
+        }
+    }
+    false
+}
+
+
+fn continuous_visibility_check(
+    mut commands: Commands,
+    sensor_query: Query<(&Sensor, &AreaName, &SensorState)>,
+    mut hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
+) {
+    for (_, sensor_area_name, sensor_state) in sensor_query.iter() {
+        let visibility = if sensor_state.players.is_empty() {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
+
+        println!("Continuous check - Updating visibility for sensor area: {:?}, Visibility: {:?}", sensor_area_name, visibility);
+        update_visibility(&mut commands, sensor_state, &hideable_query, visibility);
+    }
+}
+
 
 // TODO: This can probably be combined with read_colliders()
 pub fn read_area_markers(
@@ -197,7 +244,9 @@ pub fn read_area_markers(
                         // Insert the components to ensure it follows the parent
                         commands.entity(entity).insert((
                             collider,
+                            ColliderDensity(0.0),
                             Sensor,
+                            SensorState::default(),
                             Visibility::Hidden,
                         ));
 

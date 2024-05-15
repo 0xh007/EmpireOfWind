@@ -59,7 +59,6 @@ fn apply_controls(
         });
 
         if keyboard_input.pressed(KeyCode::Space) {
-            println!("Jumping");
             controller.action(TnuaBuiltinJump {
                 height: 4.0,
                 ..Default::default()

@@ -35,7 +35,7 @@ impl PluginGroup for CorePlugins {
             .add(hunger::HungerPlugin)
             .add(input::InputPlugin)
             .add(navmesh::NavMeshPlugin)
-            .add(npc::NpcPlugin)
+            // .add(npc::NpcPlugin)
             .add(ocean::OceanPlugin)
             .add(pathfinding::PathfindingPlugin)
             .add(physics::PhysicsPlugin)
