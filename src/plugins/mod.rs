@@ -1,11 +1,11 @@
 use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
 use bevy_gltf_components::ComponentsFromGltfPlugin;
 
-pub use {
-    assets::*, camera::*, eat::*, editor_types::*, fatigue::*, hunger::*, input::*, navmesh::*, npc::*,
-    ocean::*, pathfinding::*, physics::*, player::*, ship::*, sky::*, sleep::*,
-};
 pub use assets::AppStates;
+pub use {
+    assets::*, camera::*, eat::*, editor_types::*, fatigue::*, hunger::*, input::*, navmesh::*,
+    npc::*, ocean::*, pathfinding::*, physics::*, player::*, ship::*, sky::*, sleep::*,
+};
 
 mod assets;
 mod camera;

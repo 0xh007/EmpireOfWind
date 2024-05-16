@@ -48,7 +48,9 @@ fn test_read_area_markers() {
         .id();
 
     // Mock the parent-child relationship for the markers
-    app.world.entity_mut(ship_entity).push_children(&[area_enter_marker_entity, area_exit_marker_entity]);
+    app.world
+        .entity_mut(ship_entity)
+        .push_children(&[area_enter_marker_entity, area_exit_marker_entity]);
 
     // Add the necessary systems
     app.add_systems(Update, read_area_markers);
@@ -63,13 +65,16 @@ fn test_read_area_markers() {
     // Check the resulting changes for AreaEnterMarker
     // assert!(app.world.get::<Collider>(area_enter_marker_entity).is_some());
     assert!(app.world.get::<Sensor>(area_enter_marker_entity).is_some());
-    assert!(app.world.get::<Visibility>(area_enter_marker_entity).is_some());
+    assert!(app
+        .world
+        .get::<Visibility>(area_enter_marker_entity)
+        .is_some());
 
     // Check the resulting changes for AreaExitMarker
     // assert!(app.world.get::<Collider>(area_exit_marker_entity).is_some());
     assert!(app.world.get::<Sensor>(area_exit_marker_entity).is_some());
-    assert!(app.world.get::<Visibility>(area_exit_marker_entity).is_some());
+    assert!(app
+        .world
+        .get::<Visibility>(area_exit_marker_entity)
+        .is_some());
 }
-
-
-
