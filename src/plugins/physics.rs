@@ -29,6 +29,7 @@ impl Plugin for PhysicsPlugin {
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
+            .add_systems(Update, smooth_transparency.run_if(in_state(AppStates::Next)))
             .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
@@ -65,6 +66,11 @@ impl Vec3I {
 
 // #[derive(Component)]
 // pub struct VoxelVisual;
+
+#[derive(Component)]
+struct AdjustableTransparency {
+    target_alpha: f32,
+}
 
 #[derive(Component)]
 pub struct Buoyancy {
@@ -122,14 +128,10 @@ pub struct NavMeshMarker;
 fn hide_show_objects(
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
-    sensor_query: Query<(
-        Entity,
-        &Sensor,
-        Option<&AreaEnterMarker>,
-        Option<&AreaExitMarker>,
-    )>,
+    sensor_query: Query<(Entity, &Sensor, Option<&AreaEnterMarker>, Option<&AreaExitMarker>)>,
     player_query: Query<&Player>,
-    hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
+    hideable_query: Query<(Entity, &Hideable, &Handle<StandardMaterial>)>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for Collision(contacts) in collision_event_reader.read() {
         let entity1 = contacts.entity1;
@@ -144,23 +146,50 @@ fn hide_show_objects(
                 (entity2, entity1)
             };
 
-            if let Ok((sensor_entity, _, enter_marker, exit_marker)) =
-                sensor_query.get(other_entity)
-            {
+            if let Ok((sensor_entity, _, enter_marker, exit_marker)) = sensor_query.get(other_entity) {
                 if enter_marker.is_some() {
                     println!(
                         "Player {:?} entered area: {:?}",
                         player_entity, sensor_entity
                     );
-                    update_visibility(&mut commands, &hideable_query, Visibility::Hidden);
+                    adjust_transparency(&mut commands, &hideable_query, &mut materials, 0.3); // Set to semi-transparent
                 } else if exit_marker.is_some() {
                     println!(
                         "Player {:?} exited area: {:?}",
                         player_entity, sensor_entity
                     );
-                    update_visibility(&mut commands, &hideable_query, Visibility::Visible);
+                    adjust_transparency(&mut commands, &hideable_query, &mut materials, 1.0); // Set to opaque
                 }
             }
+        }
+    }
+}
+
+fn adjust_transparency(
+    commands: &mut Commands,
+    hideable_query: &Query<(Entity, &Hideable, &Handle<StandardMaterial>)>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    target_alpha: f32,
+) {
+    for (entity, _, material_handle) in hideable_query.iter() {
+        if let Some(material) = materials.get_mut(material_handle) {
+            material.base_color.set_a(target_alpha);
+            commands.entity(entity).insert(AdjustableTransparency { target_alpha });
+        }
+    }
+}
+
+fn smooth_transparency(
+    time: Res<Time>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    query: Query<(&AdjustableTransparency, &Handle<StandardMaterial>)>,
+) {
+    for (adjustable, material_handle) in query.iter() {
+        if let Some(material) = materials.get_mut(material_handle) {
+            let current_alpha = material.base_color.a();
+            let target_alpha = adjustable.target_alpha;
+            let new_alpha = current_alpha + (target_alpha - current_alpha) * time.delta_seconds();
+            material.base_color.set_a(new_alpha);
         }
     }
 }
@@ -591,7 +620,7 @@ pub fn calculate_and_apply_buoyancy(
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
 
     for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in
-        query.iter_mut()
+    query.iter_mut()
     {
         for voxel in &buoyancy.voxels {
             if voxel.is_solid {
