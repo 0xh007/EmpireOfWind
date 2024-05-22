@@ -29,7 +29,10 @@ impl Plugin for PhysicsPlugin {
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
-            .add_systems(Update, smooth_transparency.run_if(in_state(AppStates::Next)))
+            .add_systems(
+                Update,
+                smooth_transparency.run_if(in_state(AppStates::Next)),
+            )
             .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
@@ -43,6 +46,7 @@ impl Plugin for PhysicsPlugin {
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
             )
+            .add_systems(Update, debug_entities.run_if(in_state(AppStates::Next)))
             // .add_systems(
             //     Update,
             //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
@@ -125,12 +129,22 @@ pub struct Hideable(String);
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
 
+fn debug_entities(
+    hideable_query: Query<(Entity, &Hideable, &Handle<StandardMaterial>)>,
+) {
+    for (entity, hideable, material_handle) in hideable_query.iter() {
+        println!("Entity: {:?} has Hideable: {:?} and material handle: {:?}", entity, hideable, material_handle);
+    }
+}
+
 fn hide_show_objects(
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
     sensor_query: Query<(Entity, &Sensor, Option<&AreaEnterMarker>, Option<&AreaExitMarker>)>,
     player_query: Query<&Player>,
-    hideable_query: Query<(Entity, &Hideable, &Handle<StandardMaterial>)>,
+    hideable_query: Query<(Entity, &Hideable)>,
+    children_query: Query<&Children>,
+    material_query: Query<&Handle<StandardMaterial>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for Collision(contacts) in collision_event_reader.read() {
@@ -152,13 +166,13 @@ fn hide_show_objects(
                         "Player {:?} entered area: {:?}",
                         player_entity, sensor_entity
                     );
-                    adjust_transparency(&mut commands, &hideable_query, &mut materials, 0.3); // Set to semi-transparent
+                    adjust_transparency(&mut commands, &hideable_query, &children_query, &material_query, &mut materials, 0.1); // Set to semi-transparent
                 } else if exit_marker.is_some() {
                     println!(
                         "Player {:?} exited area: {:?}",
                         player_entity, sensor_entity
                     );
-                    adjust_transparency(&mut commands, &hideable_query, &mut materials, 1.0); // Set to opaque
+                    adjust_transparency(&mut commands, &hideable_query, &children_query, &material_query, &mut materials, 1.1); // Set to opaque
                 }
             }
         }
@@ -167,14 +181,29 @@ fn hide_show_objects(
 
 fn adjust_transparency(
     commands: &mut Commands,
-    hideable_query: &Query<(Entity, &Hideable, &Handle<StandardMaterial>)>,
+    hideable_query: &Query<(Entity, &Hideable)>,
+    children_query: &Query<&Children>,
+    material_query: &Query<&Handle<StandardMaterial>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     target_alpha: f32,
 ) {
-    for (entity, _, material_handle) in hideable_query.iter() {
-        if let Some(material) = materials.get_mut(material_handle) {
-            material.base_color.set_a(target_alpha);
-            commands.entity(entity).insert(AdjustableTransparency { target_alpha });
+    println!("Adjusting transparency to target alpha: {}", target_alpha);
+    for (entity, _) in hideable_query.iter() {
+        println!("Processing entity with Hideable: {:?}", entity);
+        if let Ok(children) = children_query.get(entity) {
+            for child in children.iter() {
+                if let Ok(material_handle) = material_query.get(*child) {
+                    if let Some(material) = materials.get_mut(material_handle) {
+                        println!("Adjusting transparency for child entity: {:?} to alpha: {}", child, target_alpha);
+                        material.base_color.set_a(target_alpha);
+                        commands.entity(*child).insert(AdjustableTransparency { target_alpha });
+                    } else {
+                        println!("Material not found for child entity: {:?}", child);
+                    }
+                }
+            }
+        } else {
+            println!("No children found for entity: {:?}", entity);
         }
     }
 }
@@ -189,7 +218,13 @@ fn smooth_transparency(
             let current_alpha = material.base_color.a();
             let target_alpha = adjustable.target_alpha;
             let new_alpha = current_alpha + (target_alpha - current_alpha) * time.delta_seconds();
+            println!(
+                "Smoothing transparency for material: {:?} from alpha: {} to new alpha: {}",
+                material_handle, current_alpha, new_alpha
+            );
             material.base_color.set_a(new_alpha);
+        } else {
+            println!("Material not found for handle: {:?}", material_handle);
         }
     }
 }
