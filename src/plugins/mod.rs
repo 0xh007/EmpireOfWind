@@ -1,11 +1,11 @@
 use bevy::app::{PluginGroup, PluginGroupBuilder, PreUpdate};
 use bevy_gltf_components::ComponentsFromGltfPlugin;
 
-pub use assets::AppStates;
 pub use {
     assets::*, camera::*, eat::*, editor_types::*, fatigue::*, hunger::*, input::*, navmesh::*,
     npc::*, ocean::*, pathfinding::*, physics::*, player::*, ship::*, sky::*, sleep::*,
 };
+pub use assets::AppStates;
 
 mod assets;
 mod camera;
@@ -23,6 +23,7 @@ mod player;
 pub mod ship;
 mod sky;
 mod sleep;
+mod materials;
 
 pub struct CorePlugins;
 
@@ -47,5 +48,7 @@ impl PluginGroup for CorePlugins {
             .add(sleep::SleepPlugin)
             .add(ship::ShipPlugin)
             .add(sky::SkyPlugin)
+            .add(materials::InvisibleMaterialPlugin)
     }
 }
+
