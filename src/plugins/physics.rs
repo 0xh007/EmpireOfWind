@@ -145,7 +145,7 @@ fn debug_entities(hideable_query: Query<(Entity, &Hideable, &Handle<StandardMate
 fn hide_show_objects(
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
-    sensor_query: Query<(Entity, &Sensor, &AreaName, Option<&AreaEnterMarker>, Option<&AreaExitMarker>)>,
+    sensor_query: Query<(Entity, &Sensor, &AreaName, Option<&AreaEnterMarker>)>,
     player_query: Query<&Player>,
     hideable_query: Query<(Entity, &Hideable)>,
     children_query: Query<&Children>,
@@ -164,9 +164,8 @@ fn hide_show_objects(
                 (entity2, entity1)
             };
 
-            if let Ok((_, _, sensor_area_name, enter_marker, exit_marker)) = sensor_query.get(other_entity) {
+            if let Ok((_, _, sensor_area_name, enter_marker)) = sensor_query.get(other_entity) {
                 if enter_marker.is_some() {
-                    info!("Player {:?} entered sensor area: {:?}", player_entity, sensor_area_name);
                     adjust_transparency_for_area(
                         &mut commands,
                         &hideable_query,
@@ -174,26 +173,19 @@ fn hide_show_objects(
                         &material_query,
                         &mut materials,
                         &sensor_area_name.0,
-                        0.3, // Set to semi-transparent
+                        0.0, // Set to fully transparent
                     );
-
-                    // Mark the player as inside the room with the specific area name
                     commands.entity(player_entity).insert(PlayerInRoom(sensor_area_name.0.clone()));
-                } else if exit_marker.is_some() {
-                    info!("Player {:?} exited sensor area: {:?}", player_entity, sensor_area_name);
-                    // Mark the player as leaving the room
-                    commands.entity(player_entity).remove::<PlayerInRoom>();
                 }
             }
         }
     }
 }
 
-
 fn hide_show_objects_end(
     mut commands: Commands,
     mut collision_event_reader: EventReader<CollisionEnded>,
-    sensor_query: Query<(Entity, &Sensor, &AreaName, Option<&AreaEnterMarker>, Option<&AreaExitMarker>)>,
+    sensor_query: Query<(Entity, &Sensor, &AreaName, Option<&AreaExitMarker>)>,
     player_query: Query<(Entity, &Player, Option<&PlayerInRoom>)>,
     hideable_query: Query<(Entity, &Hideable)>,
     children_query: Query<&Children>,
@@ -210,11 +202,18 @@ fn hide_show_objects_end(
                 (*entity2, *entity1)
             };
 
-            if let Ok((_, _, sensor_area_name, enter_marker, exit_marker)) = sensor_query.get(other_entity) {
-                if enter_marker.is_some() {
-                    info!("Player {:?} stopped touching enter sensor area: {:?}", player_entity, sensor_area_name);
-                } else if exit_marker.is_some() {
-                    info!("Player {:?} stopped touching exit sensor area: {:?}", player_entity, sensor_area_name);
+            if let Ok((_, _, sensor_area_name, exit_marker)) = sensor_query.get(other_entity) {
+                if exit_marker.is_some() {
+                    adjust_transparency_for_area(
+                        &mut commands,
+                        &hideable_query,
+                        &children_query,
+                        &material_query,
+                        &mut materials,
+                        &sensor_area_name.0,
+                        1.0, // Set to opaque
+                    );
+                    commands.entity(player_entity).remove::<PlayerInRoom>();
                 }
             }
         }
@@ -233,21 +232,20 @@ fn adjust_transparency_for_area(
 ) {
     for (entity, hideable) in hideable_query.iter() {
         if hideable.0 == area_name {
-            // debug!("Processing entity with Hideable: {:?} and name: {:?}", entity, area_name);
             if let Ok(children) = children_query.get(entity) {
                 for child in children.iter() {
                     if let Ok(material_handle) = material_query.get(*child) {
                         if let Some(material) = materials.get_mut(material_handle) {
-                            // debug!("Adjusting transparency for child entity: {:?} to alpha: {}", child, target_alpha);
                             material.base_color.set_a(target_alpha);
+                            material.alpha_mode = if target_alpha < 1.0 {
+                                AlphaMode::Blend
+                            } else {
+                                AlphaMode::Opaque
+                            };
                             commands.entity(*child).insert(AdjustableTransparency { target_alpha });
-                        } else {
-                            warn!("Material not found for child entity: {:?}", child);
                         }
                     }
                 }
-            } else {
-                warn!("No children found for entity: {:?}", entity);
             }
         }
     }
@@ -265,8 +263,6 @@ fn smooth_transparency(
             let target_alpha = adjustable.target_alpha;
             let new_alpha = current_alpha + (target_alpha - current_alpha) * time.delta_seconds();
             material.base_color.set_a(new_alpha);
-        } else {
-            warn!("Material not found for handle: {:?}", material_handle);
         }
     }
 }
@@ -281,8 +277,6 @@ fn maintain_transparency(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     if let Some(player_in_room) = player_query.iter().next() {
-        info!("Player is in room: {}", player_in_room.0);
-        // Player is in a room, ensure transparency for the room area
         adjust_transparency_for_area(
             &mut commands,
             &hideable_query,
@@ -290,22 +284,8 @@ fn maintain_transparency(
             &material_query,
             &mut materials,
             &player_in_room.0,
-            0.3,
+            0.0, // Set to fully transparent
         );
-    } else {
-        info!("Player is not in any room, ensuring opacity for all areas");
-        // Player is not in any room, ensure opacity for all
-        for (entity, hideable) in hideable_query.iter() {
-            adjust_transparency_for_area(
-                &mut commands,
-                &hideable_query,
-                &children_query,
-                &material_query,
-                &mut materials,
-                &hideable.0,
-                1.0,
-            );
-        }
     }
 }
 
