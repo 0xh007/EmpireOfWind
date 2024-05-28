@@ -34,6 +34,7 @@ impl Plugin for PhysicsPlugin {
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
             .add_systems(Update, hide_show_objects_end.run_if(in_state(AppStates::Next)))
             .add_systems(Update, maintain_transparency.run_if(in_state(AppStates::Next)))
+            .add_systems(Update, assign_materials_to_hideable.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
                 smooth_transparency.run_if(in_state(AppStates::Next)),
@@ -145,6 +146,29 @@ fn debug_entities(hideable_query: Query<(Entity, &Hideable, &Handle<StandardMate
     }
 }
 
+fn assign_materials_to_hideable(
+    mut commands: Commands,
+    hideable_query: Query<Entity, Added<Hideable>>,
+    children_query: Query<&Children>,
+    mesh_handles: Query<&Handle<Mesh>>,
+    mut materials: ResMut<Assets<InvisibleMaterial>>,
+) {
+    for entity in hideable_query.iter() {
+        if let Some(mesh_entity) = find_mesh_entity(entity, &children_query, &mesh_handles) {
+            commands.entity(mesh_entity).insert((
+                materials.add(InvisibleMaterial {
+                    color: Color::rgba(1.0, 1.0, 1.0, 1.0),
+                    // alpha_mode: AlphaMode::Blend,
+                }),
+                AdjustableTransparency { target_alpha: 1.0 },
+            ));
+        } else {
+            error!("No mesh entity found for hideable entity");
+        }
+    }
+}
+
+
 fn hide_show_objects(
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
@@ -245,11 +269,11 @@ fn adjust_transparency_for_area(
                     if let Ok(material_handle) = material_query.get(*child) {
                         if let Some(material) = materials.get_mut(material_handle) {
                             material.color.set_a(target_alpha);
-                            material.alpha_mode = if target_alpha < 1.0 {
-                                AlphaMode::Blend
-                            } else {
-                                AlphaMode::Opaque
-                            };
+                            // material.alpha_mode = if target_alpha < 1.0 {
+                            //     AlphaMode::Blend
+                            // } else {
+                            //     AlphaMode::Opaque
+                            // };
                             commands.entity(*child).insert(AdjustableTransparency { target_alpha });
                         }
                     }
@@ -460,6 +484,20 @@ pub fn read_colliders(
     }
 }
 
+/// Finds the mesh handle of a child entity recursively.
+///
+/// This function traverses the children of a given parent entity to find the first child
+/// entity that has a mesh handle. It returns the handle to that mesh if found.
+///
+/// # Arguments
+///
+/// * `parent` - The parent entity to start the search from.
+/// * `children_query` - A query that retrieves the children of an entity.
+/// * `mesh_handles` - A query that retrieves the mesh handle of an entity.
+///
+/// # Returns
+///
+/// An `Option` containing the handle to the mesh if found, or `None` if no mesh handle is found.
 fn find_mesh(
     parent: Entity,
     children_query: &Query<&Children>,
@@ -474,6 +512,38 @@ fn find_mesh(
     }
     None
 }
+
+/// Finds the entity of a child that has a mesh handle recursively.
+///
+/// This function traverses the children of a given parent entity to find the first child
+/// entity that has a mesh handle. It returns the entity of that child if found.
+///
+/// # Arguments
+///
+/// * `parent` - The parent entity to start the search from.
+/// * `children_query` - A query that retrieves the children of an entity.
+/// * `mesh_handles` - A query that retrieves the mesh handle of an entity.
+///
+/// # Returns
+///
+/// An `Option` containing the entity of the child with the mesh handle if found, or `None` if no such child is found.
+fn find_mesh_entity(
+    parent: Entity,
+    children_query: &Query<&Children>,
+    mesh_handles: &Query<&Handle<Mesh>>,
+) -> Option<Entity> {
+    if let Ok(children) = children_query.get(parent) {
+        for child in children.iter() {
+            if let Ok(_mesh_handle) = mesh_handles.get(*child) {
+                return Some(*child);
+            } else if let Some(grandchild) = find_mesh_entity(*child, children_query, mesh_handles) {
+                return Some(grandchild);
+            }
+        }
+    }
+    None
+}
+
 
 pub fn update_voxel_solidity(
     mut query: Query<(Entity, &Transform, &mut Buoyancy)>,

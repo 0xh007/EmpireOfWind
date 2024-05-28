@@ -1,25 +1,44 @@
 use bevy::{
+    pbr::MaterialPipeline,
+    pbr::MaterialPipelineKey,
     prelude::*,
-    render::render_resource::{AsBindGroup, ShaderRef},
+    reflect::TypePath,
+    render::{
+        mesh::MeshVertexBufferLayout,
+        render_resource::{AsBindGroup, ShaderRef},
+        render_resource::RenderPipelineDescriptor,
+        render_resource::SpecializedMeshPipelineError,
+    },
 };
 
-#[derive(Asset, AsBindGroup, Clone, Debug, TypePath)]
+// Define the InvisibleMaterial struct
+#[derive(Asset, TypePath, AsBindGroup, Clone)]
 pub struct InvisibleMaterial {
     #[uniform(0)]
     pub color: Color,
-    pub alpha_mode: AlphaMode,
 }
 
+// Implement the Material trait for InvisibleMaterial
 impl Material for InvisibleMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/transparent_blocking.wgsl".into()
+        "shaders/invisible_material.wgsl".into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {
-        self.alpha_mode
+        AlphaMode::Blend
+    }
+
+    fn specialize(
+        _pipeline: &MaterialPipeline<Self>,
+        descriptor: &mut RenderPipelineDescriptor,
+        _layout: &MeshVertexBufferLayout,
+        _key: MaterialPipelineKey<Self>,
+    ) -> Result<(), SpecializedMeshPipelineError> {
+        Ok(())
     }
 }
 
+// Define the plugin to register the material
 pub struct InvisibleMaterialPlugin;
 
 impl Plugin for InvisibleMaterialPlugin {

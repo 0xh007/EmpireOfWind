@@ -4,9 +4,9 @@
 @group(1) @binding(2) var<uniform> mesh: MeshUniform;
 
 struct VertexOutput {
-    @builtin(position) clip_position: vec4<f32>;
-    @location(0) world_position: vec3<f32>;
-    @location(1) world_normal: vec3<f32>;
+    @builtin(position) clip_position: vec4<f32>,
+    @location(0) world_position: vec3<f32>,
+    @location(1) world_normal: vec3<f32>,
 };
 
 @vertex
@@ -21,7 +21,6 @@ fn vertex_main(input: VertexInput) -> VertexOutput {
 
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    // If alpha < 1.0, make the fragment fully transparent but still interacting with light
     if (material.base_color.a < 1.0) {
         discard;
     }
