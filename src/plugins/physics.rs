@@ -73,10 +73,6 @@ impl Vec3I {
 // #[derive(Component)]
 // pub struct VoxelVisual;
 
-#[derive(Component)]
-struct AdjustableTransparency {
-    target_alpha: f32,
-}
 
 #[derive(Component)]
 pub struct Buoyancy {
@@ -105,6 +101,19 @@ struct Voxel {
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
+pub struct ColliderMarker;
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct COMMarker;
+
+#[derive(Component)]
+struct AdjustableTransparency {
+    target_alpha: f32,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct AreaEnterMarker;
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
@@ -114,14 +123,6 @@ pub struct AreaExitMarker;
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct AreaName(String);
-
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
-pub struct ColliderMarker;
-
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
-pub struct COMMarker;
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
@@ -174,7 +175,7 @@ fn hide_show_objects(
                         &hideable_query,
                         &children_query,
                         &material_query,
-                        materials,
+                        &mut materials,
                         &sensor_area_name.0,
                         0.0, // Set to fully transparent
                     );
@@ -215,7 +216,7 @@ fn hide_show_objects_end(
                         &hideable_query,
                         &children_query,
                         &material_query,
-                        materials,
+                        &mut materials,
                         &sensor_area_name.0,
                         1.0, // Set to opaque
                     );
@@ -228,25 +229,21 @@ fn hide_show_objects_end(
     }
 }
 
-
 fn adjust_transparency_for_area(
     commands: &mut Commands,
     hideable_query: &Query<(Entity, &Hideable)>,
     children_query: &Query<&Children>,
     material_query: &Query<&Handle<InvisibleMaterial>>,
-    mut materials: ResMut<Assets<InvisibleMaterial>>,
+    materials: &mut ResMut<Assets<InvisibleMaterial>>,
     area_name: &str,
     target_alpha: f32,
 ) {
-    println!("Adjusting transparency for area: {} to target alpha: {}", area_name, target_alpha);
     for (entity, hideable) in hideable_query.iter() {
         if hideable.0 == area_name {
-            println!("Processing entity with Hideable: {:?} and name: {:?}", entity, area_name);
             if let Ok(children) = children_query.get(entity) {
                 for child in children.iter() {
                     if let Ok(material_handle) = material_query.get(*child) {
                         if let Some(material) = materials.get_mut(material_handle) {
-                            println!("Adjusting transparency for child entity: {:?} to alpha: {}", child, target_alpha);
                             material.color.set_a(target_alpha);
                             material.alpha_mode = if target_alpha < 1.0 {
                                 AlphaMode::Blend
@@ -254,20 +251,13 @@ fn adjust_transparency_for_area(
                                 AlphaMode::Opaque
                             };
                             commands.entity(*child).insert(AdjustableTransparency { target_alpha });
-                        } else {
-                            println!("Material not found for child entity: {:?}", child);
                         }
                     }
                 }
-            } else {
-                println!("No children found for entity: {:?}", entity);
             }
-        } else {
-            println!("Skipping entity: {:?} with Hideable name: {:?}, does not match area name: {:?}", entity, hideable.0, area_name);
         }
     }
 }
-
 
 fn smooth_transparency(
     time: Res<Time>,
@@ -280,8 +270,6 @@ fn smooth_transparency(
             let target_alpha = adjustable.target_alpha;
             let new_alpha = current_alpha + (target_alpha - current_alpha) * time.delta_seconds();
             material.color.set_a(new_alpha);
-        } else {
-            warn!("Material not found for handle: {:?}", material_handle);
         }
     }
 }
@@ -302,9 +290,9 @@ fn maintain_transparency(
             &hideable_query,
             &children_query,
             &material_query,
-            materials,
+            &mut materials,
             &player_in_room.0,
-            0.0, // Set to fully transparent
+            0.0, // Fully transparent
         );
     }
 }
