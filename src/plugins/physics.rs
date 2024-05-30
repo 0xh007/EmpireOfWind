@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy::prelude::*;
 use bevy::render::mesh::VertexAttributeValues;
+use bevy::render::view::RenderLayers;
 use bevy_tnua::prelude::*;
 use bevy_tnua_xpbd3d::*;
 use bevy_water::WaterParam;
@@ -9,11 +9,13 @@ use bevy_xpbd_3d::prelude::*;
 use oxidized_navigation::NavMeshAffector;
 use serde::{Deserialize, Serialize};
 
-use crate::plugins::materials::InvisibleMaterial;
 use crate::plugins::ship::Ship;
 use crate::prelude::*;
 
 const VOXEL_SIZE: f32 = 2.0;
+const DEFAULT_LAYER: u8 = 0;
+const TOTAL_LAYERS: usize = 32;
+const DECK_2_STERN_CABIN_AREA: u8 = 1;
 
 pub struct PhysicsPlugin;
 
@@ -30,15 +32,7 @@ impl Plugin for PhysicsPlugin {
             .register_type::<COMMarker>()
             .register_type::<Hideable>()
             .register_type::<NavMeshMarker>()
-            .register_type::<PlayerInRoom>()
             .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
-            .add_systems(Update, hide_show_objects_end.run_if(in_state(AppStates::Next)))
-            .add_systems(Update, maintain_transparency.run_if(in_state(AppStates::Next)))
-            .add_systems(Update, assign_materials_to_hideable.run_if(in_state(AppStates::Next)))
-            .add_systems(
-                Update,
-                smooth_transparency.run_if(in_state(AppStates::Next)),
-            )
             .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
@@ -52,11 +46,13 @@ impl Plugin for PhysicsPlugin {
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
             )
-            // .add_systems(Update, debug_entities.run_if(in_state(AppStates::Next)))
+            // .add_systems(
+            //     Update,
+            //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
+            // );
             .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Vec3I {
@@ -73,7 +69,6 @@ impl Vec3I {
 
 // #[derive(Component)]
 // pub struct VoxelVisual;
-
 
 #[derive(Component)]
 pub struct Buoyancy {
@@ -102,19 +97,6 @@ struct Voxel {
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
-pub struct ColliderMarker;
-
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
-pub struct COMMarker;
-
-#[derive(Component)]
-struct AdjustableTransparency {
-    target_alpha: f32,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
 pub struct AreaEnterMarker;
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
@@ -125,65 +107,47 @@ pub struct AreaExitMarker;
 #[reflect(Component, Serialize, Deserialize)]
 pub struct AreaName(String);
 
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct ColliderMarker;
+
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct COMMarker;
+
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct Hideable(String);
+
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
 
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
-struct PlayerInRoom(String);
-
-fn debug_entities(hideable_query: Query<(Entity, &Hideable, &Handle<StandardMaterial>)>) {
-    for (entity, hideable, material_handle) in hideable_query.iter() {
-        println!(
-            "Entity: {:?} has Hideable: {:?} and material handle: {:?}",
-            entity, hideable, material_handle
-        );
-    }
+fn create_layer(n: u8) -> RenderLayers {
+    assert!(n < TOTAL_LAYERS as u8, "Layer out of bounds");
+    RenderLayers::layer(n)
 }
-
-fn assign_materials_to_hideable(
-    mut commands: Commands,
-    hideable_query: Query<Entity, Added<Hideable>>,
-    children_query: Query<&Children>,
-    mesh_handles: Query<&Handle<Mesh>>,
-    mut materials: ResMut<Assets<InvisibleMaterial>>,
-) {
-    for entity in hideable_query.iter() {
-        if let Some(mesh_entity) = find_mesh_entity(entity, &children_query, &mesh_handles) {
-            commands.entity(mesh_entity).insert((
-                materials.add(InvisibleMaterial {
-                    color: Color::rgba(1.0, 1.0, 1.0, 1.0),
-                    // alpha_mode: AlphaMode::Blend,
-                }),
-                AdjustableTransparency { target_alpha: 1.0 },
-            ));
-        } else {
-            error!("No mesh entity found for hideable entity");
-        }
-    }
-}
-
 
 fn hide_show_objects(
     mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
-    sensor_query: Query<(Entity, &Sensor, &AreaName, Option<&AreaEnterMarker>)>,
+    sensor_query: Query<(
+        Entity,
+        &Sensor,
+        Option<&AreaEnterMarker>,
+        Option<&AreaExitMarker>,
+    )>,
     player_query: Query<&Player>,
-    hideable_query: Query<(Entity, &Hideable)>,
-    children_query: Query<&Children>,
-    material_query: Query<&Handle<InvisibleMaterial>>,
-    mut materials: ResMut<Assets<InvisibleMaterial>>,
+    hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
 ) {
     for Collision(contacts) in collision_event_reader.read() {
         let entity1 = contacts.entity1;
         let entity2 = contacts.entity2;
 
-        let player_involved = player_query.get(entity1).is_ok() || player_query.get(entity2).is_ok();
+        let player_involved =
+            player_query.get(entity1).is_ok() || player_query.get(entity2).is_ok();
         if player_involved {
             let (player_entity, other_entity) = if player_query.get(entity1).is_ok() {
                 (entity1, entity2)
@@ -191,136 +155,26 @@ fn hide_show_objects(
                 (entity2, entity1)
             };
 
-            if let Ok((_, _, sensor_area_name, enter_marker)) = sensor_query.get(other_entity) {
+            if let Ok((sensor_entity, _, enter_marker, exit_marker)) =
+                sensor_query.get(other_entity)
+            {
                 if enter_marker.is_some() {
-                    info!("Player {:?} entered sensor area: {:?}", player_entity, sensor_area_name);
-                    adjust_transparency_for_area(
-                        &mut commands,
-                        &hideable_query,
-                        &children_query,
-                        &material_query,
-                        &mut materials,
-                        &sensor_area_name.0,
-                        0.0, // Set to fully transparent
+                    println!(
+                        "Player {:?} entered area: {:?}",
+                        player_entity, sensor_entity
                     );
-
-                    // Mark the player as inside the room with the specific area name
-                    commands.entity(player_entity).insert(PlayerInRoom(sensor_area_name.0.clone()));
-                }
-            }
-        }
-    }
-}
-
-fn hide_show_objects_end(
-    mut commands: Commands,
-    mut collision_event_reader: EventReader<CollisionEnded>,
-    sensor_query: Query<(Entity, &Sensor, &AreaName, Option<&AreaExitMarker>)>,
-    player_query: Query<(Entity, &Player, Option<&PlayerInRoom>)>,
-    hideable_query: Query<(Entity, &Hideable)>,
-    children_query: Query<&Children>,
-    material_query: Query<&Handle<InvisibleMaterial>>,
-    mut materials: ResMut<Assets<InvisibleMaterial>>,
-) {
-    for CollisionEnded(entity1, entity2) in collision_event_reader.read() {
-        let player_involved = player_query.get(*entity1).is_ok() || player_query.get(*entity2).is_ok();
-
-        if player_involved {
-            let (player_entity, other_entity) = if player_query.get(*entity1).is_ok() {
-                (*entity1, *entity2)
-            } else {
-                (*entity2, *entity1)
-            };
-
-            if let Ok((_, _, sensor_area_name, exit_marker)) = sensor_query.get(other_entity) {
-                if exit_marker.is_some() {
-                    info!("Player {:?} exited sensor area: {:?}", player_entity, sensor_area_name);
-                    adjust_transparency_for_area(
-                        &mut commands,
-                        &hideable_query,
-                        &children_query,
-                        &material_query,
-                        &mut materials,
-                        &sensor_area_name.0,
-                        1.0, // Set to opaque
+                    update_visibility(&mut commands, &hideable_query, Visibility::Hidden);
+                } else if exit_marker.is_some() {
+                    println!(
+                        "Player {:?} exited area: {:?}",
+                        player_entity, sensor_entity
                     );
-
-                    // Remove the player from the room state
-                    commands.entity(player_entity).remove::<PlayerInRoom>();
+                    update_visibility(&mut commands, &hideable_query, Visibility::Visible);
                 }
             }
         }
     }
 }
-
-fn adjust_transparency_for_area(
-    commands: &mut Commands,
-    hideable_query: &Query<(Entity, &Hideable)>,
-    children_query: &Query<&Children>,
-    material_query: &Query<&Handle<InvisibleMaterial>>,
-    materials: &mut ResMut<Assets<InvisibleMaterial>>,
-    area_name: &str,
-    target_alpha: f32,
-) {
-    for (entity, hideable) in hideable_query.iter() {
-        if hideable.0 == area_name {
-            if let Ok(children) = children_query.get(entity) {
-                for child in children.iter() {
-                    if let Ok(material_handle) = material_query.get(*child) {
-                        if let Some(material) = materials.get_mut(material_handle) {
-                            material.color.set_a(target_alpha);
-                            // material.alpha_mode = if target_alpha < 1.0 {
-                            //     AlphaMode::Blend
-                            // } else {
-                            //     AlphaMode::Opaque
-                            // };
-                            commands.entity(*child).insert(AdjustableTransparency { target_alpha });
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-fn smooth_transparency(
-    time: Res<Time>,
-    mut materials: ResMut<Assets<InvisibleMaterial>>,
-    query: Query<(&AdjustableTransparency, &Handle<InvisibleMaterial>)>,
-) {
-    for (adjustable, material_handle) in query.iter() {
-        if let Some(material) = materials.get_mut(material_handle) {
-            let current_alpha = material.color.a();
-            let target_alpha = adjustable.target_alpha;
-            let new_alpha = current_alpha + (target_alpha - current_alpha) * time.delta_seconds();
-            material.color.set_a(new_alpha);
-        }
-    }
-}
-
-
-fn maintain_transparency(
-    mut commands: Commands,
-    player_query: Query<&PlayerInRoom, With<Player>>,
-    hideable_query: Query<(Entity, &Hideable)>,
-    children_query: Query<&Children>,
-    material_query: Query<&Handle<InvisibleMaterial>>,
-    mut materials: ResMut<Assets<InvisibleMaterial>>,
-) {
-    if let Some(player_in_room) = player_query.iter().next() {
-        // Player is in a room, ensure transparency for the room area
-        adjust_transparency_for_area(
-            &mut commands,
-            &hideable_query,
-            &children_query,
-            &material_query,
-            &mut materials,
-            &player_in_room.0,
-            0.0, // Fully transparent
-        );
-    }
-}
-
 
 fn update_visibility(
     commands: &mut Commands,
@@ -484,20 +338,6 @@ pub fn read_colliders(
     }
 }
 
-/// Finds the mesh handle of a child entity recursively.
-///
-/// This function traverses the children of a given parent entity to find the first child
-/// entity that has a mesh handle. It returns the handle to that mesh if found.
-///
-/// # Arguments
-///
-/// * `parent` - The parent entity to start the search from.
-/// * `children_query` - A query that retrieves the children of an entity.
-/// * `mesh_handles` - A query that retrieves the mesh handle of an entity.
-///
-/// # Returns
-///
-/// An `Option` containing the handle to the mesh if found, or `None` if no mesh handle is found.
 fn find_mesh(
     parent: Entity,
     children_query: &Query<&Children>,
@@ -512,38 +352,6 @@ fn find_mesh(
     }
     None
 }
-
-/// Finds the entity of a child that has a mesh handle recursively.
-///
-/// This function traverses the children of a given parent entity to find the first child
-/// entity that has a mesh handle. It returns the entity of that child if found.
-///
-/// # Arguments
-///
-/// * `parent` - The parent entity to start the search from.
-/// * `children_query` - A query that retrieves the children of an entity.
-/// * `mesh_handles` - A query that retrieves the mesh handle of an entity.
-///
-/// # Returns
-///
-/// An `Option` containing the entity of the child with the mesh handle if found, or `None` if no such child is found.
-fn find_mesh_entity(
-    parent: Entity,
-    children_query: &Query<&Children>,
-    mesh_handles: &Query<&Handle<Mesh>>,
-) -> Option<Entity> {
-    if let Ok(children) = children_query.get(parent) {
-        for child in children.iter() {
-            if let Ok(_mesh_handle) = mesh_handles.get(*child) {
-                return Some(*child);
-            } else if let Some(grandchild) = find_mesh_entity(*child, children_query, mesh_handles) {
-                return Some(grandchild);
-            }
-        }
-    }
-    None
-}
-
 
 pub fn update_voxel_solidity(
     mut query: Query<(Entity, &Transform, &mut Buoyancy)>,
