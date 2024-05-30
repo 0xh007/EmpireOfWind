@@ -116,10 +116,13 @@ pub struct ColliderMarker;
 #[reflect(Component, Serialize, Deserialize)]
 pub struct COMMarker;
 
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
+#[derive(Component, Reflect, Default, Debug, Deref, DerefMut, Serialize, Deserialize)]
+#[reflect(Component)]
 pub struct Hideable(String);
 
+// #[derive(Component, Reflect, Default, Debug, Deref, DerefMut)]
+// #[reflect(Component)]
+// pub struct TupleTestStr(String);
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
