@@ -8,6 +8,23 @@ use bevy_xpbd_3d::PhysicsSet;
 
 use crate::prelude::*;
 
+#[derive(Component)]
+pub struct CameraZoom {
+    pub target_scale: f32,
+    pub current_scale: f32,
+    pub speed: f32,
+}
+
+impl CameraZoom {
+    fn new(target_scale: f32, current_scale: f32, speed: f32) -> Self {
+        Self {
+            target_scale,
+            current_scale,
+            speed,
+        }
+    }
+}
+
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
@@ -15,6 +32,7 @@ impl Plugin for CameraPlugin {
         app.add_systems(Startup, setup_camera)
             .add_plugins(PanOrbitCameraPlugin)
             .add_systems(Update, camera_switching)
+            .add_systems(Update, interpolate_zoom)
             .add_systems(
                 PostUpdate,
                 move_camera
@@ -25,6 +43,8 @@ impl Plugin for CameraPlugin {
 }
 
 fn setup_camera(mut commands: Commands) {
+    let initial_scale = 20.0;
+
     commands.spawn((
         Name::new("Main Camera"),
         Camera3dBundle {
@@ -34,7 +54,7 @@ fn setup_camera(mut commands: Commands) {
                 ..default()
             },
             projection: OrthographicProjection {
-                scale: 20.0,
+                scale: initial_scale, // Initial scale for zoom level
                 scaling_mode: ScalingMode::FixedVertical(2.0),
                 ..default()
             }
@@ -42,7 +62,7 @@ fn setup_camera(mut commands: Commands) {
             transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
-        RenderLayers::from_layers(&[0, 1]), // Render both layers 0 and 1
+        RenderLayers::from_layers(&[0, 1]), // Render both layers 0 and 1 initially
         FogSettings {
             color: Color::rgba(0.1, 0.2, 0.4, 1.0),
             falloff: FogFalloff::from_visibility_colors(
@@ -55,6 +75,7 @@ fn setup_camera(mut commands: Commands) {
         MainCamera,
         DepthPrepass,
         AtmosphereCamera::default(),
+        CameraZoom::new(initial_scale, initial_scale, 20.0), // Initialize CameraZoom
     ));
 
     commands.spawn((
@@ -70,15 +91,6 @@ fn setup_camera(mut commands: Commands) {
         },
         PanOrbitCamera::default(),
         DebugCamera,
-    ));
-
-    // Light setup
-    commands.spawn((
-        PointLightBundle {
-            transform: Transform::from_translation(Vec3::new(5.0, 5.0, 5.0)),
-            ..default()
-        },
-        RenderLayers::all(), // Light affects all layers
     ));
 }
 
@@ -124,6 +136,26 @@ fn move_camera(
             // Maintain the camera's isometric perspective while following the player
             // This might require adjusting depending on your game's specific needs
             camera_transform.look_at(player_transform.translation, Vec3::Y);
+        }
+    }
+}
+
+fn interpolate_zoom(
+    mut camera_zoom_query: Query<(&mut CameraZoom, &mut Projection), With<MainCamera>>,
+    time: Res<Time>,
+) {
+    for (mut zoom, mut projection) in camera_zoom_query.iter_mut() {
+        if let Projection::Orthographic(orthographic) = &mut *projection {
+            let delta_scale = zoom.speed * time.delta_seconds();
+            if (zoom.current_scale - zoom.target_scale).abs() < delta_scale {
+                zoom.current_scale = zoom.target_scale;
+            } else if zoom.current_scale < zoom.target_scale {
+                zoom.current_scale += delta_scale;
+            } else {
+                zoom.current_scale -= delta_scale;
+            }
+            orthographic.scale = zoom.current_scale;
+            println!("Interpolating zoom: current scale is {}", orthographic.scale);
         }
     }
 }

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::render::camera::Projection;
 use bevy::render::mesh::VertexAttributeValues;
 use bevy::render::view::RenderLayers;
 use bevy_tnua::prelude::*;
@@ -147,7 +148,8 @@ fn hide_show_objects(
         &AreaName,
     )>,
     player_query: Query<&Player>,
-    mut camera_query: Query<&mut RenderLayers, With<MainCamera>>,
+    mut camera_layers_query: Query<&mut RenderLayers, With<MainCamera>>,
+    mut camera_zoom_query: Query<&mut CameraZoom, With<MainCamera>>,
 ) {
     for Collision(contacts) in collision_event_reader.read() {
         let entity1 = contacts.entity1;
@@ -170,13 +172,17 @@ fn hide_show_objects(
                         "Player {:?} entered area: {:?}",
                         player_entity, area_name.0
                     );
-                    update_camera_layers(&mut camera_query, true);
+                    update_camera_layers(&mut camera_layers_query, true);
+                    println!("Attempting to zoom in");
+                    update_zoom_target(&mut camera_zoom_query, 10.0);
                 } else if exit_marker.is_some() {
                     println!(
                         "Player {:?} exited area: {:?}",
                         player_entity, area_name.0
                     );
-                    update_camera_layers(&mut camera_query, false);
+                    update_camera_layers(&mut camera_layers_query, false);
+                    println!("Attempting to zoom out");
+                    update_zoom_target(&mut camera_zoom_query, 20.0);
                 }
             }
         }
@@ -189,12 +195,48 @@ fn update_camera_layers(
 ) {
     for mut render_layers in camera_query.iter_mut() {
         if entering {
-            *render_layers = RenderLayers::from_layers(&[0]); // Remove layer 1
+            println!("Updating camera layers to only layer 0");
+            *render_layers = RenderLayers::from_layers(&[0]); // Only layer 0 when entering
         } else {
-            *render_layers = RenderLayers::from_layers(&[0, 1]); // Add layer 1
+            println!("Updating camera layers to layers 0 and 1");
+            *render_layers = RenderLayers::from_layers(&[0, 1]); // Both layers 0 and 1 when exiting
         }
     }
 }
+
+fn update_zoom_target(
+    camera_zoom_query: &mut Query<&mut CameraZoom, With<MainCamera>>,
+    target_scale: f32,
+) {
+    for mut zoom in camera_zoom_query.iter_mut() {
+        zoom.target_scale = target_scale;
+        println!("Setting target zoom scale to {}", target_scale);
+    }
+}
+
+
+fn zoom_camera(
+    camera_query: &mut Query<&mut Projection, With<MainCamera>>,
+    entering: bool,
+) {
+    for mut projection in camera_query.iter_mut() {
+        match &mut *projection {
+            Projection::Orthographic(orthographic) => {
+                if entering {
+                    orthographic.scale = 10.0; // Zoom in
+                    println!("Zooming in: orthographic scale set to {}", orthographic.scale);
+                } else {
+                    orthographic.scale = 20.0; // Zoom out
+                    println!("Zooming out: orthographic scale set to {}", orthographic.scale);
+                }
+            }
+            Projection::Perspective(_) => {
+                println!("MainCamera is using Perspective projection, not Orthographic.");
+            }
+        }
+    }
+}
+
 
 fn propagate_render_layers(
     mut commands: Commands,
@@ -209,7 +251,6 @@ fn propagate_render_layers(
         }
     }
 }
-
 
 fn update_render_layers(
     hideable_query: &mut Query<(Entity, &Hideable)>,

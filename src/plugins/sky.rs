@@ -138,7 +138,7 @@ fn setup_atmosphere(mut commands: Commands) {
                 transform: Transform::from_rotation(Quat::from_rotation_x(-0.340)),
                 ..default()
             },
-            RenderLayers::from_layers(&[0, 1]),
+            RenderLayers::all()
         ))
         .insert(Sun); // Marks the light as Sun
 }
