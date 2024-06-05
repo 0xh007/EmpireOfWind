@@ -1,8 +1,8 @@
-use bevy::utils::Duration;
 use bevy::{pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*};
-use bevy_atmosphere::prelude::*;
-
+use bevy::render::view::RenderLayers;
 use bevy::time::Stopwatch;
+use bevy::utils::Duration;
+use bevy_atmosphere::prelude::*;
 
 const SPEED_MIN: f32 = 0.05;
 const SPEED_DELTA: f32 = 0.01;
@@ -128,14 +128,17 @@ fn daylight_cycle(
 fn setup_atmosphere(mut commands: Commands) {
     // "Sun"
     commands
-        .spawn(DirectionalLightBundle {
-            directional_light: DirectionalLight {
-                illuminance: 11127.65,
-                shadows_enabled: true,
+        .spawn((
+            DirectionalLightBundle {
+                directional_light: DirectionalLight {
+                    illuminance: 11127.65,
+                    shadows_enabled: true,
+                    ..default()
+                },
+                transform: Transform::from_rotation(Quat::from_rotation_x(-0.340)),
                 ..default()
             },
-            transform: Transform::from_rotation(Quat::from_rotation_x(-0.340)),
-            ..default()
-        })
+            RenderLayers::from_layers(&[0, 1]),
+        ))
         .insert(Sun); // Marks the light as Sun
 }

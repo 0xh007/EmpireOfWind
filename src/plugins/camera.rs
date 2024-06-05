@@ -1,5 +1,6 @@
-use bevy::core_pipeline::prepass::DepthPrepass;
 use bevy::{prelude::*, render::camera::ScalingMode, transform::TransformSystem};
+use bevy::core_pipeline::prepass::DepthPrepass;
+use bevy::render::view::RenderLayers;
 use bevy_atmosphere::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_tnua::prelude::*;
@@ -37,16 +38,17 @@ fn setup_camera(mut commands: Commands) {
                 scaling_mode: ScalingMode::FixedVertical(2.0),
                 ..default()
             }
-            .into(),
+                .into(),
             transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
+        RenderLayers::from_layers(&[0, 1]), // Render both layers 0 and 1
         FogSettings {
             color: Color::rgba(0.1, 0.2, 0.4, 1.0),
             falloff: FogFalloff::from_visibility_colors(
-                400.0, // distance in world units up to which objects retain visibility (>= 5% contrast)
-                Color::rgb(0.35, 0.5, 0.66), // atmospheric extinction color (after light is lost due to absorption by atmospheric particles)
-                Color::rgb(0.8, 0.844, 1.0), // atmospheric inscattering color (light gained due to scattering from the sun)
+                400.0,
+                Color::rgb(0.35, 0.5, 0.66),
+                Color::rgb(0.8, 0.844, 1.0),
             ),
             ..default()
         },
@@ -69,7 +71,17 @@ fn setup_camera(mut commands: Commands) {
         PanOrbitCamera::default(),
         DebugCamera,
     ));
+
+    // Light setup
+    commands.spawn((
+        PointLightBundle {
+            transform: Transform::from_translation(Vec3::new(5.0, 5.0, 5.0)),
+            ..default()
+        },
+        RenderLayers::all(), // Light affects all layers
+    ));
 }
+
 
 fn camera_switching(
     keyboard_input: Res<ButtonInput<KeyCode>>,

@@ -12,10 +12,9 @@ use serde::{Deserialize, Serialize};
 use crate::plugins::ship::Ship;
 use crate::prelude::*;
 
-const VOXEL_SIZE: f32 = 2.0;
 const DEFAULT_LAYER: u8 = 0;
 const TOTAL_LAYERS: usize = 32;
-const DECK_2_STERN_CABIN_AREA: u8 = 1;
+const VOXEL_SIZE: f32 = 2.0;
 
 pub struct PhysicsPlugin;
 
@@ -46,10 +45,12 @@ impl Plugin for PhysicsPlugin {
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Next)),
             )
+            .add_systems(Update, debug_entities.run_if(in_state(AppStates::Next)))
             // .add_systems(
             //     Update,
             //     visualize_voxel_grid.run_if(in_state(AppStates::Next)),
             // );
+            .add_systems(Update, propagate_render_layers.run_if(in_state(AppStates::Next)))
             .add_systems(Update, read_colliders.run_if(in_state(AppStates::Next)));
     }
 }
@@ -69,6 +70,11 @@ impl Vec3I {
 
 // #[derive(Component)]
 // pub struct VoxelVisual;
+
+#[derive(Component)]
+struct AdjustableTransparency {
+    target_alpha: f32,
+}
 
 #[derive(Component)]
 pub struct Buoyancy {
@@ -107,7 +113,6 @@ pub struct AreaExitMarker;
 #[reflect(Component, Serialize, Deserialize)]
 pub struct AreaName(String);
 
-
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct ColliderMarker;
@@ -116,34 +121,33 @@ pub struct ColliderMarker;
 #[reflect(Component, Serialize, Deserialize)]
 pub struct COMMarker;
 
-#[derive(Component, Reflect, Default, Debug, Deref, DerefMut, Serialize, Deserialize)]
-#[reflect(Component)]
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct Hideable(String);
-
-// #[derive(Component, Reflect, Default, Debug, Deref, DerefMut)]
-// #[reflect(Component)]
-// pub struct TupleTestStr(String);
 
 #[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct NavMeshMarker;
 
-fn create_layer(n: u8) -> RenderLayers {
-    assert!(n < TOTAL_LAYERS as u8, "Layer out of bounds");
-    RenderLayers::layer(n)
+fn debug_entities(
+    hideable_query: Query<(Entity, &Hideable, &Handle<StandardMaterial>)>,
+) {
+    for (entity, hideable, material_handle) in hideable_query.iter() {
+        println!("Entity: {:?} has Hideable: {:?} and material handle: {:?}", entity, hideable, material_handle);
+    }
 }
 
 fn hide_show_objects(
-    mut commands: Commands,
     mut collision_event_reader: EventReader<Collision>,
     sensor_query: Query<(
         Entity,
         &Sensor,
         Option<&AreaEnterMarker>,
         Option<&AreaExitMarker>,
+        &AreaName,
     )>,
     player_query: Query<&Player>,
-    hideable_query: Query<(Entity, &Hideable, &mut Visibility)>,
+    mut camera_query: Query<&mut RenderLayers, With<MainCamera>>,
 ) {
     for Collision(contacts) in collision_event_reader.read() {
         let entity1 = contacts.entity1;
@@ -158,23 +162,135 @@ fn hide_show_objects(
                 (entity2, entity1)
             };
 
-            if let Ok((sensor_entity, _, enter_marker, exit_marker)) =
+            if let Ok((_, _, enter_marker, exit_marker, area_name)) =
                 sensor_query.get(other_entity)
             {
                 if enter_marker.is_some() {
                     println!(
                         "Player {:?} entered area: {:?}",
-                        player_entity, sensor_entity
+                        player_entity, area_name.0
                     );
-                    update_visibility(&mut commands, &hideable_query, Visibility::Hidden);
+                    update_camera_layers(&mut camera_query, true);
                 } else if exit_marker.is_some() {
                     println!(
                         "Player {:?} exited area: {:?}",
-                        player_entity, sensor_entity
+                        player_entity, area_name.0
                     );
-                    update_visibility(&mut commands, &hideable_query, Visibility::Visible);
+                    update_camera_layers(&mut camera_query, false);
                 }
             }
+        }
+    }
+}
+
+fn update_camera_layers(
+    camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
+    entering: bool,
+) {
+    for mut render_layers in camera_query.iter_mut() {
+        if entering {
+            *render_layers = RenderLayers::from_layers(&[0]); // Remove layer 1
+        } else {
+            *render_layers = RenderLayers::from_layers(&[0, 1]); // Add layer 1
+        }
+    }
+}
+
+fn propagate_render_layers(
+    mut commands: Commands,
+    parent_query: Query<(Entity, &RenderLayers, &Children)>,
+    child_query: Query<(Entity, &Handle<Mesh>, &Handle<StandardMaterial>)>,
+) {
+    for (parent, render_layers, children) in parent_query.iter() {
+        for &child in children.iter() {
+            if let Ok((child_entity, _, _)) = child_query.get(child) {
+                commands.entity(child_entity).insert(*render_layers);
+            }
+        }
+    }
+}
+
+
+fn update_render_layers(
+    hideable_query: &mut Query<(Entity, &Hideable)>,
+    camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
+    area_name: &str,
+    entering: bool,
+) {
+    let target_layer = if entering { 1 } else { DEFAULT_LAYER };
+
+    for mut render_layers in camera_query.iter_mut() {
+        if entering {
+            *render_layers = create_layer(target_layer); // Assign to the specific RenderLayer for the area
+        } else {
+            *render_layers = RenderLayers::layer(DEFAULT_LAYER); // Reset to default layer
+        }
+    }
+}
+
+fn create_layer(n: u8) -> RenderLayers {
+    assert!(n < TOTAL_LAYERS as u8, "Layer out of bounds");
+    RenderLayers::layer(n)
+}
+
+fn add_layer_to_camera(camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>, layer: u8) {
+    for mut render_layers in camera_query.iter_mut() {
+        *render_layers = render_layers.with(layer);
+    }
+}
+
+fn remove_layer_from_camera(camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>, layer: u8) {
+    for mut render_layers in camera_query.iter_mut() {
+        *render_layers = render_layers.without(layer);
+    }
+}
+
+fn adjust_transparency(
+    commands: &mut Commands,
+    hideable_query: &Query<(Entity, &Hideable)>,
+    children_query: &Query<&Children>,
+    material_query: &Query<&Handle<StandardMaterial>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    target_alpha: f32,
+) {
+    println!("Adjusting transparency to target alpha: {}", target_alpha);
+    for (entity, _) in hideable_query.iter() {
+        println!("Processing entity with Hideable: {:?}", entity);
+        if let Ok(children) = children_query.get(entity) {
+            for child in children.iter() {
+                if let Ok(material_handle) = material_query.get(*child) {
+                    if let Some(material) = materials.get_mut(material_handle) {
+                        println!("Adjusting transparency for child entity: {:?} to alpha: {}", child, target_alpha);
+                        material.base_color.set_a(target_alpha);
+                        commands.entity(*child).insert(AdjustableTransparency { target_alpha });
+                    } else {
+                        println!("Material not found for child entity: {:?}", child);
+                    }
+                }
+            }
+        } else {
+            println!("No children found for entity: {:?}", entity);
+        }
+    }
+}
+
+fn smooth_transparency(
+    time: Res<Time>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    query: Query<(&AdjustableTransparency, &Handle<StandardMaterial>)>,
+) {
+    for (adjustable, material_handle) in query.iter() {
+        if let Some(material) = materials.get_mut(material_handle) {
+            let current_alpha = material.base_color.a();
+            let target_alpha = adjustable.target_alpha;
+            let new_alpha = current_alpha + (target_alpha - current_alpha) * time.delta_seconds();
+            println!(
+                "Smoothing transparency for material: {:?} from alpha: {} to new alpha: {}",
+                material_handle, current_alpha, new_alpha
+            );
+            material.base_color.set_a(new_alpha);
+        } else {
+            println!("Material not found for handle: {:?}", material_handle);
         }
     }
 }
