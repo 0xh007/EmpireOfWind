@@ -12366,7 +12366,7 @@
       "prefixItems": [
         {
           "type": {
-            "$ref": "#/$defs/alloc::string::String"
+            "$ref": "#/$defs/alloc::vec::Vec<alloc::string::String>"
           }
         }
       ],
