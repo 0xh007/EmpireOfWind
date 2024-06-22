@@ -212,7 +212,6 @@ fn update_camera_layers(
         }
 
         *render_layers = RenderLayers::from_layers(&layers);
-        println!("Updated camera layers: {:?}", layers);
     }
 }
 
