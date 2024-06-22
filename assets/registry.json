@@ -24,6 +24,19 @@
       "type": "string",
       "typeInfo": "Value"
     },
+    "alloc::vec::Vec<alloc::string::String>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/alloc::string::String"
+        }
+      },
+      "short_name": "Vec<String>",
+      "title": "alloc::vec::Vec<alloc::string::String>",
+      "type": "array",
+      "typeInfo": "List"
+    },
     "alloc::vec::Vec<bevy_animation::VariableCurve>": {
       "isComponent": false,
       "isResource": false,

@@ -62,7 +62,7 @@ fn setup_camera(mut commands: Commands) {
             transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
-        RenderLayers::from_layers(&[0, 1]), // Render both layers 0 and 1 initially
+        RenderLayers::from_layers(&[0, 1, 2]), // Render both layers 0 and 1 initially
         FogSettings {
             color: Color::rgba(0.1, 0.2, 0.4, 1.0),
             falloff: FogFalloff::from_visibility_colors(
@@ -155,7 +155,6 @@ fn interpolate_zoom(
                 zoom.current_scale -= delta_scale;
             }
             orthographic.scale = zoom.current_scale;
-            println!("Interpolating zoom: current scale is {}", orthographic.scale);
         }
     }
 }

@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use bevy::prelude::*;
 use bevy::render::camera::Projection;
 use bevy::render::mesh::VertexAttributeValues;
@@ -31,8 +33,10 @@ impl Plugin for PhysicsPlugin {
             .register_type::<ColliderMarker>()
             .register_type::<COMMarker>()
             .register_type::<Hideable>()
+            .register_type::<Vec<String>>()
             .register_type::<NavMeshMarker>()
-            .add_systems(Update, hide_show_objects.run_if(in_state(AppStates::Next)))
+            .insert_resource(ActiveAreas::default())
+            .add_systems(Update, manage_active_areas.run_if(in_state(AppStates::Next)))
             .add_systems(Update, read_area_markers.run_if(in_state(AppStates::Next)))
             .add_systems(
                 Update,
@@ -138,7 +142,10 @@ fn debug_entities(
     }
 }
 
-fn hide_show_objects(
+#[derive(Default, Resource)]
+struct ActiveAreas(HashSet<String>);
+
+fn manage_active_areas(
     mut collision_event_reader: EventReader<Collision>,
     sensor_query: Query<(
         Entity,
@@ -148,6 +155,7 @@ fn hide_show_objects(
         &AreaName,
     )>,
     player_query: Query<&Player>,
+    mut active_areas: ResMut<ActiveAreas>,
     mut camera_layers_query: Query<&mut RenderLayers, With<MainCamera>>,
     mut camera_zoom_query: Query<&mut CameraZoom, With<MainCamera>>,
 ) {
@@ -172,35 +180,39 @@ fn hide_show_objects(
                         "Player {:?} entered area: {:?}",
                         player_entity, area_name.0
                     );
-                    update_camera_layers(&mut camera_layers_query, true);
-                    println!("Attempting to zoom in");
-                    update_zoom_target(&mut camera_zoom_query, 10.0);
+                    active_areas.0.insert(area_name.0.clone());
+                    update_zoom_target(&mut camera_zoom_query, 10.0); // Adjust zoom for entry
                 } else if exit_marker.is_some() {
                     println!(
                         "Player {:?} exited area: {:?}",
                         player_entity, area_name.0
                     );
-                    update_camera_layers(&mut camera_layers_query, false);
-                    println!("Attempting to zoom out");
-                    update_zoom_target(&mut camera_zoom_query, 20.0);
+                    active_areas.0.remove(&area_name.0);
+                    update_zoom_target(&mut camera_zoom_query, 20.0); // Adjust zoom for exit
                 }
             }
         }
     }
+
+    update_camera_layers(&mut camera_layers_query, &active_areas);
 }
 
 fn update_camera_layers(
     camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
-    entering: bool,
+    active_areas: &ActiveAreas,
 ) {
     for mut render_layers in camera_query.iter_mut() {
-        if entering {
-            println!("Updating camera layers to only layer 0");
-            *render_layers = RenderLayers::from_layers(&[0]); // Only layer 0 when entering
-        } else {
-            println!("Updating camera layers to layers 0 and 1");
-            *render_layers = RenderLayers::from_layers(&[0, 1]); // Both layers 0 and 1 when exiting
+        let mut layers = (0..RenderLayers::TOTAL_LAYERS as u8).collect::<Vec<u8>>(); // Start with all layers
+
+        if active_areas.0.contains("Deck 2 Aft Cabin") {
+            layers.retain(|&layer| layer != 1); // Remove layer 1
         }
+        if active_areas.0.contains("Deck 3 Aft Cabin") {
+            layers.retain(|&layer| layer != 1 && layer != 2); // Remove layers 1 and 2
+        }
+
+        *render_layers = RenderLayers::from_layers(&layers);
+        println!("Updated camera layers: {:?}", layers);
     }
 }
 
@@ -762,7 +774,7 @@ pub fn calculate_and_apply_buoyancy(
     let gravity = 9.81; // Acceleration due to gravity in m/s^2
 
     for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in
-    query.iter_mut()
+        query.iter_mut()
     {
         for voxel in &buoyancy.voxels {
             if voxel.is_solid {
