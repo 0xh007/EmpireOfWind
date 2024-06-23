@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Example
 ///
-/// ```
+/// ```rust
 /// use bevy::prelude::*;
 /// use empire_of_wind::components::nav_mesh_marker::NavMeshMarker;
 ///

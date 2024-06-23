@@ -35,7 +35,7 @@ use big_brain::prelude::*;
 /// }
 ///
 /// fn main() {
-///     App::build()
+///     App::new()
 ///         .add_plugins(DefaultPlugins)
 ///         .add_startup_system(setup.system())
 ///         .add_system(navigate_to_nearest::<TargetComponent>.system())

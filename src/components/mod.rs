@@ -1,6 +1,6 @@
 pub use {
     area_enter_marker::*, area_exit_marker::*, area_name::*, buoyancy::*, main_camera::*, eat::*, fatigue::*, fatigue_scorer::*, food::*,
-    hunger::*, hunger_scorer::*, move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*, sleep_area::*, debug_camera::*,
+    hunger::*, hunger_scorer::*, move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*, sleep_area::*, debug_camera::*, camera_zoom::*,
 };
 
 pub use crate::resources::active_areas::*;
