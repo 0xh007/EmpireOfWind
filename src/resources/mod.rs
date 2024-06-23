@@ -1,0 +1,1 @@
+mod ship_assets;

@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::{
-    debug_draw::{DrawNavMesh, OxidizedNavigationDebugDrawPlugin},
+    debug_draw::OxidizedNavigationDebugDrawPlugin,
     NavMeshSettings, OxidizedNavigationPlugin,
 };
 
 use crate::prelude::*;
+use crate::systems::toggle_nav_mesh_visibility;
 
 pub struct NavMeshPlugin;
 
@@ -32,16 +33,6 @@ impl Plugin for NavMeshPlugin {
                 }),
                 OxidizedNavigationDebugDrawPlugin,
             ))
-            .add_systems(Update, toggle_nav_mesh);
-    }
-}
-
-fn toggle_nav_mesh(
-    mut navmesh_debug_event_reader: EventReader<NavMeshDebugToggle>,
-    mut show_navmesh: ResMut<DrawNavMesh>,
-) {
-    for _event in navmesh_debug_event_reader.read() {
-        println!("TOGGLING NAVMESH!");
-        show_navmesh.0 = !show_navmesh.0;
+            .add_systems(Update, toggle_nav_mesh_visibility::toggle_nav_mesh_visibility);
     }
 }

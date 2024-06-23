@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::utils::Duration;
 use bevy_xpbd_3d::prelude::{Collisions, Gravity, Physics, Sensor, SpatialQueryPipeline};
+use empire_of_wind::components::ship::Ship;
 
 use empire_of_wind::prelude::*;
 

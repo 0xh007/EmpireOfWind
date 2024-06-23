@@ -1,4 +1,5 @@
 pub use manage_active_areas::*;
+pub use handle_player_input::*;
 
 mod manage_active_areas;
 mod read_area_markers;
@@ -15,3 +16,13 @@ mod interpolate_zoom;
 mod eat_action;
 mod increase_fatigue;
 mod calculate_fatigue_score;
+mod navigate_to_nearest;
+mod increase_hunger;
+mod calculate_hunger_score;
+mod handle_player_input;
+mod toggle_nav_mesh_visibility;
+mod spawn_npc;
+mod spawn_player;
+mod spawn_ship;
+mod spawn_furniture;
+mod spawn_food;

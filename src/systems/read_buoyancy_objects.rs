@@ -7,7 +7,7 @@ use bevy_xpbd_3d::math::Matrix3;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::plugins::Ship;
+use crate::components::ship::Ship;
 
 pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,

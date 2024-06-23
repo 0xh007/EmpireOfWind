@@ -5,7 +5,7 @@ use bevy::prelude::{Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, 
 use bevy_xpbd_3d::prelude::{Collider, Sensor};
 
 use crate::components::{AreaEnterMarker, AreaExitMarker};
-use crate::plugins::Ship;
+use crate::components::ship::Ship;
 
 #[allow(clippy::too_many_arguments)]
 pub fn read_area_markers(

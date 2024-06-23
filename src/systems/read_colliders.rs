@@ -6,7 +6,7 @@ use bevy_xpbd_3d::components::RigidBody;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::plugins::Ship;
+use crate::components::ship::Ship;
 
 pub fn read_colliders(
     collider_marker_query: Query<

@@ -27,3 +27,4 @@ mod area_name;
 mod nav_mesh_marker;
 mod area_exit_marker;
 mod camera_zoom;
+mod ship;
