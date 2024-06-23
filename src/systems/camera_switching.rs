@@ -1,7 +1,8 @@
 use bevy::input::ButtonInput;
 use bevy::prelude::{Camera, KeyCode, Query, Res, Without};
 
-use crate::components::{DebugCamera, MainCamera};
+use crate::components::MainCamera;
+use crate::components::DebugCamera;
 
 pub fn camera_switching(
     keyboard_input: Res<ButtonInput<KeyCode>>,

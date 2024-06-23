@@ -8,6 +8,7 @@ use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
 use crate::components::Buoyancy;
+use crate::components::buoyancy_marker::BuoyancyMarker;
 use crate::components::ship::Ship;
 
 pub fn read_buoyancy_objects(

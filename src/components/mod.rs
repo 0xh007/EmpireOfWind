@@ -1,11 +1,11 @@
 pub use {
-    area_enter_marker::*, area_exit_marker::*, area_name::*, buoyancy::*, camera::*, eat::*, fatigue::*, fatigue_scorer::*, food::*,
-    hunger::*, hunger_scorer::*, move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*, sleep_area::*,
+    area_enter_marker::*, area_exit_marker::*, area_name::*, buoyancy::*, main_camera::*, eat::*, fatigue::*, fatigue_scorer::*, food::*,
+    hunger::*, hunger_scorer::*, move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*, sleep_area::*, debug_camera::*,
 };
 
 pub use crate::resources::active_areas::*;
 
-pub mod camera;
+pub mod main_camera;
 pub mod eat;
 pub mod fatigue;
 pub mod fatigue_scorer;
@@ -30,3 +30,4 @@ pub mod area_exit_marker;
 pub mod camera_zoom;
 pub mod ship;
 pub mod sun;
+pub mod debug_camera;

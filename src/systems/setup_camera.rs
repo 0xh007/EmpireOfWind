@@ -8,8 +8,9 @@ use bevy::render::view::RenderLayers;
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_panorbit_camera::PanOrbitCamera;
 
-use crate::components::{DebugCamera, MainCamera};
+use crate::components::MainCamera;
 use crate::components::camera_zoom::CameraZoom;
+use crate::components::debug_camera::DebugCamera;
 
 pub fn setup_camera(mut commands: Commands) {
     let initial_scale = 20.0;

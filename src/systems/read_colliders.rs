@@ -5,6 +5,7 @@ use bevy::prelude::{Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, 
 use bevy_xpbd_3d::components::RigidBody;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
+use crate::components::nav_mesh_marker::NavMeshMarker;
 
 use crate::components::ship::Ship;
 
