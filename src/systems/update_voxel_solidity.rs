@@ -2,6 +2,8 @@ use bevy::math::Quat;
 use bevy::prelude::{Entity, Query, Transform};
 use bevy_xpbd_3d::prelude::{Collider, SpatialQuery, SpatialQueryFilter};
 
+use crate::components::Buoyancy;
+
 pub fn update_voxel_solidity(
     mut query: Query<(Entity, &Transform, &mut Buoyancy)>,
     mut spatial_query: SpatialQuery,

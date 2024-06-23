@@ -1,5 +1,5 @@
 pub use {
-    area_enter_marker::*, area_exit_marker::*, area_name::*, camera::*, eat::*, fatigue::*, fatigue_scorer::*, food::*,
+    area_enter_marker::*, area_exit_marker::*, area_name::*, buoyancy::*, camera::*, eat::*, fatigue::*, fatigue_scorer::*, food::*,
     hunger::*, hunger_scorer::*, move_to_nearest::*, navigation_path::*, npc::*, player::*, sleep::*, sleep_area::*,
 };
 

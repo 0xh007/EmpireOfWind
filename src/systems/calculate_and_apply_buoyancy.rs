@@ -3,6 +3,7 @@ use bevy::prelude::{Query, Transform};
 use bevy_water::WaterParam;
 use bevy_xpbd_3d::components::{CenterOfMass, ColliderDensity, ExternalForce};
 
+use crate::components::Buoyancy;
 use crate::plugins::physics;
 use crate::plugins::physics::VOXEL_SIZE;
 use crate::utils::water_utils;
