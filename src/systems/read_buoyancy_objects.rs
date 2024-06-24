@@ -10,6 +10,7 @@ use oxidized_navigation::NavMeshAffector;
 use crate::components::Buoyancy;
 use crate::components::buoyancy_marker::BuoyancyMarker;
 use crate::components::ship::Ship;
+use crate::utils::mesh_utils::*;
 
 pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,

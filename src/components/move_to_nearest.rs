@@ -37,7 +37,7 @@ use big_brain::prelude::*;
 /// fn main() {
 ///     App::new()
 ///         .add_plugins(DefaultPlugins)
-///         .add_startup_system(setup.system())
+///         .add_startup_system(setup)
 ///         .add_system(navigate_to_nearest::<TargetComponent>.system())
 ///         .add_system(spawn_npc.system())
 ///         .run();

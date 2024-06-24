@@ -3,7 +3,7 @@ use bevy::prelude::{Mesh, Transform};
 
 use crate::plugins::physics::VOXEL_SIZE;
 
-fn generate_voxel_grid(mesh: &Mesh, mesh_transform: &Transform) -> Vec<Voxel> {
+pub fn generate_voxel_grid(mesh: &Mesh, mesh_transform: &Transform) -> Vec<Voxel> {
     let bounds = crate::plugins::physics::calculate_mesh_bounds(mesh);
     let grid_size = crate::plugins::physics::calculate_grid_size(&bounds);
     let mut voxels = Vec::new();

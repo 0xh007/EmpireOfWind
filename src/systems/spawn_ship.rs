@@ -5,7 +5,7 @@ use crate::resources::ship_assets::ShipAssets;
 
 pub fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
     commands.spawn((
-        Ship, // Add this marker component
+        Ship,
         Name::new("Ship"),
         SceneBundle {
             scene: ship_assets.ship.clone(),

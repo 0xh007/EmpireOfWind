@@ -2,7 +2,7 @@ use bevy::math::Vec3;
 use bevy::prelude::{Children, Entity, Handle, Mesh, Query};
 use bevy::render::mesh::VertexAttributeValues;
 
-fn find_mesh(
+pub fn find_mesh(
     parent: Entity,
     children_query: &Query<&Children>,
     mesh_handles: &Query<&Handle<Mesh>>,
