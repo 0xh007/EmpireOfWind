@@ -23,31 +23,6 @@ use crate::events::NavMeshDebugToggle;
 /// - `keyboard_input`: Resource capturing the current state of keyboard inputs.
 /// - `nav_mesh_event_writer`: Writer to send `NavMeshDebugToggle` events.
 /// - `query`: Query to fetch the `Player` and `TnuaController` components of entities.
-///
-/// # Example Usage
-/// The `handle_player_input` system should be added to your Bevy app like this:
-/// ```rust
-/// use bevy::prelude::*;
-/// use empire_of_wind::systems::handle_player_input;
-/// use empire_of_wind::components::Player;
-/// use bevy_tnua::controller::TnuaController;
-/// use empire_of_wind::events::NavMeshDebugToggle;
-///
-/// fn main() {
-///     App::build()
-///         .add_plugins(DefaultPlugins)
-///         .add_event::<NavMeshDebugToggle>()
-///         .add_system(handle_player_input.system())
-///         .run();
-/// }
-///
-/// fn setup(mut commands: Commands) {
-///     commands.spawn((
-///         Player,
-///         TnuaController::default(),
-///     ));
-/// }
-/// ```
 pub fn handle_player_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
