@@ -13,11 +13,27 @@ use crate::resources::cycle_timer::CycleTimer;
 /// # Parameters
 /// - `input`: Resource that captures keyboard input.
 /// - `timer`: Mutable resource that manages the cycle timer.
+///
+/// # Example Usage
+/// The `control_cycle_timer` system should be added to your Bevy app like this:
+/// ```rust
+/// use bevy::prelude::*;
+/// use empire_of_wind::systems::control_cycle_timer;
+/// use empire_of_wind::resources::cycle_timer::CycleTimer;
+///
+/// fn main() {
+///     App::new()
+///         .add_plugins(DefaultPlugins)
+///         .insert_resource(CycleTimer::default())
+///         .add_systems(Update, control_cycle_timer)
+///         .run();
+/// }
+/// ```
 pub fn control_cycle_timer(input: Res<ButtonInput<KeyCode>>, mut timer: ResMut<CycleTimer>) {
     if input.just_pressed(KeyCode::KeyP) {
         timer.toggle_pause();
     }
-    
+
     if input.pressed(KeyCode::NumpadAdd) {
         timer.update_speed(DAY_CYCLE_SPEED_DELTA);
         eprintln!("Increase speed: {}", timer.speed);

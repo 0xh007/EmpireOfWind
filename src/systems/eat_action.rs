@@ -5,9 +5,31 @@ use big_brain::prelude::{ActionSpan, Actor};
 
 use crate::components::{Eat, Hunger};
 
-/// This system manages the eating action of entities. It reduces the fatigue
+/// This system manages the eating action of entities. It reduces the hunger
 /// level of the entity as it eats and updates the entity's state based on
-/// the Eat component's parameters.
+/// the `Eat` component's parameters.
+///
+/// # Parameters
+/// - `time`: Resource providing the delta time for the game.
+/// - `hungers`: Query to fetch and modify the `Hunger` component of entities.
+/// - `query`: Query to fetch and modify the `ActionState`, `Eat`, and `ActionSpan`
+///   components of entities, as well as the `Actor` component to identify the entity.
+///
+/// # Example Usage
+/// The `eat_action` system should be added to your Bevy app like this:
+/// ```rust
+/// use bevy::prelude::*;
+/// use empire_of_wind::systems::eat_action;
+/// use empire_of_wind::components::{Eat, Hunger};
+/// use big_brain::prelude::{ActionState, Actor, ActionSpan};
+///
+/// fn main() {
+///     App::new()
+///         .add_plugins(DefaultPlugins)
+///         .add_systems(Update, eat_action)
+///         .run();
+/// }
+/// ```
 pub fn eat_action(
     time: Res<Time>,
     mut hungers: Query<&mut Hunger>,

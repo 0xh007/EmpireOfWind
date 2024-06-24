@@ -4,8 +4,32 @@ use big_brain::prelude::{Actor, Score, ScorerSpan};
 
 use crate::components::{Fatigue, FatigueScorer};
 
-/// This system calculates a score based on an entity's fatigue level. The higher the fatigue, the
-/// higher the score, indicating a greater need for the entity to sleep.
+/// This system calculates a score based on an entity's fatigue level. The higher the fatigue,
+/// the higher the score, indicating a greater need for the entity to sleep.
+///
+/// The system iterates over entities with the `FatigueScorer` component, fetches their `Fatigue`
+/// component, and updates their `Score` component. If the entity is sleeping, the score remains
+/// unchanged. Otherwise, the score is updated based on the fatigue level.
+///
+/// # Parameters
+/// - `last_score`: A local cache to store the last calculated score for sleeping entities.
+/// - `fatigues`: A query to fetch the `Fatigue` component of entities.
+/// - `query`: A query to fetch the `Actor`, `Score`, and `ScorerSpan` components of entities
+///   with the `FatigueScorer` component.
+///
+/// # Example Usage
+/// The `calculate_fatigue_score` system should be added to your Bevy app like this:
+/// ```rust
+/// use bevy::prelude::*;
+/// use empire_of_wind::systems::calculate_fatigue_score;
+///
+/// fn main() {
+///     App::new()
+///         .add_plugins(DefaultPlugins)
+///         .add_system(Update, calculate_fatigue_score)
+///         .run();
+/// }
+/// ```
 pub fn calculate_fatigue_score(
     mut last_score: Local<Option<f32>>,
     fatigues: Query<&Fatigue>,

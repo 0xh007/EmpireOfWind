@@ -1,10 +1,35 @@
+use bevy::log::trace;
 use bevy::prelude::{Local, Query, With};
 use big_brain::prelude::{Actor, Score, ScorerSpan};
-use bevy::log::trace;
+
 use crate::components::{Hunger, HungerScorer};
 
-/// This system calculates a score based on an entity's hunger level. The higher the hunger, the
-/// higher the score, indicating a greater need for the entity to eat.
+/// This system calculates a score based on an entity's hunger level. The higher the hunger,
+/// the higher the score, indicating a greater need for the entity to eat.
+///
+/// The system iterates over entities with the `HungerScorer` component, fetches their `Hunger`
+/// component, and updates their `Score` component. If the entity is eating, the score remains
+/// unchanged. Otherwise, the score is updated based on the hunger level.
+///
+/// # Parameters
+/// - `last_score`: A local cache to store the last calculated score for eating entities.
+/// - `hungers`: A query to fetch the `Hunger` component of entities.
+/// - `query`: A query to fetch the `Actor`, `Score`, and `ScorerSpan` components of entities
+///   with the `HungerScorer` component.
+///
+/// # Example Usage
+/// The `calculate_hunger_score` system should be added to your Bevy app like this:
+/// ```rust
+/// use bevy::prelude::*;
+/// use empire_of_wind::systems::calculate_hunger_score;
+///
+/// fn main() {
+///     App::new()
+///         .add_plugins(DefaultPlugins)
+///         .add_system(calculate_hunger_score)
+///         .run();
+/// }
+/// ```
 pub fn calculate_hunger_score(
     mut last_score: Local<Option<f32>>,
     hungers: Query<&Hunger>,

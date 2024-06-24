@@ -5,7 +5,7 @@
 ///
 /// Example usage:
 ///
-/// ```
+/// ```rust
 /// use empire_of_wind::constants::voxel::VOXEL_SIZE;
 ///
 /// let voxel_dimension = VOXEL_SIZE;
