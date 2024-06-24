@@ -1,4 +1,9 @@
-// TODO: Make this into a toggle debug system
+use bevy::prelude::*;
+
+use crate::components::Buoyancy;
+use crate::components::voxel_visual::VoxelVisual;
+use crate::constants::voxel::VOXEL_SIZE;
+
 fn visualize_voxel_grid(
     mut commands: Commands,
     query: Query<(Entity, &Transform, &Buoyancy), Changed<Buoyancy>>,

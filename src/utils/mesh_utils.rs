@@ -1,5 +1,5 @@
 use bevy::math::Vec3;
-use bevy::prelude::{Children, Entity, Handle, Mesh, Query};
+use bevy::prelude::{Assets, Children, Color, Commands, default, Entity, Handle, Mesh, Query, ResMut, StandardMaterial, Transform};
 use bevy::render::mesh::VertexAttributeValues;
 
 pub fn find_mesh(
@@ -39,7 +39,7 @@ fn visualize_bounds(
 }
 
 
-fn calculate_mesh_bounds(mesh: &Mesh) -> (Vec3, Vec3) {
+pub fn calculate_mesh_bounds(mesh: &Mesh) -> (Vec3, Vec3) {
     let positions = if let Some(VertexAttributeValues::Float32x3(pos)) =
         mesh.attribute(Mesh::ATTRIBUTE_POSITION)
     {

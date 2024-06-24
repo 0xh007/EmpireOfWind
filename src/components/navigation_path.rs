@@ -7,7 +7,7 @@ use bevy::prelude::*;
 ///
 /// # Example
 ///
-/// ```
+/// ```rust
 /// use bevy::prelude::*;
 /// use empire_of_wind::components::NavigationPath;
 ///

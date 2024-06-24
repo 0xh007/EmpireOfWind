@@ -4,8 +4,6 @@ use bevy_tnua_xpbd3d::*;
 
 use crate::prelude::*;
 
-const VOXEL_SIZE: f32 = 2.0;
-
 pub struct PhysicsPlugin;
 
 impl Plugin for PhysicsPlugin {

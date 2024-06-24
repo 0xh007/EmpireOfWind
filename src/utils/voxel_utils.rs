@@ -1,20 +1,25 @@
 use bevy::math::Vec3;
 use bevy::prelude::{Mesh, Transform};
 
-use crate::plugins::physics::VOXEL_SIZE;
+use crate::components::{
+    vec3i::Vec3I,
+    voxel::Voxel,
+};
+use crate::constants::voxel::VOXEL_SIZE;
+use crate::utils::mesh_utils::calculate_mesh_bounds;
 
 pub fn generate_voxel_grid(mesh: &Mesh, mesh_transform: &Transform) -> Vec<Voxel> {
-    let bounds = crate::plugins::physics::calculate_mesh_bounds(mesh);
-    let grid_size = crate::plugins::physics::calculate_grid_size(&bounds);
+    let bounds = calculate_mesh_bounds(mesh);
+    let grid_size = calculate_grid_size(&bounds);
     let mut voxels = Vec::new();
 
     for x in 0..grid_size.x {
         for y in 0..grid_size.y {
             for z in 0..grid_size.z {
                 let position = Vec3::new(
-                    bounds.0.x + x as f32 * crate::plugins::physics::VOXEL_SIZE + crate::plugins::physics::VOXEL_SIZE / 2.0,
-                    bounds.0.y + y as f32 * crate::plugins::physics::VOXEL_SIZE + crate::plugins::physics::VOXEL_SIZE / 2.0,
-                    bounds.0.z + z as f32 * crate::plugins::physics::VOXEL_SIZE + crate::plugins::physics::VOXEL_SIZE / 2.0,
+                    bounds.0.x + x as f32 * VOXEL_SIZE + VOXEL_SIZE / 2.0,
+                    bounds.0.y + y as f32 * VOXEL_SIZE + VOXEL_SIZE / 2.0,
+                    bounds.0.z + z as f32 * VOXEL_SIZE + VOXEL_SIZE / 2.0,
                 ) + mesh_transform.translation;
 
                 voxels.push(Voxel {

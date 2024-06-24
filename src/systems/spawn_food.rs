@@ -1,12 +1,12 @@
-use bevy::prelude::{Color, Commands, default, Mesh, Meshable, ResMut, Sphere, Transform};
 use bevy::asset::Assets;
-use bevy::pbr::{PbrBundle, StandardMaterial};
 use bevy::core::Name;
+use bevy::pbr::{PbrBundle, StandardMaterial};
+use bevy::prelude::{Color, Commands, default, Mesh, Meshable, ResMut, Sphere, Transform};
 use bevy_xpbd_3d::components::{Friction, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
+
 use crate::components::Food;
 
-// TODO: Eviction notice
 pub fn spawn_food(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

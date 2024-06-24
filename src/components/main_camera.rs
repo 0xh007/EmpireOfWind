@@ -13,7 +13,7 @@ use bevy::prelude::*;
 ///
 /// The following example demonstrates how to attach the `MainCamera` component to a camera entity:
 ///
-/// ```no_run
+/// ```rust
 /// use bevy::prelude::*;
 ///
 /// #[derive(Component)]
