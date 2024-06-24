@@ -1,10 +1,11 @@
 use bevy::prelude::*;
+use bevy::render::view::RenderLayers;
+use bevy_xpbd_3d::prelude::Collision;
 
-use crate::Collision;
 use crate::components::{
-    ActiveAreas, AreaEnterMarker, AreaExitMarker, AreaName, CameraZoom, MainCamera, Player,
-    RenderLayers,
+    AreaEnterMarker, AreaExitMarker, AreaName, CameraZoom, MainCamera, Player,
 };
+use crate::resources::active_areas::ActiveAreas;
 
 pub fn manage_active_areas(
     mut collision_event_reader: EventReader<Collision>,

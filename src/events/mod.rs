@@ -1,4 +1,4 @@
-mod movement;
-mod navmesh;
+pub use nav_mesh_debug_toggle::*;
 
-pub use {movement::*, navmesh::*};
+mod nav_mesh_debug_toggle;
+
