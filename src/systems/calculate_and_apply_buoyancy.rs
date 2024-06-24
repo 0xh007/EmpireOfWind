@@ -4,20 +4,30 @@ use bevy_water::WaterParam;
 use bevy_xpbd_3d::components::{CenterOfMass, ColliderDensity, ExternalForce};
 
 use crate::components::Buoyancy;
-use crate::plugins::physics;
-use crate::plugins::physics::VOXEL_SIZE;
+use crate::constants::voxel::VOXEL_SIZE;
+use crate::utils::voxel_utils::calculate_submerged_volume;
 use crate::utils::water_utils;
 
-/// Calculates and applies the buoyancy force to gizmos submerged in water based on their density,
-/// taking into account the elapsed time since the last frame.
+/// This system calculates and applies buoyancy forces to entities with the `Buoyancy` component.
+///
+/// The system iterates over all entities with the `Buoyancy`, `Transform`, `ExternalForce`,
+/// `ColliderDensity`, and `CenterOfMass` components. For each voxel in the `Buoyancy` component,
+/// it calculates the buoyancy force based on the submerged volume and applies this force to
+/// the entity at the voxel's position, taking into account the entity's rotation and center of mass.
 ///
 /// # Arguments
 ///
-/// * `time` - The game's time resource, providing delta time.
-/// * `gizmos` - The collection of gizmos.
-/// * `water` - The water parameters.
-/// * `query` - The query to retrieve gizmos with buoyancy components.
+/// * `water` - A parameter containing the global water settings and time resource, used to calculate wave heights.
+/// * `query` - A query that retrieves entities with the required components for buoyancy calculation.
 ///
+/// # Details
+///
+/// The buoyancy force is computed using the following formula:
+///
+/// buoyancy force = gravity * submerged volume * hull density
+///
+/// The system also applies the calculated buoyancy force at the voxel's rotated position, creating torque around the center of mass.
+
 pub fn calculate_and_apply_buoyancy(
     water: WaterParam,
     mut query: Query<(
@@ -41,7 +51,7 @@ pub fn calculate_and_apply_buoyancy(
 
                 let water_height = water_utils::get_water_height_at_position(world_position, &water);
                 let submerged_volume =
-                    physics::calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
+                    calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
                 let hull_density = 1.0;
                 let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume * hull_density, 0.0);
 
@@ -52,6 +62,7 @@ pub fn calculate_and_apply_buoyancy(
                     center_of_mass.0,
                 );
 
+                // TODO: Make this toggleable
                 // gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
 
                 // Visualize the buoyancy force as an arrow

@@ -44,7 +44,7 @@ fn calculate_grid_size(bounds: &(Vec3, Vec3)) -> Vec3I {
     )
 }
 
-fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
+pub fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
     let bottom_of_voxel = world_position.y - voxel_size / 2.0;
     let top_of_voxel = world_position.y + voxel_size / 2.0;
 
