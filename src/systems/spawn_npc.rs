@@ -1,17 +1,29 @@
-use bevy::prelude::{Capsule3d, Color, Commands, default, Mesh, ResMut, Transform};
 use bevy::asset::Assets;
-use bevy::pbr::{PbrBundle, StandardMaterial};
-use bevy::math::Vec3;
-use big_brain::actions::Steps;
 use bevy::core::Name;
-use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
-use bevy_xpbd_3d::prelude::Collider;
+use bevy::math::Vec3;
+use bevy::pbr::{PbrBundle, StandardMaterial};
+use bevy::prelude::{Capsule3d, Color, Commands, default, Mesh, ResMut, Transform};
 use bevy_tnua::controller::TnuaControllerBundle;
 use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
-use big_brain::prelude::Thinker;
+use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
+use bevy_xpbd_3d::prelude::Collider;
+use big_brain::actions::Steps;
 use big_brain::pickers::FirstToScore;
+use big_brain::prelude::Thinker;
+
 use crate::components::{Eat, Fatigue, FatigueScorer, Food, Hunger, HungerScorer, MoveToNearest, NavigationPath, Npc, Sleep, SleepArea};
 
+/// Spawns a set of NPCs in the game world.
+///
+/// This system demonstrates how to integrate multiple crates for advanced behaviors:
+///
+/// - `big_brain`: Utility AI for defining complex behaviors.
+/// - `bevy_xpbd_3d`: Components for 3D physics.
+/// - `bevy_tnua`: Movement and navigation.
+///
+/// Each NPC is configured with basic AI to handle eating and sleeping routines. The AI is managed
+/// using the `big_brain` crate, which allows for defining scorers and actions. The NPCs also utilize
+/// `bevy_xpbd_3d` for physics and `bevy_tnua` for movement and control.
 pub fn spawn_npc(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

@@ -1,20 +1,27 @@
-use bevy::prelude::{Capsule3d, Color, Commands, default, Mesh, ResMut, Transform};
 use bevy::asset::Assets;
-use bevy::pbr::{PbrBundle, StandardMaterial};
-use bevy::log::info;
 use bevy::core::Name;
-use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
-use bevy_xpbd_3d::prelude::Collider;
+use bevy::pbr::{PbrBundle, StandardMaterial};
+use bevy::prelude::{Capsule3d, Color, Commands, default, Mesh, ResMut, Transform};
 use bevy_tnua::controller::TnuaControllerBundle;
 use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
+use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
+use bevy_xpbd_3d::prelude::Collider;
+
 use crate::components::Player;
 
+/// Spawns the player entity in the game world.
+///
+/// This system sets up the player entity with components for 3D physics and movement control. It utilizes:
+///
+/// - `bevy_xpbd_3d`: Provides the `RigidBody` and `Collider` components for physics simulation.
+/// - `bevy_tnua`: Provides the `TnuaControllerBundle` for movement control.
+///
+/// The player is visually represented by a yellow capsule.
 pub fn spawn_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    info!("Spawning player");
     commands.spawn((
         Name::new("Player"),
         Player,

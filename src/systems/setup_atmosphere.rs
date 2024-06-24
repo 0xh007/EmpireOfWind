@@ -3,7 +3,7 @@ use bevy::pbr::{DirectionalLight, DirectionalLightBundle};
 use bevy::prelude::{Commands, default, Transform};
 use bevy::render::view::RenderLayers;
 
-use crate::components::sun::Sun;
+use crate::prelude::*;
 
 /// System that sets up the atmosphere by spawning a directional light entity representing the sun.
 ///

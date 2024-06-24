@@ -8,22 +8,6 @@ use bevy_asset_loader::asset_collection::AssetCollection;
 /// load the assets during a configurable loading state. The assets are then available as resources
 /// that can be used throughout the game.
 ///
-/// # Example:
-///
-/// ```rust
-/// use bevy::prelude::{Commands, Res, Transform, GlobalTransform};
-/// use empire_of_wind::resources::ship_assets::ShipAssets;
-///
-/// fn setup_ships(mut commands: Commands, ship_assets: Res<ShipAssets>) {
-///     // Spawn the ship with a specific transformation
-///     commands.spawn((
-///         Transform::default(),
-///         GlobalTransform::default(),
-///         ship_assets.ship.clone(),
-///     ));
-/// }
-/// ```
-///
 /// # Fields
 ///
 /// * `ship` - A handle to the ship scene asset.

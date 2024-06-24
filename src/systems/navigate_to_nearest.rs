@@ -1,12 +1,27 @@
-use bevy::prelude::{Component, Query, Res, Time, Transform, With, Without};
-use oxidized_navigation::{NavMesh, NavMeshSettings};
-use big_brain::prelude::{ActionSpan, Actor, HasThinker};
-use big_brain::actions::ActionState;
 use bevy::log::debug;
-use crate::components::{MoveToNearest, NavigationPath};
-use crate::plugins::pathfinding;
-use crate::plugins::pathfinding::MAX_DISTANCE;
+use bevy::prelude::{Component, Query, Res, Time, Transform, With, Without};
+use big_brain::actions::ActionState;
+use big_brain::prelude::{ActionSpan, Actor, HasThinker};
+use oxidized_navigation::{NavMesh, NavMeshSettings};
 
+use crate::prelude::*;
+
+/// System to navigate actors towards the nearest target of a specified type.
+///
+/// This system uses navigation meshes to calculate paths for actors to move
+/// towards the nearest entity of type `T`. The system is integrated with the
+/// `big_brain` crate to handle the state transitions and pathfinding logic.
+///
+/// # Parameters
+/// - `time`: Resource to access the delta time between frames.
+/// - `nav_mesh`: Resource containing the navigation mesh for pathfinding.
+/// - `nav_mesh_settings`: Resource with settings for the navigation mesh.
+/// - `goal_query`: Query to retrieve the transforms of target entities of type `T`.
+/// - `thinker_query`: Query to retrieve the navigation path and transform of the actor entities with the `HasThinker` component, excluding target entities.
+/// - `action_query`: Query to retrieve the actors and their action states, along with the `MoveToNearest` component and the action span.
+///
+/// # Type Parameters
+/// - `T`: Component type that represents the target entities to navigate to.
 #[allow(clippy::type_complexity)]
 pub fn navigate_to_nearest<T: Component + std::fmt::Debug + Clone>(
     time: Res<Time>,
@@ -37,13 +52,13 @@ pub fn navigate_to_nearest<T: Component + std::fmt::Debug + Clone>(
                         .map(|(_, t)| t);
 
                     if navigation_path.points.is_empty() {
-                        if let Some(new_path) = pathfinding::calculate_path_blocking(
+                        if let Some(new_path) = calculate_path_blocking(
                             &nav_mesh,
                             &nav_mesh_settings,
                             actor_transform.translation,
                             goal_transform.unwrap().translation,
                         ) {
-                            debug!("Updating navgation path.");
+                            debug!("Updating navigation path.");
                             navigation_path.points = new_path;
                         } else {
                             *action_state = ActionState::Failure;
@@ -58,12 +73,11 @@ pub fn navigate_to_nearest<T: Component + std::fmt::Debug + Clone>(
                             (*next_point - actor_transform.translation).length();
 
                         // Check if we are close enough to the next point to consider it reached
-                        if distance_to_next_point < MAX_DISTANCE {
+                        if distance_to_next_point < REACHED_POINT_THRESHOLD {
                             // Remove the reached point from the navigation path
                             navigation_path.points.remove(0);
 
-                            // If after removing the point, the path is empty, we've reached the
-                            // end
+                            // If after removing the point, the path is empty, we've reached the end
                             if navigation_path.points.is_empty() {
                                 debug!("Reached end of path.");
                                 *action_state = ActionState::Success;

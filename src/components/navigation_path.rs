@@ -4,29 +4,6 @@ use bevy::prelude::*;
 ///
 /// Each `NavigationPath` contains a sequence of points (`Vec3`) that define
 /// waypoints for navigation purposes.
-///
-/// # Example
-///
-/// ```rust
-/// use bevy::prelude::*;
-/// use empire_of_wind::components::NavigationPath;
-///
-/// fn main() {
-///     // Create a new NavigationPath with some points
-///     let path = NavigationPath {
-///         points: vec![
-///             Vec3::new(0.0, 0.0, 0.0),
-///             Vec3::new(5.0, 0.0, 0.0),
-///             Vec3::new(5.0, 5.0, 0.0),
-///         ],
-///     };
-///
-///     // Print the points in the navigation path
-///     for point in &path.points {
-///         println!("Point: {:?}", point);
-///     }
-/// }
-/// ```
 #[derive(Component, Debug, Clone, Reflect)]
 #[reflect(Component)]
 pub struct NavigationPath {

@@ -11,6 +11,7 @@ pub use interpolate_zoom::*;
 pub use manage_active_areas::*;
 pub use move_camera::*;
 pub use navigate_to_nearest::*;
+pub use propagate_render_layers::*;
 pub use read_area_markers::*;
 pub use read_buoyancy_objects::*;
 pub use read_colliders::*;
@@ -57,4 +58,5 @@ mod update_sun_cycle;
 mod update_voxel_solidity;
 mod visualize_mesh_bounds;
 mod visualize_voxel_grid;
+mod propagate_render_layers;
 

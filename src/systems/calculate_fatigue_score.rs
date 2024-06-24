@@ -16,20 +16,6 @@ use crate::components::{Fatigue, FatigueScorer};
 /// - `fatigues`: A query to fetch the `Fatigue` component of entities.
 /// - `query`: A query to fetch the `Actor`, `Score`, and `ScorerSpan` components of entities
 ///   with the `FatigueScorer` component.
-///
-/// # Example Usage
-/// The `calculate_fatigue_score` system should be added to your Bevy app like this:
-/// ```rust
-/// use bevy::prelude::*;
-/// use empire_of_wind::systems::calculate_fatigue_score;
-///
-/// fn main() {
-///     App::new()
-///         .add_plugins(DefaultPlugins)
-///         .add_system(Update, calculate_fatigue_score)
-///         .run();
-/// }
-/// ```
 pub fn calculate_fatigue_score(
     mut last_score: Local<Option<f32>>,
     fatigues: Query<&Fatigue>,

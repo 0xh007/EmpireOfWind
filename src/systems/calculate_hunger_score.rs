@@ -16,20 +16,6 @@ use crate::components::{Hunger, HungerScorer};
 /// - `hungers`: A query to fetch the `Hunger` component of entities.
 /// - `query`: A query to fetch the `Actor`, `Score`, and `ScorerSpan` components of entities
 ///   with the `HungerScorer` component.
-///
-/// # Example Usage
-/// The `calculate_hunger_score` system should be added to your Bevy app like this:
-/// ```rust
-/// use bevy::prelude::*;
-/// use empire_of_wind::systems::calculate_hunger_score;
-///
-/// fn main() {
-///     App::new()
-///         .add_plugins(DefaultPlugins)
-///         .add_system(calculate_hunger_score)
-///         .run();
-/// }
-/// ```
 pub fn calculate_hunger_score(
     mut last_score: Local<Option<f32>>,
     hungers: Query<&Hunger>,

@@ -8,10 +8,30 @@ use bevy::render::view::RenderLayers;
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_panorbit_camera::PanOrbitCamera;
 
-use crate::components::MainCamera;
-use crate::components::camera_zoom::CameraZoom;
-use crate::components::debug_camera::DebugCamera;
+use crate::prelude::*;
 
+/// System to set up the main and debug cameras for the game.
+///
+/// This system spawns two camera entities:
+/// 1. The main camera, which is an orthographic camera used for the primary gameplay view.
+/// 2. A debug camera, which is an inactive perspective camera with pan and orbit capabilities.
+///
+/// # Main Camera
+/// The main camera is configured with:
+/// - Orthographic projection with an initial scale for zoom level.
+/// - Render layers to control what layers the camera can see.
+/// - Fog settings for atmospheric effects.
+/// - Depth prepass for improved rendering.
+/// - `AtmosphereCamera` for atmospheric rendering.
+/// - `CameraZoom` for handling zoom controls.
+///
+/// # Debug Camera
+/// The debug camera is configured with:
+/// - Perspective projection.
+/// - Pan and orbit capabilities for free movement.
+///
+/// # Parameters
+/// - `commands`: Commands for spawning and configuring entities.
 pub fn setup_camera(mut commands: Commands) {
     let initial_scale = 20.0;
 

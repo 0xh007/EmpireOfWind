@@ -3,7 +3,9 @@ pub use {
     area_exit_marker::*,
     area_name::*,
     buoyancy::*,
+    buoyancy_marker::*,
     camera_zoom::*,
+    collider_marker::*,
     debug_camera::*,
     eat::*,
     fatigue::*,
@@ -13,6 +15,7 @@ pub use {
     hunger_scorer::*,
     main_camera::*,
     move_to_nearest::*,
+    nav_mesh_marker::*,
     navigation_path::*,
     npc::*,
     player::*,
@@ -25,29 +28,31 @@ pub use {
     voxel_visual::*,
 };
 
-pub mod area_enter_marker;
-pub mod area_exit_marker;
-pub mod area_name;
-pub mod buoyancy;
-pub mod buoyancy_marker;
-pub mod camera_zoom;
-pub mod debug_camera;
-pub mod eat;
-pub mod fatigue;
-pub mod fatigue_scorer;
-pub mod food;
-pub mod hunger;
-pub mod hunger_scorer;
-pub mod main_camera;
-pub mod move_to_nearest;
-pub mod nav_mesh_marker;
-pub mod navigation_path;
-pub mod npc;
-pub mod player;
-pub mod ship;
-pub mod sleep;
-pub mod sleep_area;
-pub mod sun;
-pub mod vec3i;
-pub mod voxel;
-pub mod voxel_visual;
+mod area_enter_marker;
+mod area_exit_marker;
+mod area_name;
+mod buoyancy;
+mod buoyancy_marker;
+mod camera_zoom;
+mod collider_marker;
+mod debug_camera;
+mod eat;
+mod fatigue;
+mod fatigue_scorer;
+mod food;
+mod hunger;
+mod hunger_scorer;
+mod main_camera;
+mod move_to_nearest;
+mod nav_mesh_marker;
+mod navigation_path;
+mod npc;
+mod player;
+mod ship;
+mod sleep;
+mod sleep_area;
+mod sun;
+mod vec3i;
+mod voxel;
+mod voxel_visual;
+mod collider_marker;

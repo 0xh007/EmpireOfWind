@@ -5,10 +5,32 @@ use bevy::prelude::{Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, 
 use bevy_xpbd_3d::components::RigidBody;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
-use crate::components::nav_mesh_marker::NavMeshMarker;
 
-use crate::components::ship::Ship;
+use crate::prelude::*;
 
+/// System to process and configure collider objects within the game.
+///
+/// This system handles entities marked with the `ColliderMarker` component, generating
+/// colliders from associated meshes and attaching necessary components. If the entity is
+/// also marked with `NavMeshMarker`, it will additionally be configured as an affector of the
+/// navigation mesh. The system ensures colliders are correctly integrated into the ship's
+/// hierarchy and physics system.
+///
+/// # Parameters
+/// - `collider_marker_query`: Query to retrieve entities with `ColliderMarker` components, optional `NavMeshMarker`, and their transforms.
+/// - `commands`: Commands for modifying entities and their components.
+/// - `children`: Query to retrieve the children of entities.
+/// - `meshes`: Resource containing the assets of meshes.
+/// - `mesh_handles`: Query to retrieve mesh handles from entities.
+/// - `parent_query`: Query to retrieve the transform of the ship entity.
+///
+/// # Details
+/// For each `ColliderMarker` entity, the system:
+/// - Finds the associated mesh and generates a collider from it.
+/// - Updates the entity's transform to follow the ship if necessary.
+/// - Attaches the `Collider` and `RigidBody::Kinematic` components.
+/// - Hides the entity's visibility.
+/// - If marked with `NavMeshMarker`, attaches the `NavMeshAffector` component.
 pub fn read_colliders(
     collider_marker_query: Query<
         (Entity, Option<&NavMeshMarker>, &Transform),

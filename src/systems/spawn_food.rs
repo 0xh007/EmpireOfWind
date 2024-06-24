@@ -7,6 +7,23 @@ use bevy_xpbd_3d::prelude::Collider;
 
 use crate::components::Food;
 
+/// System to spawn food entities in the game.
+///
+/// This system creates food entities with specified properties, including a mesh,
+/// material, transform, and physical properties. The food entities are configured
+/// to have a dynamic rigid body, friction, and a spherical collider for physics interactions.
+///
+/// # Parameters
+/// - `commands`: Commands for spawning and configuring entities.
+/// - `meshes`: Resource to store and manage meshes.
+/// - `materials`: Resource to store and manage materials.
+///
+/// # Details
+/// The food entities are created with the following characteristics:
+/// - Name: "Food"
+/// - Mesh: A red sphere with a radius of 0.2 units.
+/// - Transform: Positioned at coordinates (13.167, 7.1885, 0.0).
+/// - Physics: Dynamic rigid body, friction of 1.0, and a spherical collider.
 pub fn spawn_food(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -17,7 +34,7 @@ pub fn spawn_food(
         Food,
         PbrBundle {
             mesh: meshes.add(Sphere::new(0.2).mesh().ico(5).unwrap()),
-            material: materials.add(Color::RED),
+            material: materials.add(Color::RED.into()),
             transform: Transform::from_xyz(13.167, 7.1885, 0.0),
             ..default()
         },

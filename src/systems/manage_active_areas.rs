@@ -1,12 +1,27 @@
 use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
-use bevy_xpbd_3d::prelude::Collision;
+use bevy_xpbd_3d::prelude::{Collision, Sensor};
 
 use crate::components::{
     AreaEnterMarker, AreaExitMarker, AreaName, CameraZoom, MainCamera, Player,
 };
 use crate::resources::active_areas::ActiveAreas;
+use crate::utils::*;
 
+/// Manages active areas based on player interactions with sensors.
+///
+/// This system updates the set of active areas when the player enters or exits an area,
+/// adjusts the camera zoom level, and updates the render layers accordingly. It listens for
+/// collision events involving the player and area sensors, and modifies the active areas
+/// resource, camera zoom, and render layers as necessary.
+///
+/// # Parameters
+/// - `collision_event_reader`: Event reader to capture collision events.
+/// - `sensor_query`: Query to fetch sensor components and area markers.
+/// - `player_query`: Query to identify player entities.
+/// - `active_areas`: Resource to manage the set of active areas.
+/// - `camera_layers_query`: Query to modify the render layers of the main camera.
+/// - `camera_zoom_query`: Query to modify the zoom level of the main camera.
 pub fn manage_active_areas(
     mut collision_event_reader: EventReader<Collision>,
     sensor_query: Query<(
@@ -57,33 +72,4 @@ pub fn manage_active_areas(
     }
 
     update_camera_layers(&mut camera_layers_query, &active_areas);
-}
-
-fn update_camera_layers(
-    camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
-    active_areas: &ActiveAreas,
-) {
-    for mut render_layers in camera_query.iter_mut() {
-        let mut layers = (0..RenderLayers::TOTAL_LAYERS as u8).collect::<Vec<u8>>(); // Start with all layers
-
-        if active_areas.0.contains("Deck 2 Aft Cabin") {
-            layers.retain(|&layer| layer != 1); // Remove layer 1
-        }
-        if active_areas.0.contains("Deck 3 Aft Cabin") {
-            layers.retain(|&layer| layer != 1 && layer != 2); // Remove layers 1 and 2
-        }
-
-        *render_layers = RenderLayers::from_layers(&layers);
-    }
-}
-
-
-fn update_zoom_target(
-    camera_zoom_query: &mut Query<&mut CameraZoom, With<MainCamera>>,
-    target_scale: f32,
-) {
-    for mut zoom in camera_zoom_query.iter_mut() {
-        zoom.target_scale = target_scale;
-        println!("Setting target zoom scale to {}", target_scale);
-    }
 }

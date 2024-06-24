@@ -7,21 +7,6 @@
 /// - `x`: The x-coordinate of the vector.
 /// - `y`: The y-coordinate of the vector.
 /// - `z`: The z-coordinate of the vector.
-///
-/// # Usage
-///
-/// ## Example: Creating and Accessing a Vec3I
-///
-/// ```rust
-/// use empire_of_wind::components::Vec3I;
-///
-/// // Creating a new Vec3I instance
-/// let vector = Vec3I::new(1, 2, 3);
-///
-/// // Accessing the components of Vec3I
-/// println!("Vector: {:?}", vector);
-/// println!("x: {}, y: {}, z: {}", vector.x, vector.y, vector.z);
-/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Vec3I {
     pub x: i32,

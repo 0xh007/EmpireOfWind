@@ -1,17 +1,36 @@
 use bevy::asset::{Assets, Handle};
 use bevy::hierarchy::{Children, DespawnRecursiveExt, Parent};
 use bevy::math::Vec3;
-use bevy::prelude::{Added, Commands, Entity, Mesh, Query, Res, Transform, Visibility, With};
+use bevy::prelude::*;
 use bevy_xpbd_3d::components::{AngularDamping, CenterOfMass, ColliderDensity, ExternalForce, Inertia, LinearDamping, Mass, RigidBody};
 use bevy_xpbd_3d::math::Matrix3;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::components::Buoyancy;
-use crate::components::buoyancy_marker::BuoyancyMarker;
-use crate::components::ship::Ship;
-use crate::utils::mesh_utils::*;
+use crate::prelude::*;
 
+/// System to process and configure buoyancy objects within the game.
+///
+/// This system handles entities marked with the `BuoyancyMarker` component, generating
+/// voxel grids for buoyancy calculations and attaching necessary components to the
+/// top-level ship entity. The system ensures that buoyancy objects are correctly integrated
+/// into the ship's dynamics, allowing for realistic buoyancy and physics interactions.
+///
+/// # Parameters
+/// - `buoyancy_marker_query`: Query to retrieve entities with `BuoyancyMarker` components and their transforms.
+/// - `commands`: Commands for modifying entities and their components.
+/// - `children_query`: Query to retrieve the children of entities.
+/// - `parent_query`: Query to navigate up the hierarchy to find parent entities.
+/// - `ship_query`: Query to identify the top-level ship entity.
+/// - `meshes`: Resource containing the assets of meshes.
+/// - `mesh_handles`: Query to retrieve mesh handles from entities.
+///
+/// # Details
+/// For each `BuoyancyMarker` entity, the system:
+/// - Finds the associated mesh and generates a voxel grid for buoyancy calculations.
+/// - Navigates up the entity hierarchy to find the top-level ship entity.
+/// - Attaches the `Buoyancy` component and other physics-related components to the ship entity.
+/// - De-spawns the original marker entity after processing.
 pub fn read_buoyancy_objects(
     buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
     mut commands: Commands,

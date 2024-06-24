@@ -1,12 +1,34 @@
 use bevy::asset::{Assets, Handle};
 use bevy::hierarchy::{Children, Parent};
 use bevy::log::error;
-use bevy::prelude::{Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, Transform, Visibility, With};
+use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::{Collider, Sensor};
 
-use crate::components::{AreaEnterMarker, AreaExitMarker};
-use crate::components::ship::Ship;
+use crate::prelude::*;
 
+/// System to process and configure area markers for entry and exit points.
+///
+/// This system handles the `AreaEnterMarker` and `AreaExitMarker` components,
+/// configuring the respective entities to act as sensors for entering and exiting
+/// specific areas. It attaches colliders and re-parents the markers to the top-level
+/// ship entity, ensuring that they are correctly integrated into the ship's hierarchy.
+///
+/// # Parameters
+/// - `enter_marker_query`: Query to retrieve entities with `AreaEnterMarker` components and their transforms.
+/// - `exit_marker_query`: Query to retrieve entities with `AreaExitMarker` components and their transforms.
+/// - `commands`: Commands for modifying entities and their components.
+/// - `children`: Query to retrieve the children of entities.
+/// - `meshes`: Resource containing the assets of meshes.
+/// - `mesh_handles`: Query to retrieve mesh handles from entities.
+/// - `parent_query`: Query to navigate up the hierarchy to find parent entities.
+/// - `ship_query`: Query to identify the top-level ship entity.
+///
+/// # Details
+/// For each `AreaEnterMarker` and `AreaExitMarker`, the system:
+/// - Finds the associated mesh and creates a collider from it.
+/// - Navigates up the entity hierarchy to find the top-level ship entity.
+/// - Re-parents the marker entity to the ship entity.
+/// - Configures the marker entity with the collider, sensor, transform, and other necessary components.
 #[allow(clippy::too_many_arguments)]
 pub fn read_area_markers(
     enter_marker_query: Query<(Entity, &Transform), Added<AreaEnterMarker>>, // Query for AreaEnterMarker
@@ -20,7 +42,7 @@ pub fn read_area_markers(
 ) {
     // Process AreaEnterMarkers
     for (entity, transform) in enter_marker_query.iter() {
-        if let Some(mesh_handle) = crate::plugins::physics::find_mesh(entity, &children, &mesh_handles) {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
             if let Some(mesh) = meshes.get(mesh_handle) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                     // Find the top-level Ship entity
@@ -66,7 +88,7 @@ pub fn read_area_markers(
 
     // Process AreaExitMarkers
     for (entity, transform) in exit_marker_query.iter() {
-        if let Some(mesh_handle) = crate::plugins::physics::find_mesh(entity, &children, &mesh_handles) {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
             if let Some(mesh) = meshes.get(mesh_handle) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                     // Find the top-level Ship entity
@@ -81,7 +103,7 @@ pub fn read_area_markers(
                     }
 
                     if let Some(ship) = ship_entity {
-                        // Reparent the sensor to the Ship entity
+                        // Re-parent the sensor to the Ship entity
                         commands.entity(ship).add_child(entity);
 
                         // Insert components for AreaExitMarker

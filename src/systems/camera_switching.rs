@@ -16,19 +16,6 @@ use crate::components::{DebugCamera, MainCamera};
 ///   that are not the main camera.
 /// - `query_main`: A query to fetch the `Camera` and `MainCamera` components of entities
 ///   that are not the debug camera.
-///
-/// # Example
-/// ```rust
-/// use bevy::prelude::*;
-/// use empire_of_wind::systems::camera_switching;
-///
-/// fn main() {
-///     App::new()
-///         .add_plugins(DefaultPlugins)
-///         .add_system(Update, camera_switching.)
-///         .run();
-/// }
-/// ```
 pub fn camera_switching(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Camera, &DebugCamera), Without<MainCamera>>,

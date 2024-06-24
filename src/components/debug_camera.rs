@@ -13,22 +13,6 @@ use bevy::prelude::Component;
 /// have various settings tailored for debugging, such as a freeform movement or different
 /// rendering layers.
 ///
-/// ## Example
-///
-/// The following example demonstrates how to attach the `DebugCamera` component to a camera entity:
-///
-/// ```rust
-/// use bevy::prelude::*;
-/// use empire_of_wind::components::DebugCamera;
-///
-/// fn setup_debug_camera(mut commands: Commands) {
-///     commands.spawn((
-///         Camera3dBundle::default(),
-///         DebugCamera,
-///     ));
-/// }
-/// ```
-///
 /// The `DebugCamera` component is integral to providing a versatile camera for development
 /// and debugging, ensuring that it interacts correctly with various systems and inputs designed
 /// for debugging purposes.

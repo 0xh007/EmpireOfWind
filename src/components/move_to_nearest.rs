@@ -13,36 +13,6 @@ use big_brain::prelude::*;
 /// # Fields
 /// - `_marker`: A phantom data marker to hold the type `T`.
 /// - `speed`: The movement speed of the entity.
-///
-/// # Example
-/// ```rust
-/// use bevy::prelude::*;
-/// use empire_of_wind::components::MoveToNearest;
-/// use empire_of_wind::systems::{navigate_to_nearest, spawn_npc};
-///
-/// // Define a component that represents the target
-/// #[derive(Component, Debug, Clone)]
-/// struct TargetComponent;
-///
-/// fn setup(mut commands: Commands) {
-///     commands.spawn((
-///         MoveToNearest::<TargetComponent> {
-///             _marker: std::marker::PhantomData,
-///             speed: 1.5,
-///         },
-///         // other components...
-///     ));
-/// }
-///
-/// fn main() {
-///     App::new()
-///         .add_plugins(DefaultPlugins)
-///         .add_startup_system(setup)
-///         .add_system(navigate_to_nearest::<TargetComponent>.system())
-///         .add_system(spawn_npc.system())
-///         .run();
-/// }
-/// ```
 #[derive(Clone, Component, Debug)]
 pub struct MoveToNearest<T: Component + std::fmt::Debug + Clone> {
     pub _marker: std::marker::PhantomData<T>,

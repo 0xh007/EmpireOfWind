@@ -5,8 +5,7 @@ use bevy_xpbd_3d::components::{CenterOfMass, ColliderDensity, ExternalForce};
 
 use crate::components::Buoyancy;
 use crate::constants::voxel::VOXEL_SIZE;
-use crate::utils::voxel_utils::calculate_submerged_volume;
-use crate::utils::water_utils;
+use crate::utils::*;
 
 /// This system calculates and applies buoyancy forces to entities with the `Buoyancy` component.
 ///
@@ -49,7 +48,7 @@ pub fn calculate_and_apply_buoyancy(
                 let rotated_position = transform.rotation.mul_vec3(voxel.position);
                 let world_position = transform.translation + rotated_position;
 
-                let water_height = water_utils::get_water_height_at_position(world_position, &water);
+                let water_height = get_water_height_at_position(world_position, &water);
                 let submerged_volume =
                     calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
                 let hull_density = 1.0;
