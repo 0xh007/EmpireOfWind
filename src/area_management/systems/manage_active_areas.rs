@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
 use bevy_xpbd_3d::prelude::{Collision, Sensor};
 
-use crate::prelude::*;
+use crate::area_management::components::*;
 
 /// Manages active areas based on player interactions with sensors.
 ///

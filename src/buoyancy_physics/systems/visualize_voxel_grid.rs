@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::prelude::*;
 
 /// Visualizes the voxel grid for debugging purposes.
 ///
@@ -25,7 +24,7 @@ use crate::prelude::*;
 ///
 /// This visualization helps developers see the results of the voxelization process and the solid voxels
 /// that contribute to the buoyancy calculations.
-fn visualize_voxel_grid(
+pub fn visualize_voxel_grid(
     mut commands: Commands,
     query: Query<(Entity, &Transform, &Buoyancy), Changed<Buoyancy>>,
     mut meshes: ResMut<Assets<Mesh>>,

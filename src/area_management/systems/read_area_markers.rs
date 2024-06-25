@@ -4,7 +4,7 @@ use bevy::log::error;
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::{Collider, Sensor};
 
-use crate::prelude::*;
+use crate::area_management::components::*;
 
 /// System to process and configure area markers for entry and exit points.
 ///

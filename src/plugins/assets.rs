@@ -1,13 +1,6 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-#[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
-pub enum AppStates {
-    #[default]
-    AssetLoading,
-    Running,
-}
-
 pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {

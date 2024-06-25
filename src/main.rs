@@ -4,11 +4,10 @@ use bevy::{
     prelude::*,
     window::{PresentMode, WindowTheme},
 };
-// use bevy_editor_pls::EditorPlugin;
 use bevy_editor_pls::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 
-use empire_of_wind::prelude::*;
+use empire_of_wind::EmpireOfWindPlugins;
 
 fn main() {
     let mut app = App::new();
@@ -16,9 +15,7 @@ fn main() {
     let default_plugins = DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: "Empire of Wind".into(),
-            // resolution: (3840., 2160.).into(),
             resolution: (1920., 1080.).into(),
-            // resolution: (1280., 800.).into(),
             present_mode: PresentMode::AutoVsync,
             window_theme: Some(WindowTheme::Dark),
             ..default()
@@ -33,7 +30,6 @@ fn main() {
         ..default()
     });
 
-    // TODO: Fix this
     // #[cfg(not(debug_assertions))]
     // let default_plugins = default_plugins.set(LogPlugin {
     //     filter: "warn".into(),
@@ -41,12 +37,9 @@ fn main() {
     // });
 
     app.add_plugins(default_plugins)
-        // .add_systems(Startup, simple_editor_setup)
-        // .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(EditorPlugin::default())
-        .add_plugins(CorePlugins)
+        .add_plugins(EmpireOfWindPlugins)
         .add_plugins(LogDiagnosticsPlugin::default());
-
     app.run();
 }

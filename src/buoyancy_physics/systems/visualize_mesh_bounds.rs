@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::prelude::*;
 
 /// Visualizes the bounding box of meshes for debugging purposes.
 ///
@@ -30,7 +29,7 @@ use crate::prelude::*;
 ///
 /// This visualization helps developers to see the initial step of the voxelization process, where the mesh bounds are determined.
 // TODO: Make this into a toggle debug system
-fn visualize_mesh_bounds(
+pub fn visualize_mesh_bounds(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
