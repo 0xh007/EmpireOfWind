@@ -1,7 +1,4 @@
 pub use {
-    area_enter_marker::*,
-    area_exit_marker::*,
-    area_name::*,
     buoyancy::*,
     buoyancy_marker::*,
     camera_zoom::*,
@@ -28,9 +25,6 @@ pub use {
     voxel_visual::*,
 };
 
-mod area_enter_marker;
-mod area_exit_marker;
-mod area_name;
 mod buoyancy;
 mod buoyancy_marker;
 mod camera_zoom;

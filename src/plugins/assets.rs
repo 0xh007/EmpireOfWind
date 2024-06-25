@@ -5,7 +5,7 @@ use bevy_asset_loader::prelude::*;
 pub enum AppStates {
     #[default]
     AssetLoading,
-    Next,
+    Running,
 }
 
 pub struct AssetsPlugin;
@@ -13,7 +13,7 @@ pub struct AssetsPlugin;
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<AppStates>().add_loading_state(
-            LoadingState::new(AppStates::AssetLoading).continue_to_state(AppStates::Next),
+            LoadingState::new(AppStates::AssetLoading).continue_to_state(AppStates::Running),
         );
     }
 }
