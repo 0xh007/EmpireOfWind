@@ -52,7 +52,7 @@ pub fn navigate_to_nearest<T: Component + std::fmt::Debug + Clone>(
                         .map(|(_, t)| t);
 
                     if navigation_path.points.is_empty() {
-                        if let Some(new_path) = calculate_path_blocking(
+                        if let Some(new_path) = find_navigation_path(
                             &nav_mesh,
                             &nav_mesh_settings,
                             actor_transform.translation,
