@@ -4,8 +4,7 @@ use bevy::pbr::light_consts::lux::AMBIENT_DAYLIGHT;
 use bevy::prelude::{Query, Res, ResMut, Time, Transform, With};
 use bevy_atmosphere::prelude::{AtmosphereMut, Nishita};
 
-use crate::components::sun::Sun;
-use crate::resources::cycle_timer::CycleTimer;
+use crate::prelude::*;
 
 /// System that updates the sun's position and lighting based on the cycle timer.
 ///

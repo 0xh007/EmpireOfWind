@@ -11,15 +11,9 @@ use big_brain::actions::Steps;
 use big_brain::pickers::FirstToScore;
 use big_brain::prelude::Thinker;
 
-use crate::components::{Eat, Fatigue, FatigueScorer, Food, Hunger, HungerScorer, MoveToNearest, NavigationPath, Npc, Sleep, SleepArea};
+use crate::prelude::*;
 
 /// Spawns a set of NPCs in the game world.
-///
-/// This system demonstrates how to integrate multiple crates for advanced behaviors:
-///
-/// - `big_brain`: Utility AI for defining complex behaviors.
-/// - `bevy_xpbd_3d`: Components for 3D physics.
-/// - `bevy_tnua`: Movement and navigation.
 ///
 /// Each NPC is configured with basic AI to handle eating and sleeping routines. The AI is managed
 /// using the `big_brain` crate, which allows for defining scorers and actions. The NPCs also utilize

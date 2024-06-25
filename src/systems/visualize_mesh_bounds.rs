@@ -1,3 +1,34 @@
+use bevy::prelude::*;
+use crate::prelude::*;
+
+/// Visualizes the bounding box of meshes for debugging purposes.
+///
+/// This system is used for visual debugging by drawing the outer bounds of meshes. It helps
+/// in understanding the voxelization process by showing the initial step of finding the
+/// mesh boundaries. The system identifies entities with the `BuoyancyMarker` component,
+/// calculates their mesh bounds, and visualizes these bounds in the game world.
+///
+/// Note: This system is intended to be made toggleable in the future for better control over
+/// debugging visuals.
+///
+/// # Parameters
+///
+/// * `commands`: The Commands resource is used to spawn and configure entities for visualizing the bounds.
+/// * `meshes`: A mutable reference to the Assets resource containing Mesh objects.
+/// * `materials`: A mutable reference to the Assets resource containing StandardMaterial objects.
+/// * `query`: A Query to retrieve entities with the `BuoyancyMarker` component and their Transforms that were recently added.
+/// * `children`: A Query to retrieve child entities of a given parent entity.
+/// * `mesh_handles`: A Query to retrieve the mesh handle associated with an entity.
+///
+/// # Behavior
+///
+/// For each entity with an `Added<BuoyancyMarker>`:
+///
+/// 1. The system finds the mesh handle associated with the entity.
+/// 2. It retrieves the mesh and calculates its outer bounds.
+/// 3. It visualizes these bounds by spawning entities that represent the bounding box using PBR (Physically Based Rendering) components.
+///
+/// This visualization helps developers to see the initial step of the voxelization process, where the mesh bounds are determined.
 // TODO: Make this into a toggle debug system
 fn visualize_mesh_bounds(
     mut commands: Commands,

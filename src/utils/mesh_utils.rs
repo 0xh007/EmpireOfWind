@@ -17,7 +17,7 @@ pub fn find_mesh(
     None
 }
 
-fn visualize_bounds(
+pub fn visualize_bounds(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,

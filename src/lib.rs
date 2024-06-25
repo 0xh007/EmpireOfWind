@@ -7,7 +7,15 @@ pub mod systems;
 pub mod utils;
 
 pub mod prelude {
-    pub use {components::*, constants::*, events::*, plugins::*, systems::*, utils::*};
+    pub use {
+        components::*,
+        constants::*,
+        events::*,
+        plugins::*,
+        resources::*,
+        systems::*,
+        utils::*
+    };
 
     use super::*;
 }

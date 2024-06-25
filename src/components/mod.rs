@@ -55,4 +55,3 @@ mod sun;
 mod vec3i;
 mod voxel;
 mod voxel_visual;
-mod collider_marker;
