@@ -2,11 +2,7 @@ use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
 use bevy_xpbd_3d::prelude::{Collision, Sensor};
 
-use crate::components::{
-    AreaEnterMarker, AreaExitMarker, AreaName, CameraZoom, MainCamera, Player,
-};
-use crate::resources::active_areas::ActiveAreas;
-use crate::utils::*;
+use crate::prelude::*;
 
 /// Manages active areas based on player interactions with sensors.
 ///

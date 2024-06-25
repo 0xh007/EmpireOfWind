@@ -1,7 +1,6 @@
 use bevy::prelude::{Projection, Query, Res, Time, With};
 
-use crate::components::camera_zoom::CameraZoom;
-use crate::components::MainCamera;
+use crate::prelude::*;
 
 /// Smoothly interpolates the camera zoom level towards the target zoom level.
 ///

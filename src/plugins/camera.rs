@@ -3,7 +3,6 @@ use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use bevy_xpbd_3d::PhysicsSet;
 
 use crate::prelude::*;
-use crate::systems::{camera_switching, interpolate_zoom, move_camera, setup_camera};
 
 pub struct CameraPlugin;
 

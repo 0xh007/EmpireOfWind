@@ -1,8 +1,7 @@
 use bevy::input::ButtonInput;
 use bevy::prelude::{KeyCode, Res, ResMut};
 
-use crate::constants::day_cycle::DAY_CYCLE_SPEED_DELTA;
-use crate::resources::cycle_timer::CycleTimer;
+use crate::prelude::*;
 
 /// Controls the cycle timer based on user input.
 ///

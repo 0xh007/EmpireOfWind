@@ -1,12 +1,7 @@
 use bevy::math::Vec3;
 use bevy::prelude::{Mesh, Transform};
 
-use crate::components::{
-    vec3i::Vec3I,
-    voxel::Voxel,
-};
-use crate::constants::voxel::VOXEL_SIZE;
-use crate::utils::mesh_utils::calculate_mesh_bounds;
+use crate::prelude::*;
 
 pub fn generate_voxel_grid(mesh: &Mesh, mesh_transform: &Transform) -> Vec<Voxel> {
     let bounds = calculate_mesh_bounds(mesh);

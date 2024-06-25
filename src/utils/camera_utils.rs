@@ -1,8 +1,7 @@
 use bevy::prelude::{Query, With};
 use bevy::render::view::RenderLayers;
 
-use crate::components::{CameraZoom, MainCamera};
-use crate::resources::active_areas::ActiveAreas;
+use crate::prelude::*;
 
 pub fn update_camera_layers(
     camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,

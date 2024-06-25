@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::{Resource, Timer, TimerMode};
 use bevy::time::Stopwatch;
 
-use crate::constants::day_cycle::{DAY_CYCLE_SPEED_MAX, DAY_CYCLE_SPEED_MIN};
+use crate::prelude::*;
 
 /// A resource for managing the day/night cycle in the game.
 ///
