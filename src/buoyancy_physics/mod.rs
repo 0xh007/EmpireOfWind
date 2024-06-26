@@ -1,38 +1,42 @@
 use bevy::prelude::*;
 
+use crate::AppStates;
+
 use components::*;
 use systems::*;
-
-use crate::AppStates;
 
 mod components;
 mod constants;
 mod systems;
 mod utils;
 
-/// Plugin for managing areas within the game world.
+/// Plugin for managing buoyancy physics within the game.
 ///
-/// The `AreaManagementPlugin` provides functionality for handling areas that
-/// players can enter and exit. It registers the necessary components, initializes
-/// resources, and sets up systems to manage the active areas and process area markers.
+/// The `BuoyancyPhysicsPlugin` provides functionality for handling buoyancy calculations
+/// and visualizing voxel grids and mesh bounds. It registers the necessary components,
+/// initializes resources, and sets up systems to manage and apply buoyancy forces to
+/// objects in the game world.
 ///
 /// # Components
-/// - `AreaEnterMarker`: Marks an area that a player can enter.
-/// - `AreaExitMarker`: Marks an area that a player can exit.
-/// - `AreaName`: Assigns a name to a specific area.
-///
-/// # Resources
-/// - `ActiveAreas`: Tracks the currently active areas in the game.
+/// - `Buoyancy`: Represents the buoyancy properties of an object.
+/// - `BuoyancyMarker`: Marks an object to be processed for buoyancy calculations.
+/// - `Vec3I`: Represents a 3D vector with integer components.
+/// - `Voxel`: Represents a single voxel within the voxel grid.
+/// - `VoxelVisual`: Represents the visual properties of a voxel.
 ///
 /// # Systems
-/// - `manage_active_areas`: Manages active areas based on player interactions.
-/// - `read_area_markers`: Processes and configures area markers for entry and exit points.
+/// - `calculate_and_apply_buoyancy`: Calculates and applies buoyancy forces to marked objects.
+/// - `read_buoyancy_objects`: Reads and processes objects marked for buoyancy calculations.
+/// - `update_voxel_solidity`: Updates the solidity state of voxels based on game state.
+/// - `visualize_mesh_bounds`: Visualizes the bounds of the mesh for debugging and tuning.
+/// - `visualize_voxel_grid`: Visualizes the voxel grid for debugging and tuning.
 ///
 /// This plugin is added to the app during the application setup and is configured to
 /// operate during the `AppStates::Running` state.
-pub struct AreaManagementPlugin;
 
-impl Plugin for AreaManagementPlugin {
+pub struct BuoyancyPhysicsPlugin;
+
+impl Plugin for BuoyancyPhysicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .register_type::<Buoyancy>()

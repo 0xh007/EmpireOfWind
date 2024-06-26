@@ -1,11 +1,11 @@
 pub use bevy::app::{PluginGroup, PluginGroupBuilder};
 use bevy::prelude::States;
 
-use crate::area_management::AreaManagementPlugin;
-use crate::buoyancy_physics::BuoyancyPhysicsPlugin;
+use area_management::AreaManagementPlugin;
+use buoyancy_physics::BuoyancyPhysicsPlugin;
 
-pub mod area_management;
-pub mod buoyancy_physics;
+mod area_management;
+mod buoyancy_physics;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum AppStates {

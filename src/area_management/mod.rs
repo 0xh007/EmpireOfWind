@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
+use crate::AppStates;
+
 use components::*;
 use resources::*;
 use systems::*;
 
-use crate::AppStates;
-
-pub mod components;
-pub mod resources;
-pub mod systems;
+mod components;
+mod resources;
+mod systems;
 
 /// Plugin for managing areas within the game world.
 ///
