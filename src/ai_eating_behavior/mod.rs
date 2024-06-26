@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_editor_pls::AddEditorWindow;
 
 use {
     components::*,

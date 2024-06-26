@@ -5,8 +5,6 @@ use bevy::prelude::{Color, Commands, default, Mesh, Meshable, ResMut, Sphere, Tr
 use bevy_xpbd_3d::components::{Friction, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
 
-use crate::components::Food;
-
 /// System to spawn food entities in the game.
 ///
 /// This system creates food entities with specified properties, including a mesh,
