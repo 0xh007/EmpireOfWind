@@ -3,9 +3,11 @@ use bevy::prelude::States;
 
 use area_management::AreaManagementPlugin;
 use buoyancy_physics::BuoyancyPhysicsPlugin;
+use camera_control::CameraControlPlugin;
 
 mod area_management;
 mod buoyancy_physics;
+mod camera_control;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum AppStates {
