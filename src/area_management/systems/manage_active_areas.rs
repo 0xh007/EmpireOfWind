@@ -3,6 +3,7 @@ use bevy::render::view::RenderLayers;
 use bevy_xpbd_3d::prelude::{Collision, Sensor};
 
 use crate::area_management::components::*;
+use crate::area_management::resources::ActiveAreas;
 
 /// Manages active areas based on player interactions with sensors.
 ///

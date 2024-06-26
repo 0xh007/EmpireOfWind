@@ -8,8 +8,6 @@ use bevy::render::view::RenderLayers;
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_panorbit_camera::PanOrbitCamera;
 
-use crate::prelude::*;
-
 /// System to set up the main and debug cameras for the game.
 ///
 /// This system spawns two camera entities:

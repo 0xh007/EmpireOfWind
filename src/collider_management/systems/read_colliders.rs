@@ -6,8 +6,6 @@ use bevy_xpbd_3d::components::RigidBody;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::prelude::*;
-
 /// System to process and configure collider objects within the game.
 ///
 /// This system handles entities marked with the `ColliderMarker` component, generating

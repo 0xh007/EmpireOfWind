@@ -1,13 +1,20 @@
 pub use bevy::app::{PluginGroup, PluginGroupBuilder};
 use bevy::prelude::States;
 
+use ai_eating_behavior::AiEatingBehaviorPlugin;
+use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
 use area_management::AreaManagementPlugin;
 use buoyancy_physics::BuoyancyPhysicsPlugin;
 use camera_control::CameraControlPlugin;
+use collider_management::ColliderManagementPlugin;
 
+mod ai_eating_behavior;
+mod ai_sleeping_behavior;
 mod area_management;
 mod buoyancy_physics;
 mod camera_control;
+mod collider_management;
+
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum AppStates {
@@ -27,7 +34,11 @@ pub struct EmpireOfWindPlugins;
 impl PluginGroup for EmpireOfWindPlugins {
     fn build(self) -> PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
+            .add(AiEatingBehaviorPlugin)
+            .add(AiSleepingBehaviorPlugin)
             .add(AreaManagementPlugin)
             .add(BuoyancyPhysicsPlugin)
+            .add(CameraControlPlugin)
+            .add(ColliderManagementPlugin)
     }
 }

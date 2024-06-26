@@ -2,8 +2,6 @@ use bevy::math::Vec3;
 use bevy::prelude::{Query, Res, Time, Transform, With, Without};
 use bevy_tnua::controller::TnuaController;
 
-use crate::components::{MainCamera, Player};
-
 /// Moves the camera to follow the player with a smooth isometric view.
 ///
 /// This system adjusts the main camera's position and orientation based on the player's position,
