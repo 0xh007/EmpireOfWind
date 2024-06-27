@@ -7,7 +7,7 @@ use crate::prelude::*;
 
 /// A resource for managing the day/night cycle in the game.
 ///
-/// The `CycleTimer` resource handles the timing and speed of the day/night cycle. It uses a `Timer`
+/// The `SunCycleTimer` resource handles the timing and speed of the day/night cycle. It uses a `Timer`
 /// to determine when to update the atmosphere and a `Stopwatch` to keep track of the elapsed time,
 /// scaled by the `speed` factor. This allows for incremental updates to the atmosphere, which is
 /// more efficient than updating it every frame.
@@ -19,7 +19,7 @@ use crate::prelude::*;
 ///
 /// # Methods
 /// - `new(duration: Duration, speed: f32) -> Self`:
-///   Creates a new `CycleTimer` with the given update interval and speed.
+///   Creates a new `SunCycleTimer` with the given update interval and speed.
 /// - `tick(&mut self, delta: Duration)`:
 ///   Advances the timer and stopwatch by the given delta time.
 /// - `paused(&self) -> bool`:
@@ -31,25 +31,25 @@ use crate::prelude::*;
 /// - `update(&self) -> bool`:
 ///   Returns whether the timer has finished its current cycle.
 /// - `update_speed(&mut self, delta: f32)`:
-///   Adjusts the speed of the day/night cycle, clamping it between `DAY_CYCLE_SPEED_MIN` and
-///   `DAY_CYCLE_SPEED_MAX`.
+///   Adjusts the speed of the day/night cycle, clamping it between `SUN_CYCLE_SPEED_MIN` and
+///   `SUN_CYCLE_SPEED_MAX`.
 ///
 #[derive(Resource)]
-pub struct CycleTimer {
+pub struct SunCycleTimer {
     pub update: Timer,
     pub time: Stopwatch,
     pub speed: f32,
 }
 
-impl CycleTimer {
-    /// Creates a new `CycleTimer`.
+impl SunCycleTimer {
+    /// Creates a new `SunCycleTimer`.
     ///
     /// # Parameters
     /// - `duration`: The duration for the update timer.
     /// - `speed`: The initial speed of the day/night cycle.
     ///
     /// # Returns
-    /// A new `CycleTimer` instance.
+    /// A new `SunCycleTimer` instance.
     pub fn new(duration: Duration, speed: f32) -> Self {
         Self {
             update: Timer::new(duration, TimerMode::Repeating),
@@ -107,7 +107,7 @@ impl CycleTimer {
     /// # Parameters
     /// - `delta`: The amount to adjust the speed by.
     ///
-    /// The speed is clamped between `DAY_CYCLE_SPEED_MIN` and `DAY_CYCLE_SPEED_MAX`.
+    /// The speed is clamped between `SUN_CYCLE_SPEED_MIN` and `SUN_CYCLE_SPEED_MAX`.
     pub fn update_speed(&mut self, delta: f32) {
         self.speed += delta;
         if self.speed < DAY_CYCLE_SPEED_MIN {

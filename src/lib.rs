@@ -2,6 +2,7 @@ pub use bevy::app::{PluginGroup, PluginGroupBuilder};
 use bevy::prelude::States;
 
 use ai_eating_behavior::AiEatingBehaviorPlugin;
+use ai_navigation::AiNavigationPlugin;
 use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
 use area_management::AreaManagementPlugin;
 use buoyancy_physics::BuoyancyPhysicsPlugin;
@@ -11,10 +12,12 @@ use food::FoodPlugin;
 
 mod ai_eating_behavior;
 mod ai_sleeping_behavior;
+mod ai_navigation;
 mod area_management;
 mod buoyancy_physics;
 mod camera_control;
 mod collider_management;
+mod sun_cycle;
 mod food;
 
 
@@ -38,6 +41,7 @@ impl PluginGroup for EmpireOfWindPlugins {
         PluginGroupBuilder::start::<Self>()
             .add(AiEatingBehaviorPlugin)
             .add(AiSleepingBehaviorPlugin)
+            .add(AiNavigationPlugin)
             .add(AreaManagementPlugin)
             .add(BuoyancyPhysicsPlugin)
             .add(CameraControlPlugin)

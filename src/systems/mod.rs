@@ -31,7 +31,7 @@ mod calculate_and_apply_buoyancy;
 mod calculate_fatigue_score;
 mod calculate_hunger_score;
 mod camera_switching;
-mod control_cycle_timer;
+mod control_day_cycle_timer;
 mod eat_action;
 mod handle_player_input;
 mod increase_fatigue;

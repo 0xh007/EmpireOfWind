@@ -3,5 +3,5 @@ pub use {
     ship_assets::*,
 };
 
-mod cycle_timer;
+mod sun_cycle_timer;
 mod ship_assets;
