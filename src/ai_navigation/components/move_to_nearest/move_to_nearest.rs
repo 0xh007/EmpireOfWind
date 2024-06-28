@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use bevy::prelude::*;
 use big_brain::prelude::*;
 
@@ -13,9 +15,11 @@ use big_brain::prelude::*;
 /// # Fields
 /// - `_marker`: A phantom data marker to hold the type `T`.
 /// - `speed`: The movement speed of the entity.
-#[derive(Clone, Component, Debug)]
+#[derive(Clone, Component, Debug, Reflect, FromReflect, TypePath)]
+#[reflect(Component, FromReflect)]
 pub struct MoveToNearest<T: Component + std::fmt::Debug + Clone> {
-    pub _marker: std::marker::PhantomData<T>,
+    #[reflect(ignore)]
+    pub _marker: PhantomData<T>,
     pub speed: f32,
 }
 
@@ -33,6 +37,9 @@ where
     /// - `action`: The entity representing the action.
     /// - `_actor`: The entity to which the action will be attached.
     fn build(&self, cmd: &mut Commands, action: Entity, _actor: Entity) {
-        cmd.entity(action).insert(MoveToNearest::<T>::clone(self));
+        cmd.entity(action).insert(MoveToNearest::<T> {
+            _marker: PhantomData,
+            speed: self.speed,
+        });
     }
 }
