@@ -9,16 +9,19 @@ use buoyancy_physics::BuoyancyPhysicsPlugin;
 use camera_control::CameraControlPlugin;
 use collider_management::ColliderManagementPlugin;
 use food::FoodPlugin;
+use navmesh::NavMeshPlugin;
+use sun_cycle::SunCyclePlugin;
 
 mod ai_eating_behavior;
-mod ai_sleeping_behavior;
 mod ai_navigation;
+mod ai_sleeping_behavior;
 mod area_management;
 mod buoyancy_physics;
 mod camera_control;
 mod collider_management;
-mod sun_cycle;
 mod food;
+mod navmesh;
+mod sun_cycle;
 
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
@@ -47,5 +50,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(CameraControlPlugin)
             .add(ColliderManagementPlugin)
             .add(FoodPlugin)
+            .add(NavMeshPlugin)
+            .add(SunCyclePlugin)
     }
 }

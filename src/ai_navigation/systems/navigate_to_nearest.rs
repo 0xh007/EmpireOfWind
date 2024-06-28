@@ -29,7 +29,7 @@ pub fn navigate_to_nearest<T: Component + std::fmt::Debug + Clone>(
     nav_mesh_settings: Res<NavMeshSettings>,
     goal_query: Query<&Transform, With<T>>,
     mut thinker_query: Query<(&mut NavigationPath, &mut Transform), (With<HasThinker>, Without<T>)>,
-    mut action_query: Query<(&Actor, &mut ActionState, &MoveToNearest<T>, &ActionSpan)>,
+    mut action_query: Query<(&Actor, &mut ActionState, &SeekBehavior<T>, &ActionSpan)>,
 ) {
     for (Actor(actor), mut action_state, move_to, span) in &mut action_query {
         let _guard = span.span().enter();
