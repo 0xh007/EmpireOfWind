@@ -5,24 +5,35 @@ use ai_eating_behavior::AiEatingBehaviorPlugin;
 use ai_navigation::AiNavigationPlugin;
 use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
 use area_management::AreaManagementPlugin;
+use atmospheric_lighting::AtmospherePlugin;
 use buoyancy_physics::BuoyancyPhysicsPlugin;
 use camera_control::CameraControlPlugin;
 use collider_management::ColliderManagementPlugin;
+use crew_management::CrewManagementPlugin;
 use food::FoodPlugin;
 use navmesh::NavMeshPlugin;
-use sun_cycle::SunCyclePlugin;
+use player::PlayerPlugin;
+use player_input::PlayerInputPlugin;
+use ship::ShipPlugin;
+use ship_items::ShipItemsPlugin;
+use sun::SunCyclePlugin;
 
 mod ai_eating_behavior;
 mod ai_navigation;
 mod ai_sleeping_behavior;
 mod area_management;
+mod atmospheric_lighting;
 mod buoyancy_physics;
 mod camera_control;
 mod collider_management;
+mod crew_management;
 mod food;
 mod navmesh;
-mod sun_cycle;
-
+mod player;
+mod player_input;
+mod ship;
+mod ship_items;
+mod sun;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum AppStates {
@@ -43,14 +54,20 @@ impl PluginGroup for EmpireOfWindPlugins {
     fn build(self) -> PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
             .add(AiEatingBehaviorPlugin)
-            .add(AiSleepingBehaviorPlugin)
             .add(AiNavigationPlugin)
+            .add(AiSleepingBehaviorPlugin)
             .add(AreaManagementPlugin)
+            .add(AtmospherePlugin)
             .add(BuoyancyPhysicsPlugin)
             .add(CameraControlPlugin)
             .add(ColliderManagementPlugin)
+            .add(CrewManagementPlugin)
             .add(FoodPlugin)
             .add(NavMeshPlugin)
+            .add(PlayerPlugin)
+            .add(PlayerInputPlugin)
+            .add(ShipPlugin)
+            .add(ShipItemsPlugin)
             .add(SunCyclePlugin)
     }
 }

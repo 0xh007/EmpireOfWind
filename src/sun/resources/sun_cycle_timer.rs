@@ -8,8 +8,8 @@ use crate::prelude::*;
 /// A resource for managing the day/night cycle in the game.
 ///
 /// The `SunCycleTimer` resource handles the timing and speed of the day/night cycle. It uses a `Timer`
-/// to determine when to update the atmosphere and a `Stopwatch` to keep track of the elapsed time,
-/// scaled by the `speed` factor. This allows for incremental updates to the atmosphere, which is
+/// to determine when to update the atmospheric_lighting and a `Stopwatch` to keep track of the elapsed time,
+/// scaled by the `speed` factor. This allows for incremental updates to the atmospheric_lighting, which is
 /// more efficient than updating it every frame.
 ///
 /// # Fields
@@ -118,4 +118,3 @@ impl SunCycleTimer {
         }
     }
 }
-

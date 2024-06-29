@@ -15,8 +15,8 @@ use crate::prelude::*;
 
 /// Spawns a set of NPCs in the game world.
 ///
-/// Each NPC is configured with basic AI to handle eating and sleeping routines. The AI is managed
-/// using the `big_brain` crate, which allows for defining scorers and actions. The NPCs also utilize
+/// Each crew member is configured with basic AI to handle eating and sleeping routines. The AI is managed
+/// using the `big_brain` crate, which allows for defining scorers and actions. The crew also utilize
 /// `bevy_xpbd_3d` for physics and `bevy_tnua` for movement and control.
 pub fn spawn_npc(
     mut commands: Commands,
@@ -54,7 +54,7 @@ pub fn spawn_npc(
         let position = start_position + Vec3::new(0.0, 0.0, spacing * i as f32);
 
         commands.spawn((
-            Name::new("NPC"),
+            Name::new("Crew Member"),
             PbrBundle {
                 mesh: meshes.add(Capsule3d {
                     radius: 0.4,
@@ -69,7 +69,7 @@ pub fn spawn_npc(
             TnuaControllerBundle::default(),
             TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
             LockedAxes::ROTATION_LOCKED,
-            Npc,
+            CrewMember,
             Hunger {
                 is_eating: false,
                 per_second: 4.0,
@@ -82,7 +82,7 @@ pub fn spawn_npc(
             },
             NavigationPath::default(),
             Thinker::build()
-                .label("NPC Thinker")
+                .label("Crew Member Thinker")
                 // Selects the action with the highest score that is above the threshold
                 .picker(FirstToScore::new(0.6))
                 .when(FatigueScorer, move_and_sleep)

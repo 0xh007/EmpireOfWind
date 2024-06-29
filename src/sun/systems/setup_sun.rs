@@ -5,7 +5,7 @@ use bevy::render::view::RenderLayers;
 
 use crate::prelude::*;
 
-/// System that sets up the atmosphere by spawning a directional light entity representing the sun.
+/// System that sets up the atmospheric_lighting by spawning a directional light entity representing the sun.
 ///
 /// This system initializes the "sun" entity in the scene with a directional light and default
 /// settings. The light is configured to cast shadows and is tagged with the `Sun` component for
@@ -26,7 +26,7 @@ pub fn setup_atmosphere(mut commands: Commands) {
                 transform: Transform::from_rotation(Quat::from_rotation_x(-0.340)),
                 ..default()
             },
-            RenderLayers::all()
+            RenderLayers::all(),
         ))
         .insert(Sun); // Marks the light as Sun
 }

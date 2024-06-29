@@ -13,7 +13,7 @@ use crate::prelude::*;
 /// and how these updates should be applied.
 ///
 /// # Parameters
-/// - `atmosphere`: A mutable reference to the `Atmosphere` resource that will be updated.
+/// - `atmospheric_lighting`: A mutable reference to the `Atmosphere` resource that will be updated.
 /// - `query`: A query to get the `Transform` and `DirectionalLight` components of the sun entity.
 /// - `timer`: A mutable reference to the `SunCycleTimer` resource to manage the day/night cycle timing.
 /// - `time`: A reference to the `Time` resource to get the elapsed time since the last update.
