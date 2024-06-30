@@ -5,7 +5,7 @@ use ai_eating_behavior::AiEatingBehaviorPlugin;
 use ai_navigation::AiNavigationPlugin;
 use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
 use area_management::AreaManagementPlugin;
-use atmospheric_lighting::AtmospherePlugin;
+use atmospheric_lighting::AtmosphericLightingPlugin;
 use buoyancy_physics::BuoyancyPhysicsPlugin;
 use camera_control::CameraControlPlugin;
 use collider_management::ColliderManagementPlugin;
@@ -57,7 +57,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(AiNavigationPlugin)
             .add(AiSleepingBehaviorPlugin)
             .add(AreaManagementPlugin)
-            .add(AtmospherePlugin)
+            .add(AtmosphericLightingPlugin)
             .add(BuoyancyPhysicsPlugin)
             .add(CameraControlPlugin)
             .add(ColliderManagementPlugin)

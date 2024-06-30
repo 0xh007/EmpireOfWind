@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 
-use {
-    components::*,
-    systems::*,
-};
+use {components::*, systems::*};
 
 use crate::AppStates;
 
@@ -27,19 +24,21 @@ mod systems;
 /// - calculate_fatigue_score: Calculates a score based on an entity's fatigue level.
 /// - increase_fatigue: Increases an entity's fatigue over time.
 /// - sleep_action: Manages the sleeping action of entities, reducing their fatigue level.
-///
-/// This plugin is added to the app during the application setup and is configured to
-/// operate during the AppStates::Running state.
 pub struct AiSleepingBehaviorPlugin;
 
 impl Plugin for AiSleepingBehaviorPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<Fatigue>()
+        app.register_type::<Fatigue>()
             .register_type::<FatigueScorer>()
             .register_type::<Sleep>()
-            .add_systems(Update, calculate_fatigue_score.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, increase_fatigue.run_if(in_state(AppStates::Running)))
+            .add_systems(
+                Update,
+                calculate_fatigue_score.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                increase_fatigue.run_if(in_state(AppStates::Running)),
+            )
             .add_systems(Update, sleep_action.run_if(in_state(AppStates::Running)));
     }
 }

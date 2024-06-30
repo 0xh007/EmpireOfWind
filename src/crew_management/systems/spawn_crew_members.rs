@@ -13,12 +13,12 @@ use big_brain::prelude::Thinker;
 
 use crate::prelude::*;
 
-/// Spawns a set of NPCs in the game world.
+/// Spawns a set of crew members in the game world.
 ///
 /// Each crew member is configured with basic AI to handle eating and sleeping routines. The AI is managed
 /// using the `big_brain` crate, which allows for defining scorers and actions. The crew also utilize
 /// `bevy_xpbd_3d` for physics and `bevy_tnua` for movement and control.
-pub fn spawn_npc(
+pub fn spawn_crew_members(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
