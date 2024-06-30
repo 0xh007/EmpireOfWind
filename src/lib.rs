@@ -12,6 +12,7 @@ use collider_management::ColliderManagementPlugin;
 use crew_management::CrewManagementPlugin;
 use food::FoodPlugin;
 use navmesh::NavMeshPlugin;
+use ocean::OceanPlugin;
 use player::PlayerPlugin;
 use player_input::PlayerInputPlugin;
 use ship::ShipPlugin;
@@ -29,6 +30,7 @@ mod collider_management;
 mod crew_management;
 mod food;
 mod navmesh;
+mod ocean;
 mod player;
 mod player_input;
 mod ship;
@@ -65,6 +67,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(CrewManagementPlugin)
             .add(FoodPlugin)
             .add(NavMeshPlugin)
+            .add(OceanPlugin)
             .add(PlayerPlugin)
             .add(PlayerInputPlugin)
             .add(ShipPlugin)

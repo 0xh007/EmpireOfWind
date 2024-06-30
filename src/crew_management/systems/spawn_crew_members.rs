@@ -12,11 +12,9 @@ use big_brain::pickers::FirstToScore;
 use big_brain::prelude::Thinker;
 
 use crate::ai_eating_behavior::{Eat, Hunger, HungerScorer};
-use crate::ai_navigation::NavigationPath;
+use crate::ai_navigation::{NavigationPath, SeekFoodBehavior, SeekSleepAreaBehavior};
 use crate::ai_sleeping_behavior::{Fatigue, FatigueScorer, Sleep};
 use crate::crew_management::CrewMember;
-use crate::food::Food;
-use crate::ship_items::SleepArea;
 
 /// Spawns a set of crew members in the game world.
 ///
@@ -36,7 +34,7 @@ pub fn spawn_crew_members(
     for i in 0..num_npcs {
         let move_and_eat = Steps::build()
             .label("MoveAndEat")
-            .step(MoveToNearest::<Food> {
+            .step(SeekFoodBehavior {
                 speed: 1.5,
                 _marker: std::marker::PhantomData,
             })
@@ -47,7 +45,7 @@ pub fn spawn_crew_members(
 
         let move_and_sleep = Steps::build()
             .label("MoveAndSleep")
-            .step(MoveToNearest::<SleepArea> {
+            .step(SeekSleepAreaBehavior {
                 speed: 1.5,
                 _marker: std::marker::PhantomData,
             })

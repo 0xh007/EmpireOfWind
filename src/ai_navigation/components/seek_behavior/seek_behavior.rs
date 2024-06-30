@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 
 use bevy::prelude::*;
 use big_brain::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// Component for entities that seek the nearest target of type `T`.
 ///
@@ -15,8 +16,8 @@ use big_brain::prelude::*;
 /// # Fields
 /// - `_marker`: A phantom data marker to hold the type `T`.
 /// - `speed`: The movement speed of the entity.
-#[derive(Clone, Component, Debug, Reflect, FromReflect, TypePath)]
-#[reflect(Component, FromReflect)]
+#[derive(Debug, Clone, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct SeekBehavior<T: Component + std::fmt::Debug + Clone> {
     #[reflect(ignore)]
     pub _marker: PhantomData<T>,
@@ -43,4 +44,3 @@ where
         });
     }
 }
-

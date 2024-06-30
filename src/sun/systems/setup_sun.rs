@@ -13,7 +13,7 @@ use crate::sun::components::Sun;
 ///
 /// # Parameters
 /// - `commands`: A mutable reference to the `Commands` resource to issue commands for spawning entities.
-pub fn setup_atmosphere(mut commands: Commands) {
+pub fn setup_sun(mut commands: Commands) {
     // "Sun"
     commands
         .spawn((
