@@ -3,7 +3,7 @@ use bevy::prelude::{Query, Res, Time};
 use big_brain::actions::ActionState;
 use big_brain::prelude::{ActionSpan, Actor};
 
-use crate::components::{Eat, Hunger};
+use crate::ai_eating_behavior::components::{Eat, Hunger};
 
 /// This system manages the eating action of entities. It reduces the hunger
 /// level of the entity as it eats and updates the entity's state based on

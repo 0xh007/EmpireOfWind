@@ -2,7 +2,7 @@ use bevy::log::trace;
 use bevy::prelude::{Local, Query, With};
 use big_brain::prelude::{Actor, Score, ScorerSpan};
 
-use crate::components::{Hunger, HungerScorer};
+use crate::ai_eating_behavior::components::HungerScorer;
 
 /// This system calculates a score based on an entity's hunger level. The higher the hunger,
 /// the higher the score, indicating a greater need for the entity to eat.
