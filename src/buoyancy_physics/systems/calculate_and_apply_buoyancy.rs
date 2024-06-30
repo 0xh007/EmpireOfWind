@@ -3,7 +3,9 @@ use bevy::prelude::{Query, Transform};
 use bevy_water::WaterParam;
 use bevy_xpbd_3d::components::{CenterOfMass, ColliderDensity, ExternalForce};
 
-use crate::prelude::*;
+use crate::buoyancy_physics::Buoyancy;
+use crate::buoyancy_physics::constants::VOXEL_SIZE;
+use crate::buoyancy_physics::utils::calculate_submerged_volume;
 
 /// This system calculates and applies buoyancy forces to entities with the `Buoyancy` component.
 ///

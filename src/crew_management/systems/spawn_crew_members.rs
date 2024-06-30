@@ -11,7 +11,12 @@ use big_brain::actions::Steps;
 use big_brain::pickers::FirstToScore;
 use big_brain::prelude::Thinker;
 
-use crate::prelude::*;
+use crate::ai_eating_behavior::{Eat, Hunger, HungerScorer};
+use crate::ai_navigation::NavigationPath;
+use crate::ai_sleeping_behavior::{Fatigue, FatigueScorer, Sleep};
+use crate::crew_management::CrewMember;
+use crate::food::Food;
+use crate::ship_items::SleepArea;
 
 /// Spawns a set of crew members in the game world.
 ///

@@ -1,3 +1,6 @@
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
 /// A simple 3D vector with integer components.
 ///
 /// The `Vec3I` struct represents a 3D vector using integer values for its components.
@@ -7,7 +10,8 @@
 /// - `x`: The x-coordinate of the vector.
 /// - `y`: The y-coordinate of the vector.
 /// - `z`: The z-coordinate of the vector.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Serialize, Deserialize)]
 pub struct Vec3I {
     pub x: i32,
     pub y: i32,

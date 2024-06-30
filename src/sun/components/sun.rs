@@ -1,4 +1,4 @@
-use bevy::prelude::{Component, Reflect};
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// Marker component for identifying the sun entity in the game.

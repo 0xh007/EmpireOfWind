@@ -1,7 +1,7 @@
 use bevy::log::trace;
 use bevy::prelude::{Query, Res, Time};
 
-use crate::components::Hunger;
+use crate::ai_eating_behavior::Hunger;
 
 /// Increases an entity's hunger over time.
 ///

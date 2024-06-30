@@ -1,6 +1,7 @@
-use bevy::prelude::Component;
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
-use crate::components::voxel::Voxel;
+use crate::buoyancy_physics::Voxel;
 
 /// The `Buoyancy` component represents the buoyant properties of an entity in the game.
 /// It contains a list of voxels that represent the volume of the entity and a flag indicating
@@ -13,7 +14,8 @@ use crate::components::voxel::Voxel;
 /// # Methods
 /// - `from_voxels(voxels: Vec<Voxel>, needs_update: bool) -> Self`:
 ///   Creates a new `Buoyancy` component from a list of voxels and an update flag.
-#[derive(Component)]
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct Buoyancy {
     pub voxels: Vec<Voxel>, // List of voxel data, possibly pulled from generate_voxel_grid
     pub needs_update: bool,

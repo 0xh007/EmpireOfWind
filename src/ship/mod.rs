@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
-use bevy_xpbd_3d::prelude::*;
 
-use components::*;
+pub use components::*;
 use resources::*;
 use systems::*;
 

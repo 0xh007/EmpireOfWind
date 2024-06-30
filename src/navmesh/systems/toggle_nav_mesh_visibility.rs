@@ -1,6 +1,7 @@
 use bevy::prelude::{EventReader, ResMut};
 use oxidized_navigation::debug_draw::DrawNavMesh;
-use crate::events::NavMeshDebugToggle;
+
+use crate::navmesh::events::NavMeshDebugToggle;
 
 /// Toggles the visibility of the navigation mesh debug view.
 ///
@@ -29,4 +30,3 @@ pub fn toggle_nav_mesh_visibility(
         show_navmesh.0 = !show_navmesh.0;
     }
 }
-

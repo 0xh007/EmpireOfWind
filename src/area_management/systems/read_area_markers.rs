@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::{Collider, Sensor};
 
 use crate::area_management::components::*;
+use crate::ship::Ship;
 
 /// System to process and configure area markers for entry and exit points.
 ///

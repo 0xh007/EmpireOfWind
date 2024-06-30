@@ -2,12 +2,17 @@ use bevy::asset::{Assets, Handle};
 use bevy::hierarchy::{Children, DespawnRecursiveExt, Parent};
 use bevy::math::Vec3;
 use bevy::prelude::*;
-use bevy_xpbd_3d::components::{AngularDamping, CenterOfMass, ColliderDensity, ExternalForce, Inertia, LinearDamping, Mass, RigidBody};
+use bevy_xpbd_3d::components::{
+    AngularDamping, CenterOfMass, ColliderDensity, ExternalForce, Inertia, LinearDamping, Mass,
+    RigidBody,
+};
 use bevy_xpbd_3d::math::Matrix3;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::prelude::*;
+use crate::buoyancy_physics::{Buoyancy, BuoyancyMarker};
+use crate::buoyancy_physics::utils::generate_voxel_grid;
+use crate::ship::Ship;
 
 /// System to process and configure buoyancy objects within the game.
 ///

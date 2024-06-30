@@ -8,6 +8,7 @@ use systems::*;
 
 use crate::AppStates;
 
+mod components;
 mod consts;
 mod resources;
 mod systems;
@@ -32,9 +33,14 @@ pub struct SunCyclePlugin;
 
 impl Plugin for SunCyclePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .insert_resource(SunCycleTimer::new(Duration::from_millis(1000), 0.2))
-            .add_systems(Update, control_sun_cycle_timer.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, update_sun_cycle.run_if(in_state(AppStates::Running)));
+        app.insert_resource(SunCycleTimer::new(Duration::from_millis(1000), 0.2))
+            .add_systems(
+                Update,
+                control_sun_cycle_timer.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                update_sun_cycle.run_if(in_state(AppStates::Running)),
+            );
     }
 }

@@ -1,10 +1,7 @@
 use bevy::prelude::*;
-use bevy_editor_pls::AddEditorWindow;
 
-use {
-    components::*,
-    systems::*,
-};
+pub use components::*;
+use systems::*;
 
 use crate::AppStates;
 
@@ -32,11 +29,13 @@ pub struct AiEatingBehaviorPlugin;
 
 impl Plugin for AiEatingBehaviorPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<Eat>()
+        app.register_type::<Eat>()
             .register_type::<Hunger>()
             .register_type::<HungerScorer>()
-            .add_systems(Update, calculate_hunger_score.run_if(in_state(AppStates::Running)))
+            .add_systems(
+                Update,
+                calculate_hunger_score.run_if(in_state(AppStates::Running)),
+            )
             .add_systems(Update, eat_action.run_if(in_state(AppStates::Running)))
             .add_systems(Update, increase_hunger.run_if(in_state(AppStates::Running)));
     }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use components::*;
+pub use components::*;
 use systems::*;
 
 use crate::AppStates;
@@ -35,9 +35,15 @@ impl Plugin for CameraControlPlugin {
         app.register_type::<CameraZoom>()
             .register_type::<DebugCamera>()
             .register_type::<MainCamera>()
-            .add_systems(Update, camera_switching.run_if(in_state(AppStates::Running)))
+            .add_systems(
+                Update,
+                camera_switching.run_if(in_state(AppStates::Running)),
+            )
             .add_systems(Update, move_camera.run_if(in_state(AppStates::Running)))
             .add_systems(Update, setup_camera.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, interpolate_zoom.run_if(in_state(AppStates::Running)));
+            .add_systems(
+                Update,
+                interpolate_zoom.run_if(in_state(AppStates::Running)),
+            );
     }
 }

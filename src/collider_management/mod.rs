@@ -1,7 +1,7 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::*;
 
-use components::*;
+pub use components::*;
 use systems::*;
 
 use crate::AppStates;

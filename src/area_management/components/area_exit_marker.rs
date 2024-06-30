@@ -1,4 +1,4 @@
-use bevy::prelude::{Component, Reflect};
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// A marker component used to designate an area that a player can exit.

@@ -1,7 +1,7 @@
 use bevy::log::trace;
 use bevy::prelude::{Query, Res, Time};
 
-use crate::components::Fatigue;
+use crate::ai_sleeping_behavior::Fatigue;
 
 /// Increases an entity's fatigue over time.
 ///

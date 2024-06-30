@@ -4,6 +4,8 @@ use bevy_xpbd_3d::prelude::{Collision, Sensor};
 
 use crate::area_management::components::*;
 use crate::area_management::resources::ActiveAreas;
+use crate::camera_control::{CameraZoom, MainCamera};
+use crate::player::Player;
 
 /// Manages active areas based on player interactions with sensors.
 ///
@@ -46,21 +48,14 @@ pub fn manage_active_areas(
                 (entity2, entity1)
             };
 
-            if let Ok((_, _, enter_marker, exit_marker, area_name)) =
-                sensor_query.get(other_entity)
+            if let Ok((_, _, enter_marker, exit_marker, area_name)) = sensor_query.get(other_entity)
             {
                 if enter_marker.is_some() {
-                    println!(
-                        "Player {:?} entered area: {:?}",
-                        player_entity, area_name.0
-                    );
+                    println!("Player {:?} entered area: {:?}", player_entity, area_name.0);
                     active_areas.0.insert(area_name.0.clone());
                     update_zoom_target(&mut camera_zoom_query, 10.0); // Adjust zoom for entry
                 } else if exit_marker.is_some() {
-                    println!(
-                        "Player {:?} exited area: {:?}",
-                        player_entity, area_name.0
-                    );
+                    println!("Player {:?} exited area: {:?}", player_entity, area_name.0);
                     active_areas.0.remove(&area_name.0);
                     update_zoom_target(&mut camera_zoom_query, 20.0); // Adjust zoom for exit
                 }

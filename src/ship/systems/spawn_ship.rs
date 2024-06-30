@@ -1,7 +1,8 @@
-use bevy::prelude::{Commands, default, Res, SceneBundle};
 use bevy::core::Name;
+use bevy::prelude::{Commands, default, Res, SceneBundle};
 
-use crate::prelude::*;
+use crate::ship::resources::ShipAssets;
+use crate::ship::Ship;
 
 /// Spawns the main ship entity in the game world.
 ///

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use {components::*, systems::*};
+pub use components::*;
+use systems::*;
 
 use crate::AppStates;
 

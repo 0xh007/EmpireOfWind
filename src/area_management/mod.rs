@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use components::*;
+pub use components::*;
 use resources::*;
 use systems::*;
 

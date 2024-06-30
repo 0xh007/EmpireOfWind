@@ -4,11 +4,11 @@ use oxidized_navigation::{
     debug_draw::OxidizedNavigationDebugDrawPlugin, NavMeshSettings, OxidizedNavigationPlugin,
 };
 
-use components::*;
+pub use components::*;
+pub use events::*;
+use systems::*;
 
 use crate::AppStates;
-use crate::navmesh::events::NavMeshDebugToggle;
-use crate::navmesh::systems::toggle_nav_mesh_visibility;
 
 mod components;
 mod events;
@@ -63,6 +63,6 @@ impl Plugin for NavMeshPlugin {
                     max_tile_generation_tasks: Some(9),
                 }),
                 OxidizedNavigationDebugDrawPlugin,
-            ))
+            ));
     }
 }

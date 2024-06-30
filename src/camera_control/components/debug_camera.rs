@@ -1,4 +1,5 @@
-use bevy::prelude::Component;
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// The `DebugCamera` component is used to mark an entity as a debug camera in the game.
 /// This component allows systems to identify and manipulate the debug camera specifically.
@@ -16,5 +17,6 @@ use bevy::prelude::Component;
 /// The `DebugCamera` component is integral to providing a versatile camera for development
 /// and debugging, ensuring that it interacts correctly with various systems and inputs designed
 /// for debugging purposes.
-#[derive(Component)]
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct DebugCamera;

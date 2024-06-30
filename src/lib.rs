@@ -34,6 +34,7 @@ mod player_input;
 mod ship;
 mod ship_items;
 mod sun;
+mod utils;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum AppStates {

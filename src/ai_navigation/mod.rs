@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 pub use components::*;
-pub use systems::*;
+use systems::*;
+
+use crate::food::Food;
+use crate::ship_items::SleepArea;
 
 mod components;
 mod constants;
@@ -27,15 +30,15 @@ pub struct AiNavigationPlugin;
 
 impl Plugin for AiNavigationPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<SeekFoodBehavior>()
+        app.register_type::<SeekFoodBehavior>()
             .register_type::<SeekSleepAreaBehavior>()
             .register_type::<NavigationPath>()
-            .add_systems(PreUpdate,
-                         (
-                             navigate_to_nearest::<SleepArea>,
-                             navigate_to_nearest::<Food>,
-                         ),
+            .add_systems(
+                PreUpdate,
+                (
+                    navigate_to_nearest::<SleepArea>,
+                    navigate_to_nearest::<Food>,
+                ),
             );
     }
 }

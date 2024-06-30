@@ -4,7 +4,8 @@ use big_brain::actions::ActionState;
 use big_brain::prelude::{ActionSpan, Actor, HasThinker};
 use oxidized_navigation::{NavMesh, NavMeshSettings};
 
-use crate::prelude::*;
+use crate::ai_navigation::{NavigationPath, SeekBehavior};
+use crate::ai_navigation::constants::REACHED_POINT_THRESHOLD;
 
 /// System to navigate actors towards the nearest target of a specified type.
 ///

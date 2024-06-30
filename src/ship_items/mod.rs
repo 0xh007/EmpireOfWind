@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
+pub use components::*;
+use systems::*;
+
 use crate::AppStates;
-use crate::ship_items::components::SleepArea;
-use crate::ship_items::systems::spawn_furniture;
 
 mod components;
 mod systems;

@@ -1,1 +1,3 @@
-mod navigation;
+pub use navigation_settings::*;
+
+mod navigation_settings;

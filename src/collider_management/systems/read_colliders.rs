@@ -1,10 +1,16 @@
 use bevy::asset::{Assets, Handle};
 use bevy::hierarchy::Children;
 use bevy::log::error;
-use bevy::prelude::{Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, Transform, Visibility, With};
+use bevy::prelude::{
+    Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, Transform, Visibility, With,
+};
 use bevy_xpbd_3d::components::RigidBody;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
+
+use crate::collider_management::ColliderMarker;
+use crate::navmesh::NavMeshMarker;
+use crate::ship::Ship;
 
 /// System to process and configure collider objects within the game.
 ///

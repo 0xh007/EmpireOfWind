@@ -5,6 +5,8 @@ use bevy::prelude::{Color, Commands, default, Mesh, Meshable, ResMut, Sphere, Tr
 use bevy_xpbd_3d::components::{Friction, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
 
+use crate::food::Food;
+
 /// System to spawn food entities in the game.
 ///
 /// This system creates food entities with specified properties, including a mesh,
@@ -32,7 +34,7 @@ pub fn spawn_food(
         Food,
         PbrBundle {
             mesh: meshes.add(Sphere::new(0.2).mesh().ico(5).unwrap()),
-            material: materials.add(Color::RED.into()),
+            material: materials.add(Color::RED),
             transform: Transform::from_xyz(13.167, 7.1885, 0.0),
             ..default()
         },

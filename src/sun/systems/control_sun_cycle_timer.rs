@@ -1,7 +1,8 @@
 use bevy::input::ButtonInput;
 use bevy::prelude::{KeyCode, Res, ResMut};
 
-use crate::prelude::*;
+use crate::sun::consts::SUN_CYCLE_SPEED_DELTA;
+use crate::sun::resources::SunCycleTimer;
 
 /// Controls the cycle timer based on user input.
 ///
@@ -18,12 +19,12 @@ pub fn control_sun_cycle_timer(input: Res<ButtonInput<KeyCode>>, mut timer: ResM
     }
 
     if input.pressed(KeyCode::NumpadAdd) {
-        timer.update_speed(DAY_CYCLE_SPEED_DELTA);
+        timer.update_speed(SUN_CYCLE_SPEED_DELTA);
         eprintln!("Increase speed: {}", timer.speed);
     }
 
     if input.pressed(KeyCode::NumpadSubtract) {
-        timer.update_speed(-DAY_CYCLE_SPEED_DELTA);
+        timer.update_speed(-SUN_CYCLE_SPEED_DELTA);
         eprintln!("Decrease speed: {}", timer.speed);
     }
 }

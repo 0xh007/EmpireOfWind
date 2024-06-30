@@ -1,5 +1,4 @@
-use bevy::ecs::reflect::ReflectComponent;
-use bevy::prelude::{Component, Reflect};
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// The `AreaName` component is used to assign a name to specific areas within the game world.

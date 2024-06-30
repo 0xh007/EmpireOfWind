@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use bevy::prelude::*;
 use big_brain::prelude::*;
 
-use crate::food::components::Food;
+use crate::food::Food;
 
 use super::seek_behavior::SeekBehavior;
 

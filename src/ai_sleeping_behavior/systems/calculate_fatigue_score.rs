@@ -2,7 +2,7 @@ use bevy::log::trace;
 use bevy::prelude::{Local, Query, With};
 use big_brain::prelude::{Actor, Score, ScorerSpan};
 
-use crate::components::{Fatigue, FatigueScorer};
+use crate::ai_sleeping_behavior::{Fatigue, FatigueScorer};
 
 /// This system calculates a score based on an entity's fatigue level. The higher the fatigue,
 /// the higher the score, indicating a greater need for the entity to sleep.

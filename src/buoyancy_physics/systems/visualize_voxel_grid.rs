@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 
+use crate::buoyancy_physics::Buoyancy;
+use crate::buoyancy_physics::constants::VOXEL_SIZE;
+use crate::buoyancy_physics::VoxelVisual;
+
 /// Visualizes the voxel grid for debugging purposes.
 ///
 /// This system is used to visualize the voxel grid associated with entities that have
@@ -41,7 +45,11 @@ pub fn visualize_voxel_grid(
                 // Spawn visual representation for each solid voxel
                 commands
                     .spawn(PbrBundle {
-                        mesh: meshes.add(Cuboid::new(voxel_visual_size, voxel_visual_size, voxel_visual_size)),
+                        mesh: meshes.add(Cuboid::new(
+                            voxel_visual_size,
+                            voxel_visual_size,
+                            voxel_visual_size,
+                        )),
                         material: materials.add(Color::rgb(0.5, 0.5, 1.0)), // Custom color
                         transform: Transform::from_translation(voxel_position),
                         ..default()

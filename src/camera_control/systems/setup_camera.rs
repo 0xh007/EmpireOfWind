@@ -2,11 +2,15 @@ use bevy::core::Name;
 use bevy::core_pipeline::prepass::DepthPrepass;
 use bevy::math::Vec3;
 use bevy::pbr::{FogFalloff, FogSettings};
-use bevy::prelude::{Camera, Camera3dBundle, Color, Commands, default, OrthographicProjection, Transform};
+use bevy::prelude::{
+    Camera, Camera3dBundle, Color, Commands, default, OrthographicProjection, Transform,
+};
 use bevy::render::camera::ScalingMode;
 use bevy::render::view::RenderLayers;
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_panorbit_camera::PanOrbitCamera;
+
+use crate::camera_control::{CameraZoom, DebugCamera, MainCamera};
 
 /// System to set up the main and debug cameras for the game.
 ///
@@ -46,7 +50,7 @@ pub fn setup_camera(mut commands: Commands) {
                 scaling_mode: ScalingMode::FixedVertical(2.0),
                 ..default()
             }
-                .into(),
+            .into(),
             transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },

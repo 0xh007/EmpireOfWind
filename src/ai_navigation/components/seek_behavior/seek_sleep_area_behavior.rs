@@ -3,6 +3,8 @@ use std::marker::PhantomData;
 use bevy::prelude::*;
 use big_brain::prelude::*;
 
+use crate::ship_items::SleepArea;
+
 use super::seek_behavior::SeekBehavior;
 
 /// Component for entities that seek the nearest `SleepArea` target.

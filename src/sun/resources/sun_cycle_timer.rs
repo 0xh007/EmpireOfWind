@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::{Resource, Timer, TimerMode};
 use bevy::time::Stopwatch;
 
-use crate::prelude::*;
+use crate::sun::consts::{SUN_CYCLE_SPEED_MAX, SUN_CYCLE_SPEED_MIN};
 
 /// A resource for managing the day/night cycle in the game.
 ///
@@ -110,11 +110,11 @@ impl SunCycleTimer {
     /// The speed is clamped between `SUN_CYCLE_SPEED_MIN` and `SUN_CYCLE_SPEED_MAX`.
     pub fn update_speed(&mut self, delta: f32) {
         self.speed += delta;
-        if self.speed < DAY_CYCLE_SPEED_MIN {
-            self.speed = DAY_CYCLE_SPEED_MIN;
+        if self.speed < SUN_CYCLE_SPEED_MIN {
+            self.speed = SUN_CYCLE_SPEED_MIN;
         }
-        if self.speed > DAY_CYCLE_SPEED_MAX {
-            self.speed = DAY_CYCLE_SPEED_MAX;
+        if self.speed > SUN_CYCLE_SPEED_MAX {
+            self.speed = SUN_CYCLE_SPEED_MAX;
         }
     }
 }

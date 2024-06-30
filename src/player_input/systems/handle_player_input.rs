@@ -4,8 +4,8 @@ use bevy::prelude::{EventWriter, KeyCode, Query, Res};
 use bevy_tnua::builtins::{TnuaBuiltinJump, TnuaBuiltinWalk};
 use bevy_tnua::controller::TnuaController;
 
-use crate::components::Player;
-use crate::events::NavMeshDebugToggle;
+use crate::navmesh::NavMeshDebugToggle;
+use crate::player::Player;
 
 /// Handles player input to control the player character's movement and actions.
 ///

@@ -4,7 +4,8 @@ use bevy::pbr::light_consts::lux::AMBIENT_DAYLIGHT;
 use bevy::prelude::{Query, Res, ResMut, Time, Transform, With};
 use bevy_atmosphere::prelude::{AtmosphereMut, Nishita};
 
-use crate::prelude::*;
+use crate::sun::components::Sun;
+use crate::sun::resources::SunCycleTimer;
 
 /// System that updates the sun's position and lighting based on the cycle timer.
 ///
@@ -20,7 +21,7 @@ use crate::prelude::*;
 pub fn update_sun_cycle(
     mut atmosphere: AtmosphereMut<Nishita>,
     mut query: Query<(&mut Transform, &mut DirectionalLight), With<Sun>>,
-    mut timer: ResMut<CycleTimer>,
+    mut timer: ResMut<SunCycleTimer>,
     time: Res<Time>,
 ) {
     // Do nothing if timer is paused.

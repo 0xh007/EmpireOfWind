@@ -1,4 +1,4 @@
-use bevy::prelude::{Component, Reflect};
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// A marker component indicating that an entity is a ship.

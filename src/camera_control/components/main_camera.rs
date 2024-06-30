@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// The `MainCamera` component is used to mark the primary camera entity in the game.
 /// This component allows systems to identify and manipulate the main camera specifically.
@@ -11,6 +12,6 @@ use bevy::prelude::*;
 ///
 /// The `MainCamera` component is integral to identifying and controlling the primary camera in the game,
 /// ensuring that it interacts correctly with various systems and player inputs.
-#[derive(Component)]
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct MainCamera;
-

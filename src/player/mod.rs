@@ -1,8 +1,6 @@
 use bevy::prelude::*;
-use bevy_tnua::prelude::*;
-use bevy_xpbd_3d::prelude::*;
 
-use components::*;
+pub use components::*;
 use systems::*;
 
 mod components;

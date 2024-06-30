@@ -1,6 +1,8 @@
 use bevy::input::ButtonInput;
 use bevy::prelude::{Camera, KeyCode, Query, Res, Without};
 
+use crate::camera_control::{DebugCamera, MainCamera};
+
 /// This system switches the active camera between the main camera and the debug camera
 /// when the `0` key is pressed.
 ///

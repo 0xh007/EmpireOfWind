@@ -1,4 +1,5 @@
-use bevy::prelude::Component;
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// Manages the zoom functionality of the camera.
 ///
@@ -10,7 +11,8 @@ use bevy::prelude::Component;
 /// - `target_scale`: The desired zoom scale that the camera should move towards.
 /// - `current_scale`: The current zoom scale of the camera.
 /// - `speed`: The speed at which the camera zooms in or out to reach the target scale.
-#[derive(Component)]
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct CameraZoom {
     pub target_scale: f32,
     pub current_scale: f32,

@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::buoyancy_physics::BuoyancyMarker;
+
 /// Visualizes the bounding box of meshes for debugging purposes.
 ///
 /// This system is used for visual debugging by drawing the outer bounds of meshes. It helps

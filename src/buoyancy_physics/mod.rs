@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use crate::AppStates;
-
-use components::*;
+pub use components::*;
 use systems::*;
+
+use crate::AppStates;
 
 mod components;
 mod constants;
@@ -38,16 +38,30 @@ pub struct BuoyancyPhysicsPlugin;
 
 impl Plugin for BuoyancyPhysicsPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<Buoyancy>()
+        app.register_type::<Buoyancy>()
             .register_type::<BuoyancyMarker>()
             .register_type::<Vec3I>()
             .register_type::<Voxel>()
             .register_type::<VoxelVisual>()
-            .add_systems(Update, calculate_and_apply_buoyancy.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, read_buoyancy_objects.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, update_voxel_solidity.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, visualize_mesh_bounds.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, visualize_voxel_grid.run_if(in_state(AppStates::Running)));
+            .add_systems(
+                Update,
+                calculate_and_apply_buoyancy.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                read_buoyancy_objects.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                update_voxel_solidity.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                visualize_mesh_bounds.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                visualize_voxel_grid.run_if(in_state(AppStates::Running)),
+            );
     }
 }

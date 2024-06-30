@@ -7,7 +7,7 @@ use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
 use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
 
-use crate::components::Player;
+use crate::player::Player;
 
 /// Spawns the player entity in the game world.
 ///

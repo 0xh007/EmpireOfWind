@@ -2,7 +2,7 @@ use bevy::prelude::{Query, Res, Time};
 use big_brain::actions::ActionState;
 use big_brain::prelude::{ActionSpan, Actor};
 
-use crate::components::{Fatigue, Sleep};
+use crate::ai_sleeping_behavior::{Fatigue, Sleep};
 
 /// System that manages the sleeping action of entities.
 ///
