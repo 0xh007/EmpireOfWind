@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 pub use components::*;
-use resources::*;
+pub use resources::*;
 use systems::*;
 
 use crate::AppStates;
@@ -9,11 +9,14 @@ use crate::AppStates;
 mod components;
 mod resources;
 mod systems;
+mod utils;
 
 /// Plugin for managing areas within the game world.
 ///
-/// The `AreaManagementPlugin` provides functionality for handling areas that
-/// players can enter and exit. It registers the necessary components, initializes
+/// The `AreaVisibilityPlugin` provides functionality for handling areas that
+/// players can enter and exit. It is largely concerned with modifying the visibility of certain areas
+/// based on the players location. For example, if the player walks into a room, this plugin provides
+/// the ability to hide and show walls as needed. It registers the necessary components, initializes
 /// resources, and sets up systems to manage the active areas and process area markers.
 ///
 /// # Components
@@ -27,9 +30,9 @@ mod systems;
 /// # Systems
 /// - `manage_active_areas`: Manages active areas based on player interactions.
 /// - `read_area_markers`: Processes and configures area markers for entry and exit points.
-pub struct AreaManagementPlugin;
+pub struct AreaVisibilityPlugin;
 
-impl Plugin for AreaManagementPlugin {
+impl Plugin for AreaVisibilityPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<AreaEnterMarker>()
             .register_type::<AreaExitMarker>()

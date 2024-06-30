@@ -6,6 +6,7 @@ use oxidized_navigation::{NavMesh, NavMeshSettings};
 
 use crate::ai_navigation::{NavigationPath, SeekBehavior};
 use crate::ai_navigation::constants::REACHED_POINT_THRESHOLD;
+use crate::ai_navigation::utils::find_navigation_path;
 
 /// System to navigate actors towards the nearest target of a specified type.
 ///

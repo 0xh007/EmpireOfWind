@@ -3,6 +3,7 @@ use bevy::prelude::{Mesh, Transform};
 
 use crate::buoyancy_physics::constants::VOXEL_SIZE;
 use crate::buoyancy_physics::Voxel;
+use crate::utils::{calculate_mesh_bounds, Vec3I};
 
 /// Generates a voxel grid within the bounds of the given mesh.
 ///

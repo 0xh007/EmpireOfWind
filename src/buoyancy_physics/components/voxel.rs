@@ -1,4 +1,5 @@
-use bevy::prelude::Vec3;
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// Represents a single voxel in the game world.
 ///
@@ -9,7 +10,8 @@ use bevy::prelude::Vec3;
 /// # Fields
 /// - `position`: The 3D position of the voxel.
 /// - `is_solid`: A boolean indicating whether the voxel is solid.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct Voxel {
     pub position: Vec3,
     pub is_solid: bool,

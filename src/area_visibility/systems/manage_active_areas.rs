@@ -2,8 +2,9 @@ use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
 use bevy_xpbd_3d::prelude::{Collision, Sensor};
 
-use crate::area_management::components::*;
-use crate::area_management::resources::ActiveAreas;
+use crate::area_visibility::components::*;
+use crate::area_visibility::resources::ActiveAreas;
+use crate::area_visibility::utils::{update_camera_layers, update_zoom_target};
 use crate::camera_control::{CameraZoom, MainCamera};
 use crate::player::Player;
 

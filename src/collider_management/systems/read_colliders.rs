@@ -11,6 +11,7 @@ use oxidized_navigation::NavMeshAffector;
 use crate::collider_management::ColliderMarker;
 use crate::navmesh::NavMeshMarker;
 use crate::ship::Ship;
+use crate::utils::find_mesh;
 
 /// System to process and configure collider objects within the game.
 ///

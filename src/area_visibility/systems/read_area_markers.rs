@@ -4,8 +4,9 @@ use bevy::log::error;
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::{Collider, Sensor};
 
-use crate::area_management::components::*;
+use crate::area_visibility::components::*;
 use crate::ship::Ship;
+use crate::utils::find_mesh;
 
 /// System to process and configure area markers for entry and exit points.
 ///

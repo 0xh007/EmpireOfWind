@@ -7,7 +7,6 @@ use crate::AppStates;
 
 mod components;
 mod systems;
-mod utils;
 
 /// Plugin for managing camera controls within the game.
 ///

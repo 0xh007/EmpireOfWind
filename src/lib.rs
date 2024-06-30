@@ -4,7 +4,7 @@ use bevy::prelude::States;
 use ai_eating_behavior::AiEatingBehaviorPlugin;
 use ai_navigation::AiNavigationPlugin;
 use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
-use area_management::AreaManagementPlugin;
+use area_visibility::AreaVisibilityPlugin;
 use atmospheric_lighting::AtmosphericLightingPlugin;
 use buoyancy_physics::BuoyancyPhysicsPlugin;
 use camera_control::CameraControlPlugin;
@@ -21,7 +21,7 @@ use sun::SunCyclePlugin;
 mod ai_eating_behavior;
 mod ai_navigation;
 mod ai_sleeping_behavior;
-mod area_management;
+mod area_visibility;
 mod atmospheric_lighting;
 mod buoyancy_physics;
 mod camera_control;
@@ -57,7 +57,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(AiEatingBehaviorPlugin)
             .add(AiNavigationPlugin)
             .add(AiSleepingBehaviorPlugin)
-            .add(AreaManagementPlugin)
+            .add(AreaVisibilityPlugin)
             .add(AtmosphericLightingPlugin)
             .add(BuoyancyPhysicsPlugin)
             .add(CameraControlPlugin)

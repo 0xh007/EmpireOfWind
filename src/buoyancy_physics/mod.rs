@@ -40,7 +40,6 @@ impl Plugin for BuoyancyPhysicsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Buoyancy>()
             .register_type::<BuoyancyMarker>()
-            .register_type::<Vec3I>()
             .register_type::<Voxel>()
             .register_type::<VoxelVisual>()
             .add_systems(

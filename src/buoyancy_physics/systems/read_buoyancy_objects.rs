@@ -13,6 +13,7 @@ use oxidized_navigation::NavMeshAffector;
 use crate::buoyancy_physics::{Buoyancy, BuoyancyMarker};
 use crate::buoyancy_physics::utils::generate_voxel_grid;
 use crate::ship::Ship;
+use crate::utils::find_mesh;
 
 /// System to process and configure buoyancy objects within the game.
 ///

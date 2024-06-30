@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::buoyancy_physics::BuoyancyMarker;
+use crate::utils::{calculate_mesh_bounds, find_mesh, visualize_bounds};
 
 /// Visualizes the bounding box of meshes for debugging purposes.
 ///
