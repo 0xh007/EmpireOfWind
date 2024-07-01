@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use resources::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod consts;
@@ -34,7 +34,7 @@ pub struct SunCyclePlugin;
 impl Plugin for SunCyclePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(SunCycleTimer::new(Duration::from_millis(1000), 0.2))
-            .add_systems(Startup, setup_sun)
+            .add_systems(OnEnter(AppStates::Running), setup_sun)
             .add_systems(
                 Update,
                 control_sun_cycle_timer.run_if(in_state(AppStates::Running)),

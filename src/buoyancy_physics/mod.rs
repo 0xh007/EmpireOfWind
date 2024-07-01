@@ -3,7 +3,7 @@ use bevy::prelude::*;
 pub use components::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod constants;
@@ -53,14 +53,14 @@ impl Plugin for BuoyancyPhysicsPlugin {
             .add_systems(
                 Update,
                 update_voxel_solidity.run_if(in_state(AppStates::Running)),
-            )
-            .add_systems(
-                Update,
-                visualize_mesh_bounds.run_if(in_state(AppStates::Running)),
-            )
-            .add_systems(
-                Update,
-                visualize_voxel_grid.run_if(in_state(AppStates::Running)),
             );
+        // .add_systems(
+        //     Update,
+        //     visualize_mesh_bounds.run_if(in_state(AppStates::Running)),
+        // )
+        // .add_systems(
+        //     Update,
+        //     visualize_voxel_grid.run_if(in_state(AppStates::Running)),
+        // );
     }
 }

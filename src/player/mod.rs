@@ -3,6 +3,8 @@ use bevy::prelude::*;
 pub use components::*;
 use systems::*;
 
+use crate::asset_management::AppStates;
+
 mod components;
 mod systems;
 
@@ -21,6 +23,6 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Player>()
-            .add_systems(Startup, spawn_player);
+            .add_systems(OnEnter(AppStates::Running), spawn_player);
     }
 }

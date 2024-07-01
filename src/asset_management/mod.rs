@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-use crate::AppStates;
+pub use states::app_states::AppStates;
 
-mod states;
+pub mod states;
 
 pub struct AssetManagementPlugin;
 

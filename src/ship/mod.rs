@@ -5,7 +5,7 @@ pub use components::*;
 use resources::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod resources;
@@ -31,7 +31,7 @@ impl Plugin for ShipPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
-        .register_type::<Ship>()
-        .add_systems(OnEnter(AppStates::Running), spawn_ship);
+            .register_type::<Ship>()
+            .add_systems(OnEnter(AppStates::Running), spawn_ship);
     }
 }

@@ -1,9 +1,11 @@
 use bevy::prelude::*;
+use bevy::transform::TransformSystem;
+use bevy_xpbd_3d::PhysicsSet;
 
 pub use components::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod systems;
@@ -38,8 +40,14 @@ impl Plugin for CameraControlPlugin {
                 Update,
                 camera_switching.run_if(in_state(AppStates::Running)),
             )
-            .add_systems(Update, move_camera.run_if(in_state(AppStates::Running)))
-            .add_systems(Update, setup_camera.run_if(in_state(AppStates::Running)))
+            .add_systems(
+                PostUpdate,
+                move_camera
+                    .run_if(in_state(AppStates::Running))
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
+            )
+            .add_systems(OnEnter(AppStates::Running), setup_camera)
             .add_systems(
                 Update,
                 interpolate_zoom.run_if(in_state(AppStates::Running)),

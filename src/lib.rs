@@ -1,10 +1,15 @@
 pub use bevy::app::{PluginGroup, PluginGroupBuilder};
-use bevy::prelude::States;
+use bevy::app::PreUpdate;
+use bevy_gltf_components::ComponentsFromGltfPlugin;
+use bevy_tnua::prelude::TnuaControllerPlugin;
+use bevy_tnua_xpbd3d::TnuaXpbd3dPlugin;
+use big_brain::BigBrainPlugin;
 
 use ai_eating_behavior::AiEatingBehaviorPlugin;
 use ai_navigation::AiNavigationPlugin;
 use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
 use area_visibility::AreaVisibilityPlugin;
+use asset_management::AssetManagementPlugin;
 use atmospheric_lighting::AtmosphericLightingPlugin;
 use buoyancy_physics::BuoyancyPhysicsPlugin;
 use camera_control::CameraControlPlugin;
@@ -39,13 +44,6 @@ mod ship_items;
 mod sun;
 mod utils;
 
-#[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
-pub enum AppStates {
-    #[default]
-    AssetLoading,
-    Running,
-}
-
 /// PluginGroup for the Empire of Wind game.
 ///
 /// The `EmpireOfWindPlugins` group encompasses all the individual plugins
@@ -61,10 +59,13 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(AiNavigationPlugin)
             .add(AiSleepingBehaviorPlugin)
             .add(AreaVisibilityPlugin)
+            .add(AssetManagementPlugin)
             .add(AtmosphericLightingPlugin)
+            .add(BigBrainPlugin::new(PreUpdate))
             .add(BuoyancyPhysicsPlugin)
             .add(CameraControlPlugin)
             .add(ColliderManagementPlugin)
+            .add(ComponentsFromGltfPlugin::default())
             .add(CrewManagementPlugin)
             .add(FoodPlugin)
             .add(NavMeshPlugin)
@@ -74,5 +75,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(ShipPlugin)
             .add(ShipItemsPlugin)
             .add(SunCyclePlugin)
+            .add(TnuaControllerPlugin)
+            .add(TnuaXpbd3dPlugin)
     }
 }

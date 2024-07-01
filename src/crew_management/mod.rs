@@ -3,6 +3,8 @@ use bevy::prelude::*;
 pub use components::*;
 use systems::*;
 
+use crate::asset_management::AppStates;
+
 mod components;
 mod systems;
 
@@ -21,6 +23,6 @@ pub struct CrewManagementPlugin;
 impl Plugin for CrewManagementPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<CrewMember>()
-            .add_systems(Startup, spawn_crew_members);
+            .add_systems(OnEnter(AppStates::Running), spawn_crew_members);
     }
 }

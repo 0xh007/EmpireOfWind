@@ -4,7 +4,7 @@ pub use components::*;
 pub use resources::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod resources;
@@ -45,6 +45,10 @@ impl Plugin for AreaVisibilityPlugin {
             .add_systems(
                 Update,
                 read_area_markers.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                propagate_render_layers.run_if(in_state(AppStates::Running)),
             );
     }
 }

@@ -4,6 +4,7 @@ use bevy::log::error;
 use bevy::prelude::{
     Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, Transform, Visibility, With,
 };
+use bevy_editor_pls::egui::debug_text::print;
 use bevy_xpbd_3d::components::RigidBody;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
@@ -48,9 +49,13 @@ pub fn read_colliders(
     parent_query: Query<&Transform, With<Ship>>,
 ) {
     for (entity, nav_mesh_marker_opt, transform) in collider_marker_query.iter() {
+        println!("QUERY WORKS");
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            println!("MESH HANDLE");
             if let Some(mesh) = meshes.get(mesh_handle) {
+                println!("FOUND MESH");
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    println!("MAKING COLLIDER");
                     // Update transform to follow the ship if needed
                     if let Ok(ship_transform) = parent_query.get_single() {
                         commands.entity(entity).insert((

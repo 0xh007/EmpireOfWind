@@ -4,7 +4,7 @@ use bevy::prelude::*;
 pub use components::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod systems;

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 pub use components::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod systems;
@@ -23,6 +23,6 @@ pub struct FoodPlugin;
 impl Plugin for FoodPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Food>()
-            .add_systems(Update, spawn_food.run_if(in_state(AppStates::Running)));
+            .add_systems(OnEnter(AppStates::Running), spawn_food);
     }
 }

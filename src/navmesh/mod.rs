@@ -8,7 +8,7 @@ pub use components::*;
 pub use events::*;
 use systems::*;
 
-use crate::AppStates;
+use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod events;

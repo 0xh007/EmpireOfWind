@@ -17,7 +17,7 @@ use bevy::render::view::RenderLayers;
 /// For each parent entity with `RenderLayers`, the system iterates over its children and
 /// checks if the child entity has a `Handle<Mesh>` and `Handle<StandardMaterial>`. If so,
 /// it propagates the `RenderLayers` from the parent to the child entity.
-fn propagate_render_layers(
+pub fn propagate_render_layers(
     mut commands: Commands,
     parent_query: Query<(&RenderLayers, &Children)>,
     child_query: Query<(Entity, &Handle<Mesh>, &Handle<StandardMaterial>)>,
