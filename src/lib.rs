@@ -23,6 +23,7 @@ mod ai_eating_behavior;
 mod ai_navigation;
 mod ai_sleeping_behavior;
 mod area_visibility;
+mod asset_management;
 mod atmospheric_lighting;
 mod buoyancy_physics;
 mod camera_control;
