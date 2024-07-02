@@ -4,7 +4,6 @@ use bevy::log::error;
 use bevy::prelude::{
     Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, Transform, Visibility, With,
 };
-use bevy_editor_pls::egui::debug_text::print;
 use bevy_xpbd_3d::components::RigidBody;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
