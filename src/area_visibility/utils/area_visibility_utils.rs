@@ -46,6 +46,5 @@ pub fn update_zoom_target(
 ) {
     for mut zoom in camera_zoom_query.iter_mut() {
         zoom.target_scale = target_scale;
-        println!("Setting target zoom scale to {}", target_scale);
     }
 }
