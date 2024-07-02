@@ -4,6 +4,7 @@ use bevy::prelude::{EventWriter, KeyCode, Query, Res};
 use bevy_tnua::builtins::{TnuaBuiltinJump, TnuaBuiltinWalk};
 use bevy_tnua::controller::TnuaController;
 
+use crate::buoyancy_physics::{VisualizeMeshBoundsDebugToggle, VisualizeVoxelsDebugToggle};
 use crate::navmesh::NavMeshDebugToggle;
 use crate::player::Player;
 
@@ -17,15 +18,21 @@ use crate::player::Player;
 /// - `A` or `ArrowLeft`: Move left.
 /// - `D` or `ArrowRight`: Move right.
 /// - `Space`: Make the player jump.
-/// - `M`: Toggle the navigation mesh debug display.
+/// - `7`: Toggle debug visuals of voxel grid for buoyancy computation.
+/// - `8`: Toggle debug visuals of mesh bounds finder.
+/// - `9`: Toggle the navigation mesh debug display.
 ///
 /// # Parameters
 /// - `keyboard_input`: Resource capturing the current state of keyboard inputs.
 /// - `nav_mesh_event_writer`: Writer to send `NavMeshDebugToggle` events.
+/// - `visualize_mesh_event_writer`: Writer to send `VisualizeMeshBoundsDebugToggle` events.
+/// - `visualize_voxels_event_writer`: Writer to send `VisualizeVoxelsDebugToggle` events.
 /// - `query`: Query to fetch the `Player` and `TnuaController` components of entities.
 pub fn handle_player_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
+    mut visualize_mesh_event_writer: EventWriter<VisualizeMeshBoundsDebugToggle>,
+    mut visualize_voxels_event_writer: EventWriter<VisualizeVoxelsDebugToggle>,
     mut query: Query<(&Player, &mut TnuaController)>,
 ) {
     for (_, mut controller) in query.iter_mut() {
@@ -76,8 +83,16 @@ pub fn handle_player_input(
             });
         }
 
-        if keyboard_input.pressed(KeyCode::KeyM) {
+        if keyboard_input.pressed(KeyCode::Digit9) {
             nav_mesh_event_writer.send(NavMeshDebugToggle);
+        }
+
+        if keyboard_input.pressed(KeyCode::Digit8) {
+            visualize_mesh_event_writer.send(VisualizeMeshBoundsDebugToggle);
+        }
+
+        if keyboard_input.pressed(KeyCode::Digit7) {
+            visualize_voxels_event_writer.send(VisualizeVoxelsDebugToggle);
         }
     }
 }

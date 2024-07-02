@@ -1,14 +1,17 @@
 use bevy::prelude::*;
 
 pub use components::*;
+pub use events::*;
 use systems::*;
 
 use crate::asset_management::states::app_states::AppStates;
 
 mod components;
 mod constants;
+mod events;
 mod systems;
 mod utils;
+
 
 /// Plugin for managing buoyancy physics within the game.
 ///
@@ -42,6 +45,8 @@ impl Plugin for BuoyancyPhysicsPlugin {
             .register_type::<BuoyancyMarker>()
             .register_type::<Voxel>()
             .register_type::<VoxelVisual>()
+            .add_event::<VisualizeMeshBoundsDebugToggle>()
+            .add_event::<VisualizeVoxelsDebugToggle>()
             .add_systems(
                 Update,
                 calculate_and_apply_buoyancy.run_if(in_state(AppStates::Running)),
@@ -53,14 +58,14 @@ impl Plugin for BuoyancyPhysicsPlugin {
             .add_systems(
                 Update,
                 update_voxel_solidity.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                visualize_mesh_bounds.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                visualize_voxel_grid.run_if(in_state(AppStates::Running)),
             );
-        // .add_systems(
-        //     Update,
-        //     visualize_mesh_bounds.run_if(in_state(AppStates::Running)),
-        // )
-        // .add_systems(
-        //     Update,
-        //     visualize_voxel_grid.run_if(in_state(AppStates::Running)),
-        // );
     }
 }

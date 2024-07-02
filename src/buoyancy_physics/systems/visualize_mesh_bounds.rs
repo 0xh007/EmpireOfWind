@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::buoyancy_physics::BuoyancyMarker;
+use crate::buoyancy_physics::{BuoyancyMarker, VisualizeMeshBoundsDebugToggle};
 use crate::utils::{calculate_mesh_bounds, find_mesh, visualize_bounds};
 
 /// Visualizes the bounding box of meshes for debugging purposes.
@@ -15,6 +15,7 @@ use crate::utils::{calculate_mesh_bounds, find_mesh, visualize_bounds};
 ///
 /// # Parameters
 ///
+/// * `visualize_mesh_bounds_debug_event_reader`: Event reader to determine if we should run the system.
 /// * `commands`: The Commands resource is used to spawn and configure entities for visualizing the bounds.
 /// * `meshes`: A mutable reference to the Assets resource containing Mesh objects.
 /// * `materials`: A mutable reference to the Assets resource containing StandardMaterial objects.
@@ -31,8 +32,8 @@ use crate::utils::{calculate_mesh_bounds, find_mesh, visualize_bounds};
 /// 3. It visualizes these bounds by spawning entities that represent the bounding box using PBR (Physically Based Rendering) components.
 ///
 /// This visualization helps developers to see the initial step of the voxelization process, where the mesh bounds are determined.
-// TODO: Make this into a toggle debug system
 pub fn visualize_mesh_bounds(
+    mut visualize_mesh_bounds_debug_event_reader: EventReader<VisualizeMeshBoundsDebugToggle>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -40,11 +41,13 @@ pub fn visualize_mesh_bounds(
     children: Query<&Children>,
     mesh_handles: Query<&Handle<Mesh>>,
 ) {
-    for (entity, _, _mesh_transform) in query.iter() {
-        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            if let Some(mesh) = meshes.get(mesh_handle) {
-                let bounds = calculate_mesh_bounds(mesh);
-                visualize_bounds(&mut commands, &mut meshes, &mut materials, bounds);
+    for _event in visualize_mesh_bounds_debug_event_reader.read() {
+        for (entity, _, _mesh_transform) in query.iter() {
+            if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+                if let Some(mesh) = meshes.get(mesh_handle) {
+                    let bounds = calculate_mesh_bounds(mesh);
+                    visualize_bounds(&mut commands, &mut meshes, &mut materials, bounds);
+                }
             }
         }
     }
