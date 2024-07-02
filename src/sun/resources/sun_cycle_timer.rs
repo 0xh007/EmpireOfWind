@@ -110,11 +110,6 @@ impl SunCycleTimer {
     /// The speed is clamped between `SUN_CYCLE_SPEED_MIN` and `SUN_CYCLE_SPEED_MAX`.
     pub fn update_speed(&mut self, delta: f32) {
         self.speed += delta;
-        if self.speed < SUN_CYCLE_SPEED_MIN {
-            self.speed = SUN_CYCLE_SPEED_MIN;
-        }
-        if self.speed > SUN_CYCLE_SPEED_MAX {
-            self.speed = SUN_CYCLE_SPEED_MAX;
-        }
+        self.speed = self.speed.clamp(SUN_CYCLE_SPEED_MIN, SUN_CYCLE_SPEED_MAX);
     }
 }

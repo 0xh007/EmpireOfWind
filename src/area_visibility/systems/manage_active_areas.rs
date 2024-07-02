@@ -22,6 +22,7 @@ use crate::player::Player;
 /// - `active_areas`: Resource to manage the set of active areas.
 /// - `camera_layers_query`: Query to modify the render layers of the main camera.
 /// - `camera_zoom_query`: Query to modify the zoom level of the main camera.
+#[allow(clippy::type_complexity)]
 pub fn manage_active_areas(
     mut collision_event_reader: EventReader<Collision>,
     sensor_query: Query<(
