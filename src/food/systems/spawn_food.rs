@@ -1,7 +1,7 @@
 use bevy::asset::Assets;
 use bevy::core::Name;
 use bevy::pbr::{PbrBundle, StandardMaterial};
-use bevy::prelude::{Color, Commands, default, Mesh, Meshable, ResMut, Sphere, Transform};
+use bevy::prelude::{default, Color, Commands, Mesh, Meshable, ResMut, Sphere, Transform};
 use bevy_xpbd_3d::components::{Friction, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
 

@@ -1,8 +1,4 @@
-pub use {
-    fatigue::*,
-    fatigue_scorer::*,
-    sleep::*,
-};
+pub use {fatigue::*, fatigue_scorer::*, sleep::*};
 
 mod fatigue;
 mod fatigue_scorer;

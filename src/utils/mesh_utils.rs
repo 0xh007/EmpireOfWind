@@ -31,7 +31,6 @@ pub fn find_mesh(
     None
 }
 
-
 /// Visualizes the bounding box of a mesh in the game world.
 ///
 /// This function creates a 3D cuboid to represent the bounding box of a mesh,
@@ -54,17 +53,12 @@ pub fn visualize_bounds(
     let bbox_position = (bounds.0 + bounds.1) * 0.5;
 
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Cuboid::new(
-            bbox_size.x,
-            bbox_size.y,
-            bbox_size.z,
-        )),
+        mesh: meshes.add(Cuboid::new(bbox_size.x, bbox_size.y, bbox_size.z)),
         material: materials.add(Color::rgb(1.0, 0.0, 0.0)),
         transform: Transform::from_translation(bbox_position),
         ..default()
     });
 }
-
 
 /// Calculates the axis-aligned bounding box (AABB) of a mesh.
 ///

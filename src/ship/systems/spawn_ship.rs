@@ -1,5 +1,5 @@
 use bevy::core::Name;
-use bevy::prelude::{Commands, default, Res, SceneBundle};
+use bevy::prelude::{default, Commands, Res, SceneBundle};
 
 use crate::ship::resources::ShipAssets;
 use crate::ship::Ship;

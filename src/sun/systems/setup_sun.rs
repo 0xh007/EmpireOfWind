@@ -1,6 +1,6 @@
 use bevy::math::Quat;
 use bevy::pbr::{DirectionalLight, DirectionalLightBundle};
-use bevy::prelude::{Commands, default, Transform};
+use bevy::prelude::{default, Commands, Transform};
 use bevy::render::view::RenderLayers;
 
 use crate::sun::components::Sun;

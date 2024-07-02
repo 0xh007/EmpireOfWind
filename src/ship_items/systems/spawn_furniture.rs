@@ -7,7 +7,7 @@ use bevy::pbr::{PbrBundle, StandardMaterial};
 ///
 /// Note: This system is expected to be deprecated as the game evolves and more
 /// sophisticated systems for spawning and managing furniture are developed.
-use bevy::prelude::{Color, Commands, Cuboid, default, Mesh, ResMut, Transform};
+use bevy::prelude::{default, Color, Commands, Cuboid, Mesh, ResMut, Transform};
 use bevy_xpbd_3d::components::{Friction, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
 

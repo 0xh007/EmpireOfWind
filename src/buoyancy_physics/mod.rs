@@ -12,7 +12,6 @@ mod events;
 mod systems;
 mod utils;
 
-
 /// Plugin for managing buoyancy physics within the game.
 ///
 /// The `BuoyancyPhysicsPlugin` provides functionality for handling buoyancy calculations

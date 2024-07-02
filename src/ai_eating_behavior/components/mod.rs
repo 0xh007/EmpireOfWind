@@ -1,8 +1,4 @@
-pub use {
-    eat::*,
-    hunger::*,
-    hunger_scorer::*,
-};
+pub use {eat::*, hunger::*, hunger_scorer::*};
 
 mod eat;
 mod hunger;

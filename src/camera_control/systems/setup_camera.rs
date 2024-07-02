@@ -3,7 +3,7 @@ use bevy::core_pipeline::prepass::DepthPrepass;
 use bevy::math::Vec3;
 use bevy::pbr::{FogFalloff, FogSettings};
 use bevy::prelude::{
-    Camera, Camera3dBundle, Color, Commands, default, OrthographicProjection, Transform,
+    default, Camera, Camera3dBundle, Color, Commands, OrthographicProjection, Transform,
 };
 use bevy::render::camera::ScalingMode;
 use bevy::render::view::RenderLayers;

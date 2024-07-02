@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::buoyancy_physics::{Buoyancy, VisualizeVoxelsDebugToggle};
 use crate::buoyancy_physics::constants::VOXEL_SIZE;
 use crate::buoyancy_physics::VoxelVisual;
+use crate::buoyancy_physics::{Buoyancy, VisualizeVoxelsDebugToggle};
 
 /// Visualizes the voxel grid for debugging purposes.
 ///

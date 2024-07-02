@@ -1,5 +1,5 @@
-pub use bevy::app::{PluginGroup, PluginGroupBuilder};
 use bevy::app::PreUpdate;
+pub use bevy::app::{PluginGroup, PluginGroupBuilder};
 use bevy_gltf_components::ComponentsFromGltfPlugin;
 use bevy_tnua::prelude::TnuaControllerPlugin;
 use bevy_tnua_xpbd3d::TnuaXpbd3dPlugin;

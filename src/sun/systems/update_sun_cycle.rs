@@ -1,6 +1,6 @@
 use bevy::math::Quat;
-use bevy::pbr::DirectionalLight;
 use bevy::pbr::light_consts::lux::AMBIENT_DAYLIGHT;
+use bevy::pbr::DirectionalLight;
 use bevy::prelude::{Query, Res, ResMut, Time, Transform, With};
 use bevy_atmosphere::prelude::{AtmosphereMut, Nishita};
 

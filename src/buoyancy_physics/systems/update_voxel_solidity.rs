@@ -2,8 +2,8 @@ use bevy::math::Quat;
 use bevy::prelude::{Entity, Query, Transform};
 use bevy_xpbd_3d::prelude::{Collider, SpatialQuery, SpatialQueryFilter};
 
-use crate::buoyancy_physics::Buoyancy;
 use crate::buoyancy_physics::constants::VOXEL_SIZE;
+use crate::buoyancy_physics::Buoyancy;
 
 /// Updates the solidity status of voxels for buoyancy calculations.
 ///

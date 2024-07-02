@@ -2,7 +2,7 @@ use bevy::asset::Assets;
 use bevy::core::Name;
 use bevy::math::Vec3;
 use bevy::pbr::{PbrBundle, StandardMaterial};
-use bevy::prelude::{Capsule3d, Color, Commands, default, Mesh, ResMut, Transform};
+use bevy::prelude::{default, Capsule3d, Color, Commands, Mesh, ResMut, Transform};
 use bevy_tnua::controller::TnuaControllerBundle;
 use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
 use bevy_xpbd_3d::components::{LockedAxes, RigidBody};

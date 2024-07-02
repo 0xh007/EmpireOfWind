@@ -1,6 +1,6 @@
 use bevy::math::Vec3;
-use oxidized_navigation::{NavMesh, NavMeshSettings};
 use oxidized_navigation::query::{find_polygon_path, perform_string_pulling_on_path};
+use oxidized_navigation::{NavMesh, NavMeshSettings};
 
 /// Finds a navigation path from the start position to the goal position using the navigation mesh.
 ///

@@ -31,7 +31,7 @@ impl Plugin for ShipPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
         )
-            .register_type::<Ship>()
-            .add_systems(OnEnter(AppStates::Running), spawn_ship);
+        .register_type::<Ship>()
+        .add_systems(OnEnter(AppStates::Running), spawn_ship);
     }
 }

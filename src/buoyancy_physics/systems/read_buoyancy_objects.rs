@@ -10,8 +10,8 @@ use bevy_xpbd_3d::math::Matrix3;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::buoyancy_physics::{Buoyancy, BuoyancyMarker};
 use crate::buoyancy_physics::utils::generate_voxel_grid;
+use crate::buoyancy_physics::{Buoyancy, BuoyancyMarker};
 use crate::ship::Ship;
 use crate::utils::find_mesh;
 
