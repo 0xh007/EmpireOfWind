@@ -31,8 +31,8 @@ use crate::player::Player;
 pub fn handle_player_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
-    mut visualize_mesh_event_writer: EventWriter<VisualizeMeshBoundsDebugToggle>,
-    mut visualize_voxels_event_writer: EventWriter<VisualizeVoxelsDebugToggle>,
+    // mut visualize_mesh_event_writer: EventWriter<VisualizeMeshBoundsDebugToggle>,
+    // mut visualize_voxels_event_writer: EventWriter<VisualizeVoxelsDebugToggle>,
     mut query: Query<(&Player, &mut TnuaController)>,
 ) {
     for (_, mut controller) in query.iter_mut() {
@@ -87,12 +87,12 @@ pub fn handle_player_input(
             nav_mesh_event_writer.send(NavMeshDebugToggle);
         }
 
-        if keyboard_input.pressed(KeyCode::Digit8) {
-            visualize_mesh_event_writer.send(VisualizeMeshBoundsDebugToggle);
-        }
-
-        if keyboard_input.pressed(KeyCode::Digit7) {
-            visualize_voxels_event_writer.send(VisualizeVoxelsDebugToggle);
-        }
+        // if keyboard_input.pressed(KeyCode::Digit8) {
+        //     visualize_mesh_event_writer.send(VisualizeMeshBoundsDebugToggle);
+        // }
+        // 
+        // if keyboard_input.pressed(KeyCode::Digit7) {
+        //     visualize_voxels_event_writer.send(VisualizeVoxelsDebugToggle);
+        // }
     }
 }

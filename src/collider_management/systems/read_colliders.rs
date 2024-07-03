@@ -48,13 +48,9 @@ pub fn read_colliders(
     parent_query: Query<&Transform, With<Ship>>,
 ) {
     for (entity, nav_mesh_marker_opt, transform) in collider_marker_query.iter() {
-        println!("QUERY WORKS");
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            println!("MESH HANDLE");
             if let Some(mesh) = meshes.get(mesh_handle) {
-                println!("FOUND MESH");
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
-                    println!("MAKING COLLIDER");
                     // Update transform to follow the ship if needed
                     if let Ok(ship_transform) = parent_query.get_single() {
                         commands.entity(entity).insert((
@@ -70,7 +66,7 @@ pub fn read_colliders(
                     commands.entity(entity).insert((
                         collider,
                         RigidBody::Kinematic, // Change to Kinematic
-                        Visibility::Hidden,
+                        Visibility::Visible,
                     ));
 
                     if nav_mesh_marker_opt.is_some() {

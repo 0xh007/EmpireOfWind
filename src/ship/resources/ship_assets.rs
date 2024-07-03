@@ -16,3 +16,4 @@ pub struct ShipAssets {
     #[asset(path = "models/export/ship/carrack_2.glb#Scene0")]
     pub ship: Handle<Scene>,
 }
+    

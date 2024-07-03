@@ -23,7 +23,7 @@ pub struct ShipItemsPlugin;
 
 impl Plugin for ShipItemsPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<SleepArea>()
-            .add_systems(OnEnter(AppStates::Running), spawn_furniture);
+        app.register_type::<SleepArea>();
+            // .add_systems(OnEnter(AppStates::Running), spawn_furniture);
     }
 }
