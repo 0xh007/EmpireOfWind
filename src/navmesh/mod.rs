@@ -55,7 +55,7 @@ impl Plugin for NavMeshPlugin {
                     max_traversable_slope_radians: (100.0_f32).to_radians(),
                     walkable_height: 10,
                     walkable_radius: 1,
-                    step_height: 3,
+                    step_height: 8,
                     min_region_area: 100,
                     merge_region_area: 500,
                     max_contour_simplification_error: 1.5,
