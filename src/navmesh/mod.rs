@@ -52,7 +52,7 @@ impl Plugin for NavMeshPlugin {
                     tile_width: 100,
                     world_half_extents: 250.0,
                     world_bottom_bound: -100.0,
-                    max_traversable_slope_radians: (80.0_f32 - 0.1).to_radians(),
+                    max_traversable_slope_radians: (100.0_f32).to_radians(),
                     walkable_height: 10,
                     walkable_radius: 1,
                     step_height: 3,

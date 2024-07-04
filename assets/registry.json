@@ -24,19 +24,6 @@
       "type": "string",
       "typeInfo": "Value"
     },
-    "alloc::vec::Vec<alloc::string::String>": {
-      "isComponent": false,
-      "isResource": false,
-      "items": {
-        "type": {
-          "$ref": "#/$defs/alloc::string::String"
-        }
-      },
-      "short_name": "Vec<String>",
-      "title": "alloc::vec::Vec<alloc::string::String>",
-      "type": "array",
-      "typeInfo": "List"
-    },
     "alloc::vec::Vec<bevy_animation::VariableCurve>": {
       "isComponent": false,
       "isResource": false,
@@ -737,44 +724,6 @@
       "type": "object",
       "typeInfo": "Enum"
     },
-    "bevy_asset::handle::Handle<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>": {
-      "isComponent": true,
-      "isResource": false,
-      "oneOf": [
-        {
-          "items": false,
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/std::sync::Arc<bevy_asset::handle::StrongHandle>"
-              }
-            }
-          ],
-          "short_name": "Strong",
-          "title": "Strong",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_asset::id::AssetId<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>"
-              }
-            }
-          ],
-          "short_name": "Weak",
-          "title": "Weak",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "Handle<ExtendedMaterial<StandardMaterial, WaterMaterial>>",
-      "title": "bevy_asset::handle::Handle<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
     "bevy_asset::handle::Handle<bevy_pbr::pbr_material::StandardMaterial>": {
       "isComponent": true,
       "isResource": false,
@@ -1190,44 +1139,6 @@
       ],
       "short_name": "Handle<Font>",
       "title": "bevy_asset::handle::Handle<bevy_text::font::Font>",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_asset::handle::Handle<bevy_water::water::material::WaterMaterial>": {
-      "isComponent": true,
-      "isResource": false,
-      "oneOf": [
-        {
-          "items": false,
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/std::sync::Arc<bevy_asset::handle::StrongHandle>"
-              }
-            }
-          ],
-          "short_name": "Strong",
-          "title": "Strong",
-          "type": "array",
-          "typeInfo": "Tuple"
-        },
-        {
-          "items": false,
-          "prefixItems": [
-            {
-              "type": {
-                "$ref": "#/$defs/bevy_asset::id::AssetId<bevy_water::water::material::WaterMaterial>"
-              }
-            }
-          ],
-          "short_name": "Weak",
-          "title": "Weak",
-          "type": "array",
-          "typeInfo": "Tuple"
-        }
-      ],
-      "short_name": "Handle<WaterMaterial>",
-      "title": "bevy_asset::handle::Handle<bevy_water::water::material::WaterMaterial>",
       "type": "object",
       "typeInfo": "Enum"
     },
@@ -1780,52 +1691,6 @@
       ],
       "short_name": "AssetId<GltfPrimitive>",
       "title": "bevy_asset::id::AssetId<bevy_gltf::GltfPrimitive>",
-      "type": "object",
-      "typeInfo": "Enum"
-    },
-    "bevy_asset::id::AssetId<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>": {
-      "isComponent": false,
-      "isResource": false,
-      "oneOf": [
-        {
-          "additionalProperties": false,
-          "properties": {
-            "index": {
-              "title": "index",
-              "type": {
-                "$ref": "#/$defs/bevy_asset::assets::AssetIndex"
-              }
-            }
-          },
-          "required": [
-            "index"
-          ],
-          "short_name": "Index",
-          "title": "Index",
-          "type": "object",
-          "typeInfo": "Struct"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "uuid": {
-              "title": "uuid",
-              "type": {
-                "$ref": "#/$defs/bevy_utils::Uuid"
-              }
-            }
-          },
-          "required": [
-            "uuid"
-          ],
-          "short_name": "Uuid",
-          "title": "Uuid",
-          "type": "object",
-          "typeInfo": "Struct"
-        }
-      ],
-      "short_name": "AssetId<ExtendedMaterial<StandardMaterial, WaterMaterial>>",
-      "title": "bevy_asset::id::AssetId<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>",
       "type": "object",
       "typeInfo": "Enum"
     },
@@ -5771,31 +5636,6 @@
       "required": [],
       "short_name": "CubemapVisibleEntities",
       "title": "bevy_pbr::bundle::CubemapVisibleEntities",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "properties": {
-        "base": {
-          "type": {
-            "$ref": "#/$defs/bevy_pbr::pbr_material::StandardMaterial"
-          }
-        },
-        "extension": {
-          "type": {
-            "$ref": "#/$defs/bevy_water::water::material::WaterMaterial"
-          }
-        }
-      },
-      "required": [
-        "base",
-        "extension"
-      ],
-      "short_name": "ExtendedMaterial<StandardMaterial, WaterMaterial>",
-      "title": "bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -9944,145 +9784,6 @@
       "type": "array",
       "typeInfo": "List"
     },
-    "bevy_water::water::WaterSettings": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": true,
-      "properties": {
-        "alpha_mode": {
-          "type": {
-            "$ref": "#/$defs/bevy_pbr::alpha::AlphaMode"
-          }
-        },
-        "amplitude": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "base_color": {
-          "type": {
-            "$ref": "#/$defs/bevy_render::color::Color"
-          }
-        },
-        "clarity": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "deep_color": {
-          "type": {
-            "$ref": "#/$defs/bevy_render::color::Color"
-          }
-        },
-        "edge_color": {
-          "type": {
-            "$ref": "#/$defs/bevy_render::color::Color"
-          }
-        },
-        "edge_scale": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "height": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "shallow_color": {
-          "type": {
-            "$ref": "#/$defs/bevy_render::color::Color"
-          }
-        },
-        "spawn_tiles": {
-          "type": {
-            "$ref": "#/$defs/core::option::Option<glam::UVec2>"
-          }
-        },
-        "update_materials": {
-          "type": {
-            "$ref": "#/$defs/bool"
-          }
-        }
-      },
-      "required": [
-        "alpha_mode",
-        "height",
-        "amplitude",
-        "base_color",
-        "clarity",
-        "deep_color",
-        "shallow_color",
-        "edge_scale",
-        "edge_color",
-        "update_materials"
-      ],
-      "short_name": "WaterSettings",
-      "title": "bevy_water::water::WaterSettings",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "bevy_water::water::material::WaterMaterial": {
-      "additionalProperties": false,
-      "isComponent": false,
-      "isResource": false,
-      "properties": {
-        "amplitude": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "clarity": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "coord_offset": {
-          "type": {
-            "$ref": "#/$defs/glam::Vec2"
-          }
-        },
-        "coord_scale": {
-          "type": {
-            "$ref": "#/$defs/glam::Vec2"
-          }
-        },
-        "deep_color": {
-          "type": {
-            "$ref": "#/$defs/bevy_render::color::Color"
-          }
-        },
-        "edge_color": {
-          "type": {
-            "$ref": "#/$defs/bevy_render::color::Color"
-          }
-        },
-        "edge_scale": {
-          "type": {
-            "$ref": "#/$defs/f32"
-          }
-        },
-        "shallow_color": {
-          "type": {
-            "$ref": "#/$defs/bevy_render::color::Color"
-          }
-        }
-      },
-      "required": [
-        "clarity",
-        "deep_color",
-        "shallow_color",
-        "edge_color",
-        "edge_scale",
-        "amplitude",
-        "coord_offset",
-        "coord_scale"
-      ],
-      "short_name": "WaterMaterial",
-      "title": "bevy_water::water::material::WaterMaterial",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
     "bevy_window::cursor::CursorIcon": {
       "isComponent": false,
       "isResource": false,
@@ -12195,38 +11896,32 @@
       "type": "object",
       "typeInfo": "Enum"
     },
-    "empire_of_wind::components::fatigue::Fatigue": {
+    "empire_of_wind::ai_eating_behavior::components::eat::Eat": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
       "properties": {
-        "is_sleeping": {
-          "type": {
-            "$ref": "#/$defs/bool"
-          }
-        },
-        "level": {
+        "per_second": {
           "type": {
             "$ref": "#/$defs/f32"
           }
         },
-        "per_second": {
+        "until": {
           "type": {
             "$ref": "#/$defs/f32"
           }
         }
       },
       "required": [
-        "is_sleeping",
-        "per_second",
-        "level"
+        "until",
+        "per_second"
       ],
-      "short_name": "Fatigue",
-      "title": "empire_of_wind::components::fatigue::Fatigue",
+      "short_name": "Eat",
+      "title": "empire_of_wind::ai_eating_behavior::components::eat::Eat",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::components::hunger::Hunger": {
+    "empire_of_wind::ai_eating_behavior::components::hunger::Hunger": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
@@ -12253,11 +11948,22 @@
         "level"
       ],
       "short_name": "Hunger",
-      "title": "empire_of_wind::components::hunger::Hunger",
+      "title": "empire_of_wind::ai_eating_behavior::components::hunger::Hunger",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::components::navigation_path::NavigationPath": {
+    "empire_of_wind::ai_eating_behavior::components::hunger_scorer::HungerScorer": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "HungerScorer",
+      "title": "empire_of_wind::ai_eating_behavior::components::hunger_scorer::HungerScorer",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::ai_navigation::components::navigation_path::NavigationPath": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
@@ -12272,11 +11978,91 @@
         "points"
       ],
       "short_name": "NavigationPath",
-      "title": "empire_of_wind::components::navigation_path::NavigationPath",
+      "title": "empire_of_wind::ai_navigation::components::navigation_path::NavigationPath",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::components::sleep::Sleep": {
+    "empire_of_wind::ai_navigation::components::seek_behavior::seek_food_behavior::SeekFoodBehavior": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {
+        "speed": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "speed"
+      ],
+      "short_name": "SeekFoodBehavior",
+      "title": "empire_of_wind::ai_navigation::components::seek_behavior::seek_food_behavior::SeekFoodBehavior",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::ai_navigation::components::seek_behavior::seek_sleep_area_behavior::SeekSleepAreaBehavior": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {
+        "speed": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "speed"
+      ],
+      "short_name": "SeekSleepAreaBehavior",
+      "title": "empire_of_wind::ai_navigation::components::seek_behavior::seek_sleep_area_behavior::SeekSleepAreaBehavior",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::ai_sleeping_behavior::components::fatigue::Fatigue": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {
+        "is_sleeping": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "level": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "per_second": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        }
+      },
+      "required": [
+        "is_sleeping",
+        "per_second",
+        "level"
+      ],
+      "short_name": "Fatigue",
+      "title": "empire_of_wind::ai_sleeping_behavior::components::fatigue::Fatigue",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::ai_sleeping_behavior::components::fatigue_scorer::FatigueScorer": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "FatigueScorer",
+      "title": "empire_of_wind::ai_sleeping_behavior::components::fatigue_scorer::FatigueScorer",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::ai_sleeping_behavior::components::sleep::Sleep": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
@@ -12297,105 +12083,126 @@
         "per_second"
       ],
       "short_name": "Sleep",
-      "title": "empire_of_wind::components::sleep::Sleep",
+      "title": "empire_of_wind::ai_sleeping_behavior::components::sleep::Sleep",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::plugins::physics::AreaEnterMarker": {
+    "empire_of_wind::camera_control::components::camera_zoom::CameraZoom": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "properties": {},
-      "required": [],
-      "short_name": "AreaEnterMarker",
-      "title": "empire_of_wind::plugins::physics::AreaEnterMarker",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "empire_of_wind::plugins::physics::AreaExitMarker": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "properties": {},
-      "required": [],
-      "short_name": "AreaExitMarker",
-      "title": "empire_of_wind::plugins::physics::AreaExitMarker",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
-    "empire_of_wind::plugins::physics::AreaName": {
-      "isComponent": true,
-      "isResource": false,
-      "items": false,
-      "prefixItems": [
-        {
+      "properties": {
+        "current_scale": {
           "type": {
-            "$ref": "#/$defs/alloc::string::String"
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "speed": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "target_scale": {
+          "type": {
+            "$ref": "#/$defs/f32"
           }
         }
+      },
+      "required": [
+        "target_scale",
+        "current_scale",
+        "speed"
       ],
-      "short_name": "AreaName",
-      "title": "empire_of_wind::plugins::physics::AreaName",
-      "type": "array",
-      "typeInfo": "TupleStruct"
+      "short_name": "CameraZoom",
+      "title": "empire_of_wind::camera_control::components::camera_zoom::CameraZoom",
+      "type": "object",
+      "typeInfo": "Struct"
     },
-    "empire_of_wind::plugins::physics::BuoyancyMarker": {
+    "empire_of_wind::camera_control::components::debug_camera::DebugCamera": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
       "properties": {},
       "required": [],
-      "short_name": "BuoyancyMarker",
-      "title": "empire_of_wind::plugins::physics::BuoyancyMarker",
+      "short_name": "DebugCamera",
+      "title": "empire_of_wind::camera_control::components::debug_camera::DebugCamera",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::plugins::physics::COMMarker": {
+    "empire_of_wind::camera_control::components::main_camera::MainCamera": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
       "properties": {},
       "required": [],
-      "short_name": "COMMarker",
-      "title": "empire_of_wind::plugins::physics::COMMarker",
+      "short_name": "MainCamera",
+      "title": "empire_of_wind::camera_control::components::main_camera::MainCamera",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::plugins::physics::ColliderMarker": {
+    "empire_of_wind::collider_management::components::collider_marker::ColliderMarker": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
       "properties": {},
       "required": [],
       "short_name": "ColliderMarker",
-      "title": "empire_of_wind::plugins::physics::ColliderMarker",
+      "title": "empire_of_wind::collider_management::components::collider_marker::ColliderMarker",
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::plugins::physics::Hideable": {
+    "empire_of_wind::crew_management::components::crew_member::CrewMember": {
+      "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "items": false,
-      "prefixItems": [
-        {
-          "type": {
-            "$ref": "#/$defs/alloc::vec::Vec<alloc::string::String>"
-          }
-        }
-      ],
-      "short_name": "Hideable",
-      "title": "empire_of_wind::plugins::physics::Hideable",
-      "type": "array",
-      "typeInfo": "TupleStruct"
+      "properties": {},
+      "required": [],
+      "short_name": "CrewMember",
+      "title": "empire_of_wind::crew_management::components::crew_member::CrewMember",
+      "type": "object",
+      "typeInfo": "Struct"
     },
-    "empire_of_wind::plugins::physics::NavMeshMarker": {
+    "empire_of_wind::food::components::food::Food": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "Food",
+      "title": "empire_of_wind::food::components::food::Food",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::navmesh::components::nav_mesh_marker::NavMeshMarker": {
       "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
       "properties": {},
       "required": [],
       "short_name": "NavMeshMarker",
-      "title": "empire_of_wind::plugins::physics::NavMeshMarker",
+      "title": "empire_of_wind::navmesh::components::nav_mesh_marker::NavMeshMarker",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::player::components::player::Player": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "Player",
+      "title": "empire_of_wind::player::components::player::Player",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::ship_items::components::sleep_area::SleepArea": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "SleepArea",
+      "title": "empire_of_wind::ship_items::components::sleep_area::SleepArea",
       "type": "object",
       "typeInfo": "Struct"
     },
