@@ -25,7 +25,7 @@ use sun::SunCyclePlugin;
 mod ai_eating_behavior;
 mod ai_navigation;
 mod ai_sleeping_behavior;
-mod area_visibility;
+mod area_management;
 mod asset_management;
 mod atmospheric_lighting;
 mod buoyancy_physics;
@@ -39,9 +39,9 @@ mod player;
 mod player_input;
 mod ship;
 mod ship_items;
+mod stairs_test;
 mod sun;
 mod utils;
-mod stairs_test;
 
 /// PluginGroup for the Empire of Wind game.
 ///
@@ -57,7 +57,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(AiEatingBehaviorPlugin)
             .add(AiNavigationPlugin)
             .add(AiSleepingBehaviorPlugin)
-            // .add(AreaVisibilityPlugin)
+            // .add(AreaManagementPlugin)
             .add(AssetManagementPlugin)
             .add(AtmosphericLightingPlugin)
             .add(BigBrainPlugin::new(PreUpdate))

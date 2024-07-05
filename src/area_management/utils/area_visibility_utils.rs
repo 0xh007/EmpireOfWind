@@ -1,7 +1,7 @@
 use bevy::prelude::{Query, With};
 use bevy::render::view::RenderLayers;
 
-use crate::area_visibility::ActiveAreas;
+use crate::area_management::ActiveAreas;
 use crate::camera_control::{CameraZoom, MainCamera};
 
 /// Updates the render layers of the main camera based on active areas.

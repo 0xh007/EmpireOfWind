@@ -13,7 +13,7 @@ mod utils;
 
 /// Plugin for managing areas within the game world.
 ///
-/// The `AreaVisibilityPlugin` provides functionality for handling areas that
+/// The `AreaManagementPlugin` provides functionality for handling areas that
 /// players can enter and exit. It is largely concerned with modifying the visibility of certain areas
 /// based on the players location. For example, if the player walks into a room, this plugin provides
 /// the ability to hide and show walls as needed. It registers the necessary components, initializes
@@ -30,9 +30,9 @@ mod utils;
 /// # Systems
 /// - `manage_active_areas`: Manages active areas based on player interactions.
 /// - `read_area_markers`: Processes and configures area markers for entry and exit points.
-pub struct AreaVisibilityPlugin;
+pub struct AreaManagementPlugin;
 
-impl Plugin for AreaVisibilityPlugin {
+impl Plugin for AreaManagementPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<AreaEnterMarker>()
             .register_type::<AreaExitMarker>()

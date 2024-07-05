@@ -1254,9 +1254,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_water"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d0ae7102f4e0dcc616bfc7c01d42bb55b7a958297459f590f1ddff6ec20d8fb"
+checksum = "5e90f06843057373e6747b1893c156b979ce8f71fd3546d10bdcab806ee641e2"
 dependencies = [
  "anyhow",
  "bevy",

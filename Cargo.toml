@@ -9,7 +9,7 @@ edition = "2021"
 bevy = { version = "0.13.2", features = ["dynamic_linking", "wayland", "jpeg"] }
 bevy_panorbit_camera = "0.17"
 bevy_xpbd_3d = { version = "0.4.2", features = ["debug-plugin"] }
-bevy_water = "0.13"
+bevy_water = "0.13.1"
 big-brain = { git = "https://github.com/zkat/big-brain", rev = "50415e55f0a9937dc99cb8f0b0906e47cb390082" }
 oxidized_navigation = { version = "0.10", features = ["debug_draw", "xpbd"] }
 
