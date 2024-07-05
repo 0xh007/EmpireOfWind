@@ -9,6 +9,7 @@ use big_brain::BigBrainPlugin;
 use ai_eating_behavior::AiEatingBehaviorPlugin;
 use ai_navigation::AiNavigationPlugin;
 use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
+use area_management::AreaManagementPlugin;
 use asset_management::AssetManagementPlugin;
 use atmospheric_lighting::AtmosphericLightingPlugin;
 use camera_control::CameraControlPlugin;
@@ -57,7 +58,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(AiEatingBehaviorPlugin)
             .add(AiNavigationPlugin)
             .add(AiSleepingBehaviorPlugin)
-            // .add(AreaManagementPlugin)
+            .add(AreaManagementPlugin)
             .add(AssetManagementPlugin)
             .add(AtmosphericLightingPlugin)
             .add(BigBrainPlugin::new(PreUpdate))

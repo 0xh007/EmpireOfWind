@@ -59,7 +59,7 @@ pub fn read_area_markers(
                     }
 
                     if let Some(ship) = ship_entity {
-                        // Reparent the sensor to the Ship entity
+                        // Re-parent the sensor to the Ship entity
                         commands.entity(ship).add_child(entity);
 
                         // Insert components for AreaEnterMarker

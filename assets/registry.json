@@ -12087,6 +12087,44 @@
       "type": "object",
       "typeInfo": "Struct"
     },
+    "empire_of_wind::area_management::components::area_enter_marker::AreaEnterMarker": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "AreaEnterMarker",
+      "title": "empire_of_wind::area_management::components::area_enter_marker::AreaEnterMarker",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::area_management::components::area_exit_marker::AreaExitMarker": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "AreaExitMarker",
+      "title": "empire_of_wind::area_management::components::area_exit_marker::AreaExitMarker",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::area_management::components::area_name::AreaName": {
+      "isComponent": true,
+      "isResource": false,
+      "items": false,
+      "prefixItems": [
+        {
+          "type": {
+            "$ref": "#/$defs/alloc::string::String"
+          }
+        }
+      ],
+      "short_name": "AreaName",
+      "title": "empire_of_wind::area_management::components::area_name::AreaName",
+      "type": "array",
+      "typeInfo": "TupleStruct"
+    },
     "empire_of_wind::camera_control::components::camera_zoom::CameraZoom": {
       "additionalProperties": false,
       "isComponent": true,
