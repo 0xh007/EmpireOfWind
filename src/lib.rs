@@ -19,9 +19,12 @@ use food::FoodPlugin;
 use navmesh::NavMeshPlugin;
 use player::PlayerPlugin;
 use player_input::PlayerInputPlugin;
+use ship::ShipPlugin;
 use ship_items::ShipItemsPlugin;
-use stairs_test::StairsTestPlugin;
 use sun::SunCyclePlugin;
+
+// use stairs_test::StairsTestPlugin;
+use crate::buoyancy_physics::BuoyancyPhysicsPlugin;
 
 mod ai_eating_behavior;
 mod ai_navigation;
@@ -40,7 +43,7 @@ mod player;
 mod player_input;
 mod ship;
 mod ship_items;
-mod stairs_test;
+// mod stairs_test;
 mod sun;
 mod utils;
 
@@ -62,7 +65,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(AssetManagementPlugin)
             .add(AtmosphericLightingPlugin)
             .add(BigBrainPlugin::new(PreUpdate))
-            // .add(BuoyancyPhysicsPlugin)
+            .add(BuoyancyPhysicsPlugin)
             .add(CameraControlPlugin)
             .add(ColliderManagementPlugin)
             .add(ComponentsFromGltfPlugin::default())
@@ -73,11 +76,11 @@ impl PluginGroup for EmpireOfWindPlugins {
             // .add(OceanPlugin)
             .add(PlayerPlugin)
             .add(PlayerInputPlugin)
-            // .add(ShipPlugin)
+            .add(ShipPlugin)
             .add(ShipItemsPlugin)
             .add(SunCyclePlugin)
             .add(TnuaControllerPlugin)
             .add(TnuaXpbd3dPlugin)
-            .add(StairsTestPlugin)
+        // .add(StairsTestPlugin)
     }
 }

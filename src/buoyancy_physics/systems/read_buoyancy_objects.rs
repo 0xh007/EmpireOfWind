@@ -10,8 +10,8 @@ use bevy_xpbd_3d::math::Matrix3;
 use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::NavMeshAffector;
 
-use crate::buoyancy_physics::utils::generate_voxel_grid;
 use crate::buoyancy_physics::{Buoyancy, BuoyancyMarker};
+use crate::buoyancy_physics::utils::generate_voxel_grid;
 use crate::ship::Ship;
 use crate::utils::find_mesh;
 
@@ -77,7 +77,7 @@ pub fn read_buoyancy_objects(
                             Buoyancy::from_voxels(voxels, true),
                             collider,
                             ColliderDensity(0.0),
-                            RigidBody::Dynamic,
+                            RigidBody::Kinematic,
                             LinearDamping(0.8),
                             AngularDamping(0.8),
                             ExternalForce::new(Vec3::ZERO).with_persistence(false),

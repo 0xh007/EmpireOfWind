@@ -26,8 +26,11 @@ pub fn toggle_nav_mesh_visibility(
     mut navmesh_debug_event_reader: EventReader<NavMeshDebugToggle>,
     mut show_navmesh: ResMut<DrawNavMesh>,
 ) {
-    show_navmesh.0 = true;
-    // for _event in navmesh_debug_event_reader.read() {
-    //     show_navmesh.0 = !show_navmesh.0;
-    // }
+    // Show navmesh always
+    // show_navmesh.0 = true;
+
+    // Show navmesh on toggle
+    for _event in navmesh_debug_event_reader.read() {
+        show_navmesh.0 = !show_navmesh.0;
+    }
 }

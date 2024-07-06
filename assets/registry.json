@@ -12125,6 +12125,78 @@
       "type": "array",
       "typeInfo": "TupleStruct"
     },
+    "empire_of_wind::buoyancy_physics::components::buoyancy::Buoyancy": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {
+        "needs_update": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "voxels": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<empire_of_wind::buoyancy_physics::components::voxel::Voxel>"
+          }
+        }
+      },
+      "required": [
+        "voxels",
+        "needs_update"
+      ],
+      "short_name": "Buoyancy",
+      "title": "empire_of_wind::buoyancy_physics::components::buoyancy::Buoyancy",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::buoyancy_physics::components::buoyancy_marker::BuoyancyMarker": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "BuoyancyMarker",
+      "title": "empire_of_wind::buoyancy_physics::components::buoyancy_marker::BuoyancyMarker",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::buoyancy_physics::components::voxel::Voxel": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {
+        "is_solid": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        },
+        "position": {
+          "type": {
+            "$ref": "#/$defs/glam::Vec3"
+          }
+        }
+      },
+      "required": [
+        "position",
+        "is_solid"
+      ],
+      "short_name": "Voxel",
+      "title": "empire_of_wind::buoyancy_physics::components::voxel::Voxel",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::buoyancy_physics::components::voxel_visual::VoxelVisual": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "VoxelVisual",
+      "title": "empire_of_wind::buoyancy_physics::components::voxel_visual::VoxelVisual",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
     "empire_of_wind::camera_control::components::camera_zoom::CameraZoom": {
       "additionalProperties": false,
       "isComponent": true,
@@ -12230,6 +12302,17 @@
       "required": [],
       "short_name": "Player",
       "title": "empire_of_wind::player::components::player::Player",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::ship::components::ship::Ship": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {},
+      "required": [],
+      "short_name": "Ship",
+      "title": "empire_of_wind::ship::components::ship::Ship",
       "type": "object",
       "typeInfo": "Struct"
     },

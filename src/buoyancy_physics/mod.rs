@@ -46,10 +46,10 @@ impl Plugin for BuoyancyPhysicsPlugin {
             .register_type::<VoxelVisual>()
             .add_event::<VisualizeMeshBoundsDebugToggle>()
             .add_event::<VisualizeVoxelsDebugToggle>()
-            .add_systems(
-                Update,
-                calculate_and_apply_buoyancy.run_if(in_state(AppStates::Running)),
-            )
+            // .add_systems(
+            //     Update,
+            //     calculate_and_apply_buoyancy.run_if(in_state(AppStates::Running)),
+            // )
             .add_systems(
                 Update,
                 read_buoyancy_objects.run_if(in_state(AppStates::Running)),
