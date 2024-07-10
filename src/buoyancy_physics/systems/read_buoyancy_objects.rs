@@ -77,7 +77,7 @@ pub fn read_buoyancy_objects(
                             Buoyancy::from_voxels(voxels, true),
                             collider,
                             ColliderDensity(0.0),
-                            RigidBody::Kinematic,
+                            RigidBody::Dynamic,
                             LinearDamping(0.8),
                             AngularDamping(0.8),
                             ExternalForce::new(Vec3::ZERO).with_persistence(false),

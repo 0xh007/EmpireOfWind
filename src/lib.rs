@@ -25,6 +25,7 @@ use sun::SunCyclePlugin;
 
 // use stairs_test::StairsTestPlugin;
 use crate::buoyancy_physics::BuoyancyPhysicsPlugin;
+use crate::ocean::OceanPlugin;
 
 mod ai_eating_behavior;
 mod ai_navigation;
@@ -73,7 +74,7 @@ impl PluginGroup for EmpireOfWindPlugins {
             .add(ExportRegistryPlugin::default())
             .add(FoodPlugin)
             .add(NavMeshPlugin)
-            // .add(OceanPlugin)
+            .add(OceanPlugin)
             .add(PlayerPlugin)
             .add(PlayerInputPlugin)
             .add(ShipPlugin)

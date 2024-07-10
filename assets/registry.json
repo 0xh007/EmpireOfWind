@@ -724,6 +724,44 @@
       "type": "object",
       "typeInfo": "Enum"
     },
+    "bevy_asset::handle::Handle<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>": {
+      "isComponent": true,
+      "isResource": false,
+      "oneOf": [
+        {
+          "items": false,
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/std::sync::Arc<bevy_asset::handle::StrongHandle>"
+              }
+            }
+          ],
+          "short_name": "Strong",
+          "title": "Strong",
+          "type": "array",
+          "typeInfo": "Tuple"
+        },
+        {
+          "items": false,
+          "prefixItems": [
+            {
+              "type": {
+                "$ref": "#/$defs/bevy_asset::id::AssetId<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>"
+              }
+            }
+          ],
+          "short_name": "Weak",
+          "title": "Weak",
+          "type": "array",
+          "typeInfo": "Tuple"
+        }
+      ],
+      "short_name": "Handle<ExtendedMaterial<StandardMaterial, WaterMaterial>>",
+      "title": "bevy_asset::handle::Handle<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
     "bevy_asset::handle::Handle<bevy_pbr::pbr_material::StandardMaterial>": {
       "isComponent": true,
       "isResource": false,
@@ -1691,6 +1729,52 @@
       ],
       "short_name": "AssetId<GltfPrimitive>",
       "title": "bevy_asset::id::AssetId<bevy_gltf::GltfPrimitive>",
+      "type": "object",
+      "typeInfo": "Enum"
+    },
+    "bevy_asset::id::AssetId<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>": {
+      "isComponent": false,
+      "isResource": false,
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "index": {
+              "title": "index",
+              "type": {
+                "$ref": "#/$defs/bevy_asset::assets::AssetIndex"
+              }
+            }
+          },
+          "required": [
+            "index"
+          ],
+          "short_name": "Index",
+          "title": "Index",
+          "type": "object",
+          "typeInfo": "Struct"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "uuid": {
+              "title": "uuid",
+              "type": {
+                "$ref": "#/$defs/bevy_utils::Uuid"
+              }
+            }
+          },
+          "required": [
+            "uuid"
+          ],
+          "short_name": "Uuid",
+          "title": "Uuid",
+          "type": "object",
+          "typeInfo": "Struct"
+        }
+      ],
+      "short_name": "AssetId<ExtendedMaterial<StandardMaterial, WaterMaterial>>",
+      "title": "bevy_asset::id::AssetId<bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>>",
       "type": "object",
       "typeInfo": "Enum"
     },
@@ -5636,6 +5720,31 @@
       "required": [],
       "short_name": "CubemapVisibleEntities",
       "title": "bevy_pbr::bundle::CubemapVisibleEntities",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": false,
+      "properties": {
+        "base": {
+          "type": {
+            "$ref": "#/$defs/bevy_pbr::pbr_material::StandardMaterial"
+          }
+        },
+        "extension": {
+          "type": {
+            "$ref": "#/$defs/bevy_water::water::material::WaterMaterial"
+          }
+        }
+      },
+      "required": [
+        "base",
+        "extension"
+      ],
+      "short_name": "ExtendedMaterial<StandardMaterial, WaterMaterial>",
+      "title": "bevy_pbr::extended_material::ExtendedMaterial<bevy_pbr::pbr_material::StandardMaterial, bevy_water::water::material::WaterMaterial>",
       "type": "object",
       "typeInfo": "Struct"
     },
@@ -9783,6 +9892,84 @@
       "title": "bevy_utils::smallvec::SmallVec<[bevy_ecs::entity::Entity; 8]>",
       "type": "array",
       "typeInfo": "List"
+    },
+    "bevy_water::water::WaterSettings": {
+      "additionalProperties": false,
+      "isComponent": false,
+      "isResource": true,
+      "properties": {
+        "alpha_mode": {
+          "type": {
+            "$ref": "#/$defs/bevy_pbr::alpha::AlphaMode"
+          }
+        },
+        "amplitude": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "base_color": {
+          "type": {
+            "$ref": "#/$defs/bevy_render::color::Color"
+          }
+        },
+        "clarity": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "deep_color": {
+          "type": {
+            "$ref": "#/$defs/bevy_render::color::Color"
+          }
+        },
+        "edge_color": {
+          "type": {
+            "$ref": "#/$defs/bevy_render::color::Color"
+          }
+        },
+        "edge_scale": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "height": {
+          "type": {
+            "$ref": "#/$defs/f32"
+          }
+        },
+        "shallow_color": {
+          "type": {
+            "$ref": "#/$defs/bevy_render::color::Color"
+          }
+        },
+        "spawn_tiles": {
+          "type": {
+            "$ref": "#/$defs/core::option::Option<glam::UVec2>"
+          }
+        },
+        "update_materials": {
+          "type": {
+            "$ref": "#/$defs/bool"
+          }
+        }
+      },
+      "required": [
+        "alpha_mode",
+        "height",
+        "amplitude",
+        "base_color",
+        "clarity",
+        "deep_color",
+        "shallow_color",
+        "edge_scale",
+        "edge_color",
+        "update_materials"
+      ],
+      "short_name": "WaterSettings",
+      "title": "bevy_water::water::WaterSettings",
+      "type": "object",
+      "typeInfo": "Struct"
     },
     "bevy_window::cursor::CursorIcon": {
       "isComponent": false,
