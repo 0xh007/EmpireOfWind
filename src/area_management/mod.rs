@@ -11,6 +11,7 @@ mod resources;
 mod systems;
 mod utils;
 
+// TODO: Update Docs
 /// Plugin for managing areas within the game world.
 ///
 /// The `AreaManagementPlugin` provides functionality for handling areas that
@@ -34,9 +35,9 @@ pub struct AreaManagementPlugin;
 
 impl Plugin for AreaManagementPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<AreaEnterMarker>()
+        app.register_type::<AreaMarker>()
             .register_type::<AreaExitMarker>()
-            .register_type::<AreaName>()
+            .register_type::<Occluding>()
             .insert_resource(ActiveAreas::default())
             .add_systems(
                 Update,

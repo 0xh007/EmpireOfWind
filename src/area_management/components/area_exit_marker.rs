@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+// TODO: Update Docs - AreaEnterMarker changed
 /// A marker component used to designate an area that a player can exit.
 ///
 /// The `AreaExitMarker` component is used to identify entities that represent

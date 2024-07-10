@@ -8,6 +8,8 @@ use crate::area_management::components::*;
 use crate::ship::Ship;
 use crate::utils::find_mesh;
 
+
+// TODO: DOCS
 /// System to process and configure area markers for entry and exit points.
 ///
 /// This system handles the `AreaEnterMarker` and `AreaExitMarker` components,
@@ -33,7 +35,7 @@ use crate::utils::find_mesh;
 /// - Configures the marker entity with the collider, sensor, transform, and other necessary components.
 #[allow(clippy::too_many_arguments)]
 pub fn read_area_markers(
-    enter_marker_query: Query<(Entity, &Transform), Added<AreaEnterMarker>>, // Query for AreaEnterMarker
+    area_marker_query: Query<(Entity, &Transform), Added<AreaMarker>>, // Query for AreaEnterMarker
     exit_marker_query: Query<(Entity, &Transform), Added<AreaExitMarker>>, // Query for AreaExitMarker
     mut commands: Commands,
     children: Query<&Children>,
@@ -43,7 +45,7 @@ pub fn read_area_markers(
     ship_query: Query<Entity, With<Ship>>, // Query for the Ship entity
 ) {
     // Process AreaEnterMarkers
-    for (entity, transform) in enter_marker_query.iter() {
+    for (entity, transform) in area_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
             if let Some(mesh) = meshes.get(mesh_handle) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {

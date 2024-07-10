@@ -1,9 +1,11 @@
 use bevy::prelude::{Query, With};
 use bevy::render::view::RenderLayers;
 
-use crate::area_management::ActiveAreas;
+use crate::area_management::{ActiveAreas, Occluding};
 use crate::camera_control::{CameraZoom, MainCamera};
 
+// TODO: Update Docs
+// TODO: Check if function should be renamed
 /// Updates the render layers of the main camera based on active areas.
 ///
 /// This function iterates over all cameras with the `MainCamera` component and updates
@@ -16,20 +18,22 @@ use crate::camera_control::{CameraZoom, MainCamera};
 pub fn update_camera_layers(
     camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
     active_areas: &ActiveAreas,
+    occluding_query: &Query<&Occluding>,
+    area_render_layers: &RenderLayers,
 ) {
     for mut render_layers in camera_query.iter_mut() {
         let mut layers = (0..RenderLayers::TOTAL_LAYERS as u8).collect::<Vec<u8>>(); // Start with all layers
 
-        if active_areas.0.contains("Deck 2 Aft Cabin") {
-            layers.retain(|&layer| layer != 1); // Remove layer 1
-        }
-        if active_areas.0.contains("Deck 3 Aft Cabin") {
-            layers.retain(|&layer| layer != 1 && layer != 2); // Remove layers 1 and 2
+        for occluding in occluding_query.iter() {
+            if occluding.areas.iter().any(|area| active_areas.0.contains(area)) {
+                layers.retain(|layer| !area_render_layers.iter().any(|l| l == *layer));
+            }
         }
 
         *render_layers = RenderLayers::from_layers(&layers);
     }
 }
+
 
 /// Updates the zoom target of the main camera.
 ///
