@@ -24,6 +24,19 @@
       "type": "string",
       "typeInfo": "Value"
     },
+    "alloc::vec::Vec<alloc::string::String>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/alloc::string::String"
+        }
+      },
+      "short_name": "Vec<String>",
+      "title": "alloc::vec::Vec<alloc::string::String>",
+      "type": "array",
+      "typeInfo": "List"
+    },
     "alloc::vec::Vec<bevy_animation::VariableCurve>": {
       "isComponent": false,
       "isResource": false,
@@ -99,6 +112,19 @@
       },
       "short_name": "Vec<Vec3>",
       "title": "alloc::vec::Vec<glam::Vec3>",
+      "type": "array",
+      "typeInfo": "List"
+    },
+    "alloc::vec::Vec<u8>": {
+      "isComponent": false,
+      "isResource": false,
+      "items": {
+        "type": {
+          "$ref": "#/$defs/u8"
+        }
+      },
+      "short_name": "Vec<u8>",
+      "title": "alloc::vec::Vec<u8>",
       "type": "array",
       "typeInfo": "List"
     },
@@ -12274,17 +12300,6 @@
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::area_management::components::area_enter_marker::AreaEnterMarker": {
-      "additionalProperties": false,
-      "isComponent": true,
-      "isResource": false,
-      "properties": {},
-      "required": [],
-      "short_name": "AreaEnterMarker",
-      "title": "empire_of_wind::area_management::components::area_enter_marker::AreaEnterMarker",
-      "type": "object",
-      "typeInfo": "Struct"
-    },
     "empire_of_wind::area_management::components::area_exit_marker::AreaExitMarker": {
       "additionalProperties": false,
       "isComponent": true,
@@ -12296,21 +12311,62 @@
       "type": "object",
       "typeInfo": "Struct"
     },
-    "empire_of_wind::area_management::components::area_name::AreaName": {
+    "empire_of_wind::area_management::components::area_marker::AreaMarker": {
+      "additionalProperties": false,
       "isComponent": true,
       "isResource": false,
-      "items": false,
-      "prefixItems": [
-        {
+      "properties": {
+        "name": {
           "type": {
             "$ref": "#/$defs/alloc::string::String"
           }
         }
+      },
+      "required": [
+        "name"
       ],
-      "short_name": "AreaName",
-      "title": "empire_of_wind::area_management::components::area_name::AreaName",
-      "type": "array",
-      "typeInfo": "TupleStruct"
+      "short_name": "AreaMarker",
+      "title": "empire_of_wind::area_management::components::area_marker::AreaMarker",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::area_management::components::layer_set::LayerSet": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {
+        "layers": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<u8>"
+          }
+        }
+      },
+      "required": [
+        "layers"
+      ],
+      "short_name": "LayerSet",
+      "title": "empire_of_wind::area_management::components::layer_set::LayerSet",
+      "type": "object",
+      "typeInfo": "Struct"
+    },
+    "empire_of_wind::area_management::components::occluding::Occluding": {
+      "additionalProperties": false,
+      "isComponent": true,
+      "isResource": false,
+      "properties": {
+        "areas": {
+          "type": {
+            "$ref": "#/$defs/alloc::vec::Vec<alloc::string::String>"
+          }
+        }
+      },
+      "required": [
+        "areas"
+      ],
+      "short_name": "Occluding",
+      "title": "empire_of_wind::area_management::components::occluding::Occluding",
+      "type": "object",
+      "typeInfo": "Struct"
     },
     "empire_of_wind::buoyancy_physics::components::buoyancy::Buoyancy": {
       "additionalProperties": false,

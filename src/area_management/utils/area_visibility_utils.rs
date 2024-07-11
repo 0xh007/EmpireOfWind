@@ -19,7 +19,7 @@ pub fn update_camera_layers(
     camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
     active_areas: &ActiveAreas,
     occluding_query: &Query<&Occluding>,
-    area_render_layers: &RenderLayers,
+    area_render_layers: RenderLayers,
 ) {
     for mut render_layers in camera_query.iter_mut() {
         let mut layers = (0..RenderLayers::TOTAL_LAYERS as u8).collect::<Vec<u8>>(); // Start with all layers

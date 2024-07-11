@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+// TODO: Review docs
 /// A marker component used to designate an area that a player can enter or detect entities within.
 ///
 /// The `AreaMarker` component is used to identify entities that represent

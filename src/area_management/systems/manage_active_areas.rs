@@ -29,8 +29,10 @@ pub fn manage_active_areas(
     sensor_query: Query<(Entity, &Sensor, Option<&AreaMarker>, Option<&RenderLayers>)>,
     player_query: Query<&Player>,
     mut active_areas: ResMut<ActiveAreas>,
-    mut camera_layers_query: Query<&mut RenderLayers, With<MainCamera>>,
-    mut camera_zoom_query: Query<&mut CameraZoom, With<MainCamera>>,
+    mut param_set: ParamSet<(
+        Query<&mut RenderLayers, With<MainCamera>>,
+        Query<&mut CameraZoom, With<MainCamera>>,
+    )>,
     occluding_query: Query<&Occluding>,
 ) {
     for Collision(contacts) in collision_event_reader.read() {
@@ -48,8 +50,8 @@ pub fn manage_active_areas(
 
             if let Ok((_, _, Some(area_marker), Some(render_layers))) = sensor_query.get(other_entity) {
                 active_areas.0.insert(area_marker.name.clone());
-                update_zoom_target(&mut camera_zoom_query, 10.0); // Adjust zoom for entry
-                update_camera_layers(&mut camera_layers_query, &active_areas, &occluding_query, render_layers);
+                update_zoom_target(&mut param_set.p1(), 10.0); // Adjust zoom for entry
+                update_camera_layers(&mut param_set.p0(), &active_areas, &occluding_query, render_layers.clone());
             }
         }
     }

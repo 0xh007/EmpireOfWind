@@ -1,9 +1,8 @@
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
 
 // TODO: Add Docs
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
-#[reflect(Component, Serialize, Deserialize)]
+#[derive(Component, Reflect, Default, Debug)]
+#[reflect(Component)]
 pub struct Occluding {
     pub areas: Vec<String>,
 }
