@@ -1,9 +1,9 @@
-use bevy::prelude::*;
-use bevy::render::view::RenderLayers;
+use bevy::{prelude::*, render::view::RenderLayers};
+use serde::{Deserialize, Serialize};
 
-// TODO: ADD DOCS
 /// Enum representing possible layers for better readability and type safety.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, TypePath, FromReflect)] // Step 2: Derive the traits
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Reflect)]
+#[reflect(Serialize, Deserialize)]
 pub enum Layer {
     Layer0,
     Layer1,
@@ -47,8 +47,8 @@ impl Layer {
 }
 
 /// A component to specify which rendering layers an entity belongs to in a user-friendly way.
-#[derive(Component, Reflect, Default, Debug)]
-#[reflect(Component)]
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct LayerSet {
     pub layers: Vec<Layer>,
 }

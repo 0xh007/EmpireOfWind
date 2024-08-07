@@ -12316,6 +12316,11 @@
       "isComponent": true,
       "isResource": false,
       "properties": {
+        "layer_set": {
+          "type": {
+            "$ref": "#/$defs/empire_of_wind::area_management::components::layer_set::LayerSet"
+          }
+        },
         "name": {
           "type": {
             "$ref": "#/$defs/alloc::string::String"
@@ -12323,7 +12328,8 @@
         }
       },
       "required": [
-        "name"
+        "name",
+        "layer_set"
       ],
       "short_name": "AreaMarker",
       "title": "empire_of_wind::area_management::components::area_marker::AreaMarker",
@@ -12337,7 +12343,7 @@
       "properties": {
         "layers": {
           "type": {
-            "$ref": "#/$defs/alloc::vec::Vec<u8>"
+            "$ref": "#/$defs/alloc::vec::Vec<empire_of_wind::area_management::components::layer_set::Layer>"
           }
         }
       },

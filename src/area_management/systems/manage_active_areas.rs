@@ -21,12 +21,12 @@ use crate::player::Player;
 /// - `sensor_query`: Query to fetch sensor components and area markers.
 /// - `player_query`: Query to identify player entities.
 /// - `active_areas`: Resource to manage the set of active areas.
-/// - `camera_layers_query`: Query to modify the render layers of the main camera.
-/// - `camera_zoom_query`: Query to modify the zoom level of the main camera.
+/// - `param_set`: ParamSet to handle multiple conflicting queries safely.
+/// - `occluding_query`: Query to check for entities with `Occluding` components.
 #[allow(clippy::type_complexity)]
 pub fn manage_active_areas(
     mut collision_event_reader: EventReader<Collision>,
-    sensor_query: Query<(Entity, &Sensor, Option<&AreaMarker>, Option<&RenderLayers>)>,
+    sensor_query: Query<(Entity, &Sensor, Option<&AreaMarker>)>,
     player_query: Query<&Player>,
     mut active_areas: ResMut<ActiveAreas>,
     mut param_set: ParamSet<(
@@ -48,10 +48,16 @@ pub fn manage_active_areas(
                 (entity2, entity1)
             };
 
-            if let Ok((_, _, Some(area_marker), Some(render_layers))) = sensor_query.get(other_entity) {
+            if let Ok((_, _, Some(area_marker))) = sensor_query.get(other_entity) {
                 active_areas.0.insert(area_marker.name.clone());
                 update_zoom_target(&mut param_set.p1(), 10.0); // Adjust zoom for entry
-                update_camera_layers(&mut param_set.p0(), &active_areas, &occluding_query, render_layers.clone());
+                let render_layers = area_marker.layer_set.to_render_layers();
+                update_camera_layers(
+                    &mut param_set.p0(),
+                    &active_areas,
+                    &occluding_query,
+                    render_layers,
+                );
             }
         }
     }

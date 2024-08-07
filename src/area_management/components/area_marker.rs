@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use crate::area_management::LayerSet;
 
 // TODO: Review docs
 /// A marker component used to designate an area that a player can enter or detect entities within.
@@ -15,8 +16,9 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Fields
 /// - `name`: A `String` representing the name of the area.
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Component, Serialize, Deserialize)]
 pub struct AreaMarker {
     pub name: String,
+    pub layer_set: LayerSet,
 }
