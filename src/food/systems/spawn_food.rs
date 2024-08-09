@@ -4,6 +4,7 @@ use bevy::pbr::{PbrBundle, StandardMaterial};
 use bevy::prelude::{default, Color, Commands, Mesh, Meshable, ResMut, Sphere, Transform};
 use bevy_xpbd_3d::components::{Friction, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
+use bevy::color::palettes::css::RED;
 
 use crate::food::Food;
 
@@ -34,7 +35,7 @@ pub fn spawn_food(
         Food,
         PbrBundle {
             mesh: meshes.add(Sphere::new(0.2).mesh().ico(5).unwrap()),
-            material: materials.add(Color::RED),
+            material: materials.add(Color::from(RED)),
             transform: Transform::from_xyz(13.167, 7.1885, 0.0),
             ..default()
         },

@@ -11,11 +11,15 @@ bevy_panorbit_camera = "0.19.1"
 bevy_xpbd_3d = { version = "0.5.0", features = ["debug-plugin"] }
 bevy_water = "0.14.2"
 big-brain = "0.21.1"
-oxidized_navigation = { version = "0.11.0", features = ["debug_draw", "xpbd"] }
+oxidized_navigation = { version = "0.11.0", default-features = false, features = [
+    "debug_draw",
+    "xpbd",
+] }
 bevy_asset_loader = { version = "0.21.0", features = ["3d"] }
 blenvy = { git = "https://github.com/kaosat-dev/Blenvy/", branch = "blenvy", version = "0.1.0-alpha.1" }
 bevy_atmosphere = "0.10.0"
 bevy-tnua = "0.19.0"
+bevy-tnua-physics-integration-layer = "0.4.0"
 bevy-tnua-xpbd3d = "0.5.0"
 anyhow = "1"
 rand = "0.8.5"

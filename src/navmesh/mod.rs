@@ -3,6 +3,7 @@ use bevy_xpbd_3d::prelude::Collider;
 use oxidized_navigation::{
     debug_draw::OxidizedNavigationDebugDrawPlugin, NavMeshSettings, OxidizedNavigationPlugin,
 };
+use std::num::NonZeroU16;
 
 pub use components::*;
 pub use events::*;
@@ -57,10 +58,10 @@ impl Plugin for NavMeshPlugin {
                     walkable_radius: 1,
                     step_height: 8,
                     min_region_area: 100,
-                    merge_region_area: 500,
+                    max_region_area_to_merge_into: 500,
                     max_contour_simplification_error: 1.5,
                     max_edge_length: 80,
-                    max_tile_generation_tasks: Some(9),
+                    max_tile_generation_tasks: NonZeroU16::new(9),
                 }),
                 OxidizedNavigationDebugDrawPlugin,
             ));

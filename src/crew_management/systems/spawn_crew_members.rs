@@ -10,6 +10,7 @@ use bevy_xpbd_3d::prelude::Collider;
 use big_brain::actions::Steps;
 use big_brain::pickers::FirstToScore;
 use big_brain::prelude::Thinker;
+use bevy::color::palettes::css::YELLOW;
 
 use crate::ai_eating_behavior::{Eat, Hunger, HungerScorer};
 use crate::ai_navigation::{NavigationPath, SeekFoodBehavior, SeekSleepAreaBehavior};
@@ -63,7 +64,7 @@ pub fn spawn_crew_members(
                     radius: 0.4,
                     ..default()
                 }),
-                material: materials.add(Color::YELLOW),
+                material: materials.add(Color::from(YELLOW)),
                 transform: Transform::from_translation(position),
                 ..default()
             },

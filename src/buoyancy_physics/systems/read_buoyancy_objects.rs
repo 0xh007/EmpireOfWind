@@ -54,7 +54,7 @@ pub fn read_buoyancy_objects(
 
         if let Some(mesh_handle) = find_mesh(entity, &children_query, &mesh_handles) {
             println!("Mesh handle found: {:?}", mesh_handle);
-            if let Some(mesh) = meshes.get(mesh_handle) {
+            if let Some(mesh) = meshes.get(mesh_handle.id()) {
                 println!("Generating voxel grid for mesh.");
                 let voxels = generate_voxel_grid(mesh, mesh_transform);
 

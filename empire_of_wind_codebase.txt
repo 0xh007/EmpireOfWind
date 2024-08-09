@@ -1,0 +1,4685 @@
+=== Cargo.toml ===
+[package]
+name = "empire_of_wind"
+version = "0.1.1"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { version = "0.14.1", features = ["wayland", "jpeg"] }
+bevy_panorbit_camera = "0.19.1"
+bevy_xpbd_3d = { version = "0.5.0", features = ["debug-plugin"] }
+bevy_water = "0.14.2"
+big-brain = "0.21.1"
+oxidized_navigation = { version = "0.11.0", default-features = false, features = [
+    "debug_draw",
+    "xpbd",
+] }
+bevy_asset_loader = { version = "0.21.0", features = ["3d"] }
+blenvy = { git = "https://github.com/kaosat-dev/Blenvy/", branch = "blenvy", version = "0.1.0-alpha.1" }
+bevy_atmosphere = "0.10.0"
+bevy-tnua = "0.19.0"
+bevy-tnua-physics-integration-layer = "0.4.0"
+bevy-tnua-xpbd3d = "0.5.0"
+anyhow = "1"
+rand = "0.8.5"
+serde = { version = "1", features = ["derive"] }
+#bevy_editor_pls = "0.8"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[patch.crates-io]
+
+
+=== Source Directory Structure ===
+├── ai_eating_behavior
+│   ├── components
+│   │   ├── eat.rs
+│   │   ├── hunger.rs
+│   │   ├── hunger_scorer.rs
+│   │   └── mod.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── calculate_hunger_score.rs
+│       ├── eat_action.rs
+│       ├── increase_hunger.rs
+│       └── mod.rs
+├── ai_navigation
+│   ├── components
+│   │   ├── mod.rs
+│   │   ├── navigation_path.rs
+│   │   └── seek_behavior
+│   │       ├── mod.rs
+│   │       ├── seek_food_behavior.rs
+│   │       └── seek_sleep_area_behavior.rs
+│   ├── constants
+│   │   ├── mod.rs
+│   │   └── navigation_settings.rs
+│   ├── mod.rs
+│   ├── systems
+│   │   ├── mod.rs
+│   │   └── navigate_to_nearest.rs
+│   └── utils
+│       ├── mod.rs
+│       └── navigation_utils.rs
+├── ai_sleeping_behavior
+│   ├── components
+│   │   ├── fatigue.rs
+│   │   ├── fatigue_scorer.rs
+│   │   ├── mod.rs
+│   │   └── sleep.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── calculate_fatigue_score.rs
+│       ├── increase_fatigue.rs
+│       ├── mod.rs
+│       └── sleep_action.rs
+├── area_management
+│   ├── components
+│   │   ├── area_exit_marker.rs
+│   │   ├── area_marker.rs
+│   │   ├── mod.rs
+│   │   └── occluding.rs
+│   ├── mod.rs
+│   ├── resources
+│   │   ├── active_areas.rs
+│   │   └── mod.rs
+│   ├── systems
+│   │   ├── manage_active_areas.rs
+│   │   ├── mod.rs
+│   │   ├── propagate_render_layers.rs
+│   │   └── read_area_markers.rs
+│   └── utils
+│       ├── area_visibility_utils.rs
+│       └── mod.rs
+├── asset_management
+│   ├── mod.rs
+│   └── states
+│       ├── app_states.rs
+│       └── mod.rs
+├── atmospheric_lighting
+│   └── mod.rs
+├── buoyancy_physics
+│   ├── components
+│   │   ├── buoyancy_marker.rs
+│   │   ├── buoyancy.rs
+│   │   ├── mod.rs
+│   │   ├── voxel.rs
+│   │   └── voxel_visual.rs
+│   ├── constants
+│   │   ├── mod.rs
+│   │   └── voxel.rs
+│   ├── events
+│   │   ├── mod.rs
+│   │   ├── visualize_mesh_bounds_debug_toggle.rs
+│   │   └── visualize_voxels_debug_toggle.rs
+│   ├── mod.rs
+│   ├── systems
+│   │   ├── calculate_and_apply_buoyancy.rs
+│   │   ├── mod.rs
+│   │   ├── read_buoyancy_objects.rs
+│   │   ├── update_voxel_solidity.rs
+│   │   ├── visualize_mesh_bounds.rs
+│   │   └── visualize_voxel_grid.rs
+│   └── utils
+│       ├── mod.rs
+│       └── voxel_utils.rs
+├── camera_control
+│   ├── components
+│   │   ├── camera_zoom.rs
+│   │   ├── debug_camera.rs
+│   │   ├── main_camera.rs
+│   │   └── mod.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── camera_switching.rs
+│       ├── interpolate_zoom.rs
+│       ├── mod.rs
+│       ├── move_camera.rs
+│       └── setup_camera.rs
+├── collider_management
+│   ├── components
+│   │   ├── collider_marker.rs
+│   │   └── mod.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── mod.rs
+│       └── read_colliders.rs
+├── crew_management
+│   ├── components
+│   │   ├── crew_member.rs
+│   │   └── mod.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── mod.rs
+│       └── spawn_crew_members.rs
+├── food
+│   ├── components
+│   │   ├── food.rs
+│   │   └── mod.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── mod.rs
+│       └── spawn_food.rs
+├── lib.rs
+├── main.rs
+├── navmesh
+│   ├── components
+│   │   ├── mod.rs
+│   │   └── nav_mesh_marker.rs
+│   ├── events
+│   │   ├── mod.rs
+│   │   └── nav_mesh_debug_toggle.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── mod.rs
+│       └── toggle_nav_mesh_visibility.rs
+├── ocean
+│   ├── consts
+│   │   ├── mod.rs
+│   │   └── ocean_settings.rs
+│   └── mod.rs
+├── player
+│   ├── components
+│   │   ├── mod.rs
+│   │   └── player.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── mod.rs
+│       └── spawn_player.rs
+├── player_input
+│   ├── mod.rs
+│   └── systems
+│       ├── handle_player_input.rs
+│       └── mod.rs
+├── ship
+│   ├── components
+│   │   ├── mod.rs
+│   │   └── ship.rs
+│   ├── mod.rs
+│   ├── resources
+│   │   ├── mod.rs
+│   │   └── ship_assets.rs
+│   └── systems
+│       ├── mod.rs
+│       └── spawn_ship.rs
+├── ship_items
+│   ├── components
+│   │   ├── mod.rs
+│   │   └── sleep_area.rs
+│   ├── mod.rs
+│   └── systems
+│       ├── mod.rs
+│       └── spawn_furniture.rs
+├── stairs_test
+│   └── mod.rs
+├── sun
+│   ├── components
+│   │   ├── mod.rs
+│   │   └── sun.rs
+│   ├── consts
+│   │   ├── mod.rs
+│   │   └── sun_cycle_settings.rs
+│   ├── mod.rs
+│   ├── resources
+│   │   ├── mod.rs
+│   │   └── sun_cycle_timer.rs
+│   └── systems
+│       ├── control_sun_cycle_timer.rs
+│       ├── mod.rs
+│       ├── setup_sun.rs
+│       └── update_sun_cycle.rs
+└── utils
+    ├── mesh_utils.rs
+    ├── mod.rs
+    ├── vec3i.rs
+    └── water_utils.rs
+
+
+=== src/food/components/mod.rs ===
+pub use food::*;
+
+mod food;
+
+
+=== src/food/components/food.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// Marker component for something edible.
+///
+/// The `Food` component is a marker component used to identify entities that can be consumed
+/// by other entities. This component does not have any fields or behavior on its own.
+/// It is typically used in systems where entities search for and interact with food items.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct Food;
+
+
+=== src/food/systems/spawn_food.rs ===
+use bevy::asset::Assets;
+use bevy::core::Name;
+use bevy::pbr::{PbrBundle, StandardMaterial};
+use bevy::prelude::{default, Color, Commands, Mesh, Meshable, ResMut, Sphere, Transform};
+use bevy_xpbd_3d::components::{Friction, RigidBody};
+use bevy_xpbd_3d::prelude::Collider;
+
+use crate::food::Food;
+
+/// System to spawn food entities in the game.
+///
+/// This system creates food entities with specified properties, including a mesh,
+/// material, transform, and physical properties. The food entities are configured
+/// to have a dynamic rigid body, friction, and a spherical collider for physics interactions.
+///
+/// # Parameters
+/// - `commands`: Commands for spawning and configuring entities.
+/// - `meshes`: Resource to store and manage meshes.
+/// - `materials`: Resource to store and manage materials.
+///
+/// # Details
+/// The food entities are created with the following characteristics:
+/// - Name: "Food"
+/// - Mesh: A red sphere with a radius of 0.2 units.
+/// - Transform: Positioned at coordinates (13.167, 7.1885, 0.0).
+/// - Physics: Dynamic rigid body, friction of 1.0, and a spherical collider.
+pub fn spawn_food(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.spawn((
+        Name::new("Food"),
+        Food,
+        PbrBundle {
+            mesh: meshes.add(Sphere::new(0.2).mesh().ico(5).unwrap()),
+            material: materials.add(Color::RED),
+            transform: Transform::from_xyz(13.167, 7.1885, 0.0),
+            ..default()
+        },
+        RigidBody::Dynamic,
+        Friction::new(1.0),
+        Collider::sphere(0.2),
+    ));
+}
+
+
+=== src/food/systems/mod.rs ===
+pub use spawn_food::*;
+
+mod spawn_food;
+
+
+=== src/food/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod systems;
+
+/// Plugin for managing food within the game world.
+///
+/// The `FoodPlugin` handles the creation and management of food items, setting up the necessary
+/// components and systems to spawn food entities in the game world.
+///
+/// # Components
+/// - `Food`: A marker component indicating that an entity is a food item.
+///
+/// # Systems
+/// - `spawn_food`: Spawns food items in the game world and configures their initial properties and behavior.
+pub struct FoodPlugin;
+
+impl Plugin for FoodPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Food>()
+            .add_systems(OnEnter(AppStates::Running), spawn_food);
+    }
+}
+
+
+=== src/ai_navigation/components/seek_behavior/seek_food_behavior.rs ===
+use std::marker::PhantomData;
+
+use bevy::prelude::*;
+use big_brain::prelude::*;
+use serde::{Deserialize, Serialize};
+
+use crate::food::Food;
+
+/// Component for entities that seek the nearest `Food` target.
+///
+/// This component is used in conjunction with an `ActionBuilder` to create actions
+/// where an entity will navigate towards the nearest `Food` target.
+///
+/// # Fields
+/// - `_marker`: A phantom data marker to hold the type `Food`.
+/// - `speed`: The movement speed of the entity.
+#[derive(Debug, Clone, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct SeekFoodBehavior {
+    #[reflect(ignore)]
+    pub _marker: PhantomData<Food>,
+    pub speed: f32,
+}
+
+impl ActionBuilder for SeekFoodBehavior {
+    /// Attaches the `SeekFoodBehavior` component to the specified actor entity.
+    ///
+    /// This method is used by the `ActionBuilder` trait to add the `SeekFoodBehavior` component
+    /// to an entity, enabling it to move towards the nearest `Food` target.
+    ///
+    /// # Parameters
+    /// - `cmd`: The `Commands` object used to issue commands to the ECS.
+    /// - `action`: The entity representing the action.
+    /// - `_actor`: The entity to which the action will be attached.
+    fn build(&self, cmd: &mut Commands, action: Entity, _actor: Entity) {
+        cmd.entity(action).insert(SeekFoodBehavior {
+            _marker: PhantomData,
+            speed: self.speed,
+        });
+    }
+}
+
+
+=== src/ai_navigation/components/seek_behavior/seek_sleep_area_behavior.rs ===
+use std::marker::PhantomData;
+
+use bevy::prelude::*;
+use big_brain::prelude::*;
+use serde::{Deserialize, Serialize};
+
+use crate::ship_items::SleepArea;
+
+/// Component for entities that seek the nearest `SleepArea` target.
+///
+/// This component is used in conjunction with an `ActionBuilder` to create actions
+/// where an entity will navigate towards the nearest `SleepArea` target.
+///
+/// # Fields
+/// - `_marker`: A phantom data marker to hold the type `SleepArea`.
+/// - `speed`: The movement speed of the entity.
+#[derive(Debug, Clone, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct SeekSleepAreaBehavior {
+    #[reflect(ignore)]
+    pub _marker: PhantomData<SleepArea>,
+    pub speed: f32,
+}
+
+impl ActionBuilder for SeekSleepAreaBehavior {
+    /// Attaches the `SeekSleepAreaBehavior` component to the specified actor entity.
+    ///
+    /// This method is used by the `ActionBuilder` trait to add the `SeekSleepAreaBehavior` component
+    /// to an entity, enabling it to move towards the nearest `SleepArea` target.
+    ///
+    /// # Parameters
+    /// - `cmd`: The `Commands` object used to issue commands to the ECS.
+    /// - `action`: The entity representing the action.
+    /// - `_actor`: The entity to which the action will be attached.
+    fn build(&self, cmd: &mut Commands, action: Entity, _actor: Entity) {
+        cmd.entity(action).insert(SeekSleepAreaBehavior {
+            _marker: PhantomData,
+            speed: self.speed,
+        });
+    }
+}
+
+
+=== src/ai_navigation/components/seek_behavior/mod.rs ===
+use std::marker::PhantomData;
+
+use bevy::prelude::*;
+use big_brain::prelude::*;
+use serde::{Deserialize, Serialize};
+
+pub use {seek_food_behavior::*, seek_sleep_area_behavior::*};
+
+mod seek_food_behavior;
+mod seek_sleep_area_behavior;
+
+/// Component for entities that seek the nearest target of type `T`.
+///
+/// This component is used in conjunction with an `ActionBuilder` to create actions
+/// where an entity will navigate towards and seek the nearest target of a specified type `T`.
+///
+/// # Type Parameters
+/// - `T`: The type of the target component that the entity will seek. It must implement
+///   the `Component`, `Debug`, and `Clone` traits.
+///
+/// # Fields
+/// - `_marker`: A phantom data marker to hold the type `T`.
+/// - `speed`: The movement speed of the entity.
+#[derive(Debug, Clone, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct SeekBehavior<T: Component + std::fmt::Debug + Clone> {
+    #[reflect(ignore)]
+    pub _marker: PhantomData<T>,
+    pub speed: f32,
+}
+
+impl<T> ActionBuilder for SeekBehavior<T>
+where
+    T: Component + std::fmt::Debug + Clone,
+{
+    /// Attaches the `SeekBehavior` component to the specified actor entity.
+    ///
+    /// This method is used by the `ActionBuilder` trait to add the `SeekBehavior` component
+    /// to an entity, enabling it to seek the nearest target of type `T`.
+    ///
+    /// # Parameters
+    /// - `cmd`: The `Commands` object used to issue commands to the ECS.
+    /// - `action`: The entity representing the action.
+    /// - `_actor`: The entity to which the action will be attached.
+    fn build(&self, cmd: &mut Commands, action: Entity, _actor: Entity) {
+        cmd.entity(action).insert(SeekBehavior::<T> {
+            _marker: PhantomData,
+            speed: self.speed,
+        });
+    }
+}
+
+
+=== src/ai_navigation/components/navigation_path.rs ===
+use bevy::prelude::*;
+
+/// Component for storing a path of navigation points in 3D space.
+///
+/// Each `NavigationPath` contains a sequence of points (`Vec3`) that define
+/// waypoints for navigation purposes.
+#[derive(Component, Debug, Clone, Reflect)]
+#[reflect(Component)]
+pub struct NavigationPath {
+    /// The sequence of points that define the navigation path.
+    pub points: Vec<Vec3>,
+}
+
+impl Default for NavigationPath {
+    /// Creates a new `NavigationPath` with an empty path.
+    fn default() -> Self {
+        NavigationPath { points: Vec::new() }
+    }
+}
+
+
+=== src/ai_navigation/components/mod.rs ===
+pub use navigation_path::*;
+pub use seek_behavior::*;
+
+mod navigation_path;
+
+mod seek_behavior;
+
+
+=== src/ai_navigation/systems/navigate_to_nearest.rs ===
+use bevy::log::debug;
+use bevy::prelude::{Component, Query, Res, Time, Transform, With, Without};
+use big_brain::actions::ActionState;
+use big_brain::prelude::{ActionSpan, Actor, HasThinker};
+use oxidized_navigation::{NavMesh, NavMeshSettings};
+
+use crate::ai_navigation::constants::REACHED_POINT_THRESHOLD;
+use crate::ai_navigation::utils::find_navigation_path;
+use crate::ai_navigation::{NavigationPath, SeekBehavior};
+
+/// System to navigate actors towards the nearest target of a specified type.
+///
+/// This system uses navigation meshes to calculate paths for actors to move
+/// towards the nearest entity of type `T`. The system is integrated with the
+/// `big_brain` crate to handle the state transitions and pathfinding logic.
+///
+/// # Parameters
+/// - `time`: Resource to access the delta time between frames.
+/// - `nav_mesh`: Resource containing the navigation mesh for pathfinding.
+/// - `nav_mesh_settings`: Resource with settings for the navigation mesh.
+/// - `goal_query`: Query to retrieve the transforms of target entities of type `T`.
+/// - `thinker_query`: Query to retrieve the navigation path and transform of the actor entities with the `HasThinker` component, excluding target entities.
+/// - `action_query`: Query to retrieve the actors and their action states, along with the `MoveToNearest` component and the action span.
+///
+/// # Type Parameters
+/// - `T`: Component type that represents the target entities to navigate to.
+#[allow(clippy::type_complexity)]
+pub fn navigate_to_nearest<T: Component + std::fmt::Debug + Clone>(
+    time: Res<Time>,
+    nav_mesh: Res<NavMesh>,
+    nav_mesh_settings: Res<NavMeshSettings>,
+    goal_query: Query<&Transform, With<T>>,
+    mut thinker_query: Query<(&mut NavigationPath, &mut Transform), (With<HasThinker>, Without<T>)>,
+    mut action_query: Query<(&Actor, &mut ActionState, &SeekBehavior<T>, &ActionSpan)>,
+) {
+    for (Actor(actor), mut action_state, move_to, span) in &mut action_query {
+        let _guard = span.span().enter();
+
+        if let Ok((mut navigation_path, mut actor_transform)) = thinker_query.get_mut(*actor) {
+            match *action_state {
+                ActionState::Requested => {
+                    debug!("Lets go find a {:?}", std::any::type_name::<T>());
+                    *action_state = ActionState::Executing;
+                }
+                ActionState::Executing => {
+                    let goal_transform = goal_query
+                        .iter()
+                        .map(|t| (t.translation, t))
+                        .min_by(|(a, _), (b, _)| {
+                            a.distance_squared(actor_transform.translation)
+                                .partial_cmp(&b.distance_squared(actor_transform.translation))
+                                .unwrap()
+                        })
+                        .map(|(_, t)| t);
+
+                    if navigation_path.points.is_empty() {
+                        if let Some(new_path) = find_navigation_path(
+                            &nav_mesh,
+                            &nav_mesh_settings,
+                            actor_transform.translation,
+                            goal_transform.unwrap().translation,
+                        ) {
+                            debug!("Updating navigation path.");
+                            navigation_path.points = new_path;
+                        } else {
+                            *action_state = ActionState::Failure;
+                            continue;
+                        }
+                    }
+
+                    // Check if we have a path to follow
+                    if let Some(next_point) = navigation_path.points.first() {
+                        let direction = (*next_point - actor_transform.translation).normalize();
+                        let distance_to_next_point =
+                            (*next_point - actor_transform.translation).length();
+
+                        // Check if we are close enough to the next point to consider it reached
+                        if distance_to_next_point < REACHED_POINT_THRESHOLD {
+                            // Remove the reached point from the navigation path
+                            navigation_path.points.remove(0);
+
+                            // If after removing the point, the path is empty, we've reached the end
+                            if navigation_path.points.is_empty() {
+                                debug!("Reached end of path.");
+                                *action_state = ActionState::Success;
+                                continue;
+                            }
+                        } else {
+                            // Move towards the next point
+                            let step_size = time.delta_seconds() * move_to.speed;
+                            let step = direction * step_size.min(distance_to_next_point);
+                            actor_transform.translation += step;
+                        }
+                    }
+                }
+                ActionState::Cancelled => {
+                    debug!("Moving to is cancelled.");
+                    *action_state = ActionState::Failure;
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+
+=== src/ai_navigation/systems/mod.rs ===
+pub use navigate_to_nearest::*;
+
+mod navigate_to_nearest;
+
+
+=== src/ai_navigation/utils/navigation_utils.rs ===
+use bevy::math::Vec3;
+use oxidized_navigation::query::{find_polygon_path, perform_string_pulling_on_path};
+use oxidized_navigation::{NavMesh, NavMeshSettings};
+
+/// Finds a navigation path from the start position to the goal position using the navigation mesh.
+///
+/// This function integrates with the `oxidized_navigation` crate to perform pathfinding
+/// on a navigation mesh. It first finds the polygon path on the navigation mesh and then
+/// performs string pulling to convert the polygon path into a path of `Vec3` positions.
+///
+/// # Parameters
+/// - `nav_mesh`: Reference to the `NavMesh` object used for pathfinding.
+/// - `nav_mesh_settings`: Reference to the `NavMeshSettings` object containing settings for the navigation mesh.
+/// - `start`: The starting position (`Vec3`) for the path.
+/// - `goal`: The goal position (`Vec3`) for the path.
+///
+/// # Returns
+/// An `Option<Vec<Vec3>>` which is:
+/// - `Some(Vec<Vec3>)` containing the path from start to goal if the pathfinding is successful.
+/// - `None` if the pathfinding fails.
+pub fn find_navigation_path(
+    nav_mesh: &NavMesh,
+    nav_mesh_settings: &NavMeshSettings,
+    start: Vec3,
+    goal: Vec3,
+) -> Option<Vec<Vec3>> {
+    // Lock the nav_mesh for reading
+    let nav_mesh_lock = nav_mesh.get();
+    let nav_mesh = nav_mesh_lock.read().unwrap();
+
+    // Find the polygon path using the navigation mesh
+    let polygon_path = match find_polygon_path(
+        &nav_mesh,
+        nav_mesh_settings,
+        start,
+        goal,
+        None, // You can specify options here if needed
+        Some(&[
+            nav_mesh_settings.walkable_radius.into(),
+            nav_mesh_settings.walkable_height.into(),
+        ]),
+    ) {
+        Ok(path) => path,
+        Err(_) => return None,
+    };
+
+    // Perform string pulling on the polygon path to get a Vec3 path
+    match perform_string_pulling_on_path(&nav_mesh, start, goal, &polygon_path) {
+        Ok(string_path) => Some(string_path),
+        Err(_) => None,
+    }
+}
+
+
+=== src/ai_navigation/utils/mod.rs ===
+pub use navigation_utils::*;
+
+mod navigation_utils;
+
+
+=== src/ai_navigation/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::food::Food;
+use crate::ship_items::SleepArea;
+
+mod components;
+mod constants;
+mod systems;
+mod utils;
+
+/// Plugin for managing AI navigation behavior within the game.
+///
+/// The AiNavigationPlugin provides functionality for handling the navigation
+/// behaviors of entities. It registers the necessary components and sets up
+/// systems to manage navigation towards food and sleep areas.
+///
+/// # Components
+/// - SeekFoodBehavior: Enables an entity to navigate towards the nearest `Food` target,
+///   defining the movement speed.
+/// - SeekSleepAreaBehavior: Enables an entity to navigate towards the nearest `SleepArea` target,
+///   defining the movement speed.
+/// - NavigationPath: Stores a sequence of points that define a navigation path in 3D space.
+///
+/// # Systems
+/// - navigate_to_nearest: Manages the navigation of entities towards the nearest target of a specified type.
+pub struct AiNavigationPlugin;
+
+impl Plugin for AiNavigationPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<SeekFoodBehavior>()
+            .register_type::<SeekSleepAreaBehavior>()
+            .register_type::<NavigationPath>()
+            .add_systems(
+                PreUpdate,
+                (
+                    navigate_to_nearest::<SleepArea>,
+                    navigate_to_nearest::<Food>,
+                ),
+            );
+    }
+}
+
+
+=== src/ai_navigation/constants/navigation_settings.rs ===
+/// The distance threshold to determine if the actor has reached the next point in the navigation path.
+pub const REACHED_POINT_THRESHOLD: f32 = 1.0;
+
+
+=== src/ai_navigation/constants/mod.rs ===
+pub use navigation_settings::*;
+
+mod navigation_settings;
+
+
+=== src/stairs_test/mod.rs ===
+use bevy::prelude::*;
+use bevy_asset_loader::asset_collection::AssetCollection;
+use bevy_asset_loader::prelude::{ConfigureLoadingState, LoadingStateAppExt, LoadingStateConfig};
+
+use crate::asset_management::AppStates;
+use crate::ship::Ship;
+
+pub struct StairsTestPlugin;
+
+impl Plugin for StairsTestPlugin {
+    fn build(&self, app: &mut App) {
+        app.configure_loading_state(
+            LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<StairsTestLevelAssets>(),
+        )
+            .add_systems(OnEnter(AppStates::Running), spawn_test_level);
+    }
+}
+
+#[derive(AssetCollection, Resource)]
+pub struct StairsTestLevelAssets {
+    #[asset(path = "models/export/test/navmeshtest.glb#Scene0")]
+    pub stairs_test_level: Handle<Scene>,
+}
+
+pub fn spawn_test_level(mut commands: Commands, test_level_assets: Res<StairsTestLevelAssets>) {
+    commands.spawn((
+        Name::new("Test Level"),
+        SceneBundle {
+            scene: test_level_assets.stairs_test_level.clone(),
+            ..default()
+        },
+    ));
+}
+
+=== src/player_input/systems/mod.rs ===
+pub use handle_player_input::*;
+
+mod handle_player_input;
+
+
+=== src/player_input/systems/handle_player_input.rs ===
+use bevy::input::ButtonInput;
+use bevy::math::Vec3;
+use bevy::prelude::{EventWriter, KeyCode, Query, Res};
+use bevy_tnua::builtins::{TnuaBuiltinJump, TnuaBuiltinWalk};
+use bevy_tnua::controller::TnuaController;
+
+use crate::buoyancy_physics::{VisualizeMeshBoundsDebugToggle, VisualizeVoxelsDebugToggle};
+use crate::navmesh::NavMeshDebugToggle;
+use crate::player::Player;
+
+/// Handles player input to control the player character's movement and actions.
+///
+/// This system listens for specific keyboard inputs to move the player character,
+/// make it jump, and toggle the navigation mesh debug display.
+///
+/// - `W` or `ArrowUp`: Move forward.
+/// - `S` or `ArrowDown`: Move backward.
+/// - `A` or `ArrowLeft`: Move left.
+/// - `D` or `ArrowRight`: Move right.
+/// - `Space`: Make the player jump.
+/// - `7`: Toggle debug visuals of voxel grid for buoyancy computation.
+/// - `8`: Toggle debug visuals of mesh bounds finder.
+/// - `9`: Toggle the navigation mesh debug display.
+///
+/// # Parameters
+/// - `keyboard_input`: Resource capturing the current state of keyboard inputs.
+/// - `nav_mesh_event_writer`: Writer to send `NavMeshDebugToggle` events.
+/// - `visualize_mesh_event_writer`: Writer to send `VisualizeMeshBoundsDebugToggle` events.
+/// - `visualize_voxels_event_writer`: Writer to send `VisualizeVoxelsDebugToggle` events.
+/// - `query`: Query to fetch the `Player` and `TnuaController` components of entities.
+pub fn handle_player_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut nav_mesh_event_writer: EventWriter<NavMeshDebugToggle>,
+    // mut visualize_mesh_event_writer: EventWriter<VisualizeMeshBoundsDebugToggle>,
+    // mut visualize_voxels_event_writer: EventWriter<VisualizeVoxelsDebugToggle>,
+    mut query: Query<(&Player, &mut TnuaController)>,
+) {
+    for (_, mut controller) in query.iter_mut() {
+        let mut direction = Vec3::ZERO;
+
+        if keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp) {
+            direction.x -= 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown) {
+            direction.x += 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft) {
+            direction.z += 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
+            direction.z -= 1.0;
+        }
+
+        // Normalize the direction vector to ensure consistent movement speed in all directions
+        if direction != Vec3::ZERO {
+            direction = direction.normalize();
+        }
+
+        // Rotate the direction vector to align with the isometric perspective
+        let rotation_angle = 45.0f32.to_radians(); // Convert 45 degrees to radians for isometric rotation
+        let cos_angle = rotation_angle.cos();
+        let sin_angle = rotation_angle.sin();
+
+        // Rotate direction vector by the camera's rotation angle
+        let rotated_direction = Vec3::new(
+            direction.x * cos_angle - direction.z * sin_angle,
+            0.0, // Y component remains 0 as we're rotating in the XZ plane
+            direction.x * sin_angle + direction.z * cos_angle,
+        );
+
+        let desired_velocity = rotated_direction * 10.0; // Adjust speed as necessary
+
+        controller.basis(TnuaBuiltinWalk {
+            desired_velocity,
+            float_height: 1.2,
+            ..Default::default()
+        });
+
+        if keyboard_input.pressed(KeyCode::Space) {
+            controller.action(TnuaBuiltinJump {
+                height: 4.0,
+                ..Default::default()
+            });
+        }
+
+        if keyboard_input.pressed(KeyCode::Digit9) {
+            nav_mesh_event_writer.send(NavMeshDebugToggle);
+        }
+
+        // if keyboard_input.pressed(KeyCode::Digit8) {
+        //     visualize_mesh_event_writer.send(VisualizeMeshBoundsDebugToggle);
+        // }
+        // 
+        // if keyboard_input.pressed(KeyCode::Digit7) {
+        //     visualize_voxels_event_writer.send(VisualizeVoxelsDebugToggle);
+        // }
+    }
+}
+
+
+=== src/player_input/mod.rs ===
+use bevy::prelude::*;
+use bevy_tnua::prelude::*;
+
+use systems::*;
+
+mod systems;
+
+/// Plugin for handling player input within the game.
+///
+/// The `PlayerInputPlugin` is responsible for processing player input to control
+/// the player character's movement and actions. It registers the necessary systems
+/// to handle input events and update the player character accordingly.
+///
+/// # Systems
+/// - `handle_player_input`: Handles player input to control movement and actions of the player character.
+pub struct PlayerInputPlugin;
+
+impl Plugin for PlayerInputPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            handle_player_input.in_set(TnuaUserControlsSystemSet),
+        );
+    }
+}
+
+
+=== src/buoyancy_physics/events/visualize_voxels_debug_toggle.rs ===
+use bevy::prelude::*;
+
+/// Event to toggle the visualization of voxel grid for debugging purposes.
+///
+/// This event is used to enable or disable the debug visualization of the voxel grid within the game.
+/// It is triggered by a specific keyboard input and processed by the `visualize_voxel_grid` system
+/// to render or hide the voxel grid, helping developers understand the voxelization and buoyancy calculations.
+///
+/// # Usage
+/// - Triggered by a keyboard input (e.g., pressing the `7` key).
+/// - Listened to by the `visualize_voxel_grid` system to toggle voxel grid visualization.
+#[derive(Event)]
+pub struct VisualizeVoxelsDebugToggle;
+
+
+=== src/buoyancy_physics/events/mod.rs ===
+pub use {visualize_mesh_bounds_debug_toggle::*, visualize_voxels_debug_toggle::*};
+
+mod visualize_mesh_bounds_debug_toggle;
+mod visualize_voxels_debug_toggle;
+
+
+=== src/buoyancy_physics/events/visualize_mesh_bounds_debug_toggle.rs ===
+use bevy::prelude::*;
+
+/// Event to toggle the visualization of mesh bounds for debugging purposes.
+///
+/// This event is used to enable or disable the debug visualization of mesh bounds within the game.
+/// It is triggered by a specific keyboard input and processed by the `visualize_mesh_bounds` system
+/// to render or hide the bounding boxes of meshes, helping developers understand the voxelization process.
+///
+/// # Usage
+/// - Triggered by a keyboard input (e.g., pressing the `8` key).
+/// - Listened to by the `visualize_mesh_bounds` system to toggle mesh bounds visualization.
+#[derive(Event)]
+pub struct VisualizeMeshBoundsDebugToggle;
+
+
+=== src/buoyancy_physics/components/buoyancy.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+use crate::buoyancy_physics::Voxel;
+
+/// The `Buoyancy` component represents the buoyant properties of an entity in the game.
+/// It contains a list of voxels that represent the volume of the entity and a flag indicating
+/// whether the voxel data needs to be updated.
+///
+/// # Fields
+/// - `voxels`: A vector of `Voxel` instances that represent the voxelized volume of the entity.
+/// - `needs_update`: A boolean flag indicating whether the voxel data requires updating.
+///
+/// # Methods
+/// - `from_voxels(voxels: Vec<Voxel>, needs_update: bool) -> Self`:
+///   Creates a new `Buoyancy` component from a list of voxels and an update flag.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct Buoyancy {
+    pub voxels: Vec<Voxel>, // List of voxel data, possibly pulled from generate_voxel_grid
+    pub needs_update: bool,
+}
+
+impl Buoyancy {
+    /// Creates a new `Buoyancy` component from a list of voxels and an update flag.
+    pub fn from_voxels(voxels: Vec<Voxel>, needs_update: bool) -> Self {
+        Self {
+            voxels,
+            needs_update,
+        }
+    }
+}
+
+
+=== src/buoyancy_physics/components/voxel_visual.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// Marker component for identifying voxel visual entities in the game.
+///
+/// The `VoxelVisual` component is used to tag entities that represent visual
+/// representations of voxels. This component does not have any fields and is purely
+/// used for identification purposes by various systems that need to interact with
+/// voxel visuals.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct VoxelVisual;
+
+
+=== src/buoyancy_physics/components/voxel.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// Represents a single voxel in the game world.
+///
+/// A `Voxel` is a cubic unit of space in the game world, defined by its position
+/// and a boolean indicating whether it is solid. Voxels are used in various systems
+/// such as buoyancy and collision detection.
+///
+/// # Fields
+/// - `position`: The 3D position of the voxel.
+/// - `is_solid`: A boolean indicating whether the voxel is solid.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct Voxel {
+    pub position: Vec3,
+    pub is_solid: bool,
+}
+
+
+=== src/buoyancy_physics/components/buoyancy_marker.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// A marker component used to signify that an entity should be processed for buoyancy.
+///
+/// This component is added to entities that require buoyancy calculations. The system
+/// looks for entities with this marker and performs necessary operations such as
+/// generating voxel grids, attaching buoyancy-related components, and handling
+/// mesh transformations.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct BuoyancyMarker;
+
+
+=== src/buoyancy_physics/components/mod.rs ===
+pub use {buoyancy::*, buoyancy_marker::*, voxel::*, voxel_visual::*};
+
+mod buoyancy;
+mod buoyancy_marker;
+mod voxel;
+mod voxel_visual;
+
+
+=== src/buoyancy_physics/systems/visualize_voxel_grid.rs ===
+use bevy::prelude::*;
+
+use crate::buoyancy_physics::constants::VOXEL_SIZE;
+use crate::buoyancy_physics::VoxelVisual;
+use crate::buoyancy_physics::{Buoyancy, VisualizeVoxelsDebugToggle};
+
+/// Visualizes the voxel grid for debugging purposes.
+///
+/// This system is used to visualize the voxel grid associated with entities that have
+/// a `Buoyancy` component. It draws solid voxels in the game world to help developers
+/// understand and debug the voxelization and buoyancy calculations.
+///
+/// # Parameters
+///
+/// * `visualize_voxel_grid_debug_event_reader`: Event reader to determine if we should run the system.
+/// * `commands`: The Commands resource is used to spawn and configure entities for visualizing voxels.
+/// * `query`: A Query to retrieve entities with their `Transform` and `Buoyancy` components that have changed.
+/// * `meshes`: A mutable reference to the Assets resource containing Mesh objects.
+/// * `materials`: A mutable reference to the Assets resource containing StandardMaterial objects.
+///
+/// # Behavior
+///
+/// For each entity with a changed `Buoyancy` component:
+///
+/// 1. The system iterates over the voxels associated with the `Buoyancy` component.
+/// 2. For each solid voxel, it calculates its world position based on the entity's transform.
+/// 3. It spawns a visual representation of the solid voxel using PBR (Physically Based Rendering) components,
+///    with a slightly reduced size to create visual gaps between voxels.
+///
+/// This visualization helps developers see the results of the voxelization process and the solid voxels
+/// that contribute to the buoyancy calculations.
+pub fn visualize_voxel_grid(
+    mut visualize_voxel_grid_debug_event_reader: EventReader<VisualizeVoxelsDebugToggle>,
+    mut commands: Commands,
+    query: Query<(Entity, &Transform, &Buoyancy), Changed<Buoyancy>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let voxel_visual_size = VOXEL_SIZE * 0.95; // Adjust size for visual gaps
+
+    for _event in visualize_voxel_grid_debug_event_reader.read() {
+        for (_entity, transform, buoyancy) in query.iter() {
+            for voxel in &buoyancy.voxels {
+                if voxel.is_solid {
+                    // Transform for each voxel based on its position relative to the parent entity
+                    let voxel_position = transform.translation + voxel.position;
+
+                    // Spawn visual representation for each solid voxel
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: meshes.add(Cuboid::new(
+                                voxel_visual_size,
+                                voxel_visual_size,
+                                voxel_visual_size,
+                            )),
+                            material: materials.add(Color::rgb(0.5, 0.5, 1.0)), // Custom color
+                            transform: Transform::from_translation(voxel_position),
+                            ..default()
+                        })
+                        .insert(VoxelVisual {}); // Mark it visually if needed for tracking/deletion
+                }
+            }
+        }
+    }
+}
+
+
+=== src/buoyancy_physics/systems/update_voxel_solidity.rs ===
+use bevy::math::Quat;
+use bevy::prelude::{Entity, Query, Transform};
+use bevy_xpbd_3d::prelude::{Collider, SpatialQuery, SpatialQueryFilter};
+
+use crate::buoyancy_physics::constants::VOXEL_SIZE;
+use crate::buoyancy_physics::Buoyancy;
+
+/// Updates the solidity status of voxels for buoyancy calculations.
+///
+/// This system checks each voxel associated with entities that have a `Buoyancy` component
+/// and updates their solidity status based on spatial intersections. The system uses
+/// the `SpatialQuery` resource to determine if each voxel intersects with any colliders in the world,
+/// which is crucial for calculating buoyancy of floating objects such as ships.
+///
+/// # Parameters
+///
+/// * `query`: A Query to retrieve entities with their `Transform` and `Buoyancy` components.
+/// * `spatial_query`: A mutable reference to the `SpatialQuery` resource used for checking spatial intersections.
+///
+/// # Behavior
+///
+/// For each entity with a `Buoyancy` component that needs an update, the system iterates over its voxels and:
+///
+/// 1. Computes the world position of each voxel based on the entity's transform.
+/// 2. Creates a cuboid collider representing the voxel.
+/// 3. Checks for intersections between the voxel collider and other colliders in the world using the `SpatialQuery` resource.
+/// 4. Updates the `is_solid` status of the voxel based on whether any intersections were found.
+/// 5. Marks the `Buoyancy` component as updated to avoid redundant calculations.
+///
+/// This system ensures that the buoyancy calculations accurately reflect the current state of the game world,
+/// taking into account any changes in the position or state of colliders.
+pub fn update_voxel_solidity(
+    mut query: Query<(Entity, &Transform, &mut Buoyancy)>,
+    mut spatial_query: SpatialQuery,
+) {
+    spatial_query.update_pipeline();
+
+    for (_entity, transform, mut buoyancy) in query.iter_mut() {
+        if buoyancy.needs_update {
+            for voxel in buoyancy.voxels.iter_mut() {
+                let world_position = transform.translation + voxel.position;
+                let voxel_collider = Collider::cuboid(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
+                let intersects = spatial_query.shape_intersections(
+                    &voxel_collider,
+                    world_position,
+                    Quat::IDENTITY,
+                    SpatialQueryFilter::default(),
+                );
+
+                voxel.is_solid = !intersects.is_empty();
+            }
+            buoyancy.needs_update = false;
+        }
+    }
+}
+
+
+=== src/buoyancy_physics/systems/calculate_and_apply_buoyancy.rs ===
+use bevy::math::Vec3;
+use bevy::prelude::{Query, Transform};
+use bevy_water::WaterParam;
+use bevy_xpbd_3d::components::{CenterOfMass, ColliderDensity, ExternalForce};
+
+use crate::buoyancy_physics::constants::VOXEL_SIZE;
+use crate::buoyancy_physics::utils::calculate_submerged_volume;
+use crate::buoyancy_physics::Buoyancy;
+use crate::utils::get_water_height_at_position;
+
+/// This system calculates and applies buoyancy forces to entities with the `Buoyancy` component.
+///
+/// The system iterates over all entities with the `Buoyancy`, `Transform`, `ExternalForce`,
+/// `ColliderDensity`, and `CenterOfMass` components. For each voxel in the `Buoyancy` component,
+/// it calculates the buoyancy force based on the submerged volume and applies this force to
+/// the entity at the voxel's position, taking into account the entity's rotation and center of mass.
+///
+/// # Arguments
+///
+/// * `water` - A parameter containing the global water settings and time resource, used to calculate wave heights.
+/// * `query` - A query that retrieves entities with the required components for buoyancy calculation.
+///
+/// # Details
+///
+/// The buoyancy force is computed using the following formula:
+///
+/// buoyancy force = gravity * submerged volume * hull density
+///
+/// The system also applies the calculated buoyancy force at the voxel's rotated position, creating torque around the center of mass.
+
+pub fn calculate_and_apply_buoyancy(
+    water: WaterParam,
+    mut query: Query<(
+        &Buoyancy,
+        &Transform,
+        &mut ExternalForce,
+        &ColliderDensity,
+        &CenterOfMass,
+    )>,
+) {
+    let gravity = 9.81; // Acceleration due to gravity in m/s^2
+
+    for (buoyancy, transform, mut external_force, _collider_density, center_of_mass) in
+        query.iter_mut()
+    {
+        for voxel in &buoyancy.voxels {
+            if voxel.is_solid {
+                // Apply the ship's rotation to the voxel's position relative to the ship's center of mass
+                let rotated_position = transform.rotation.mul_vec3(voxel.position);
+                let world_position = transform.translation + rotated_position;
+
+                let water_height = get_water_height_at_position(world_position, &water);
+                let submerged_volume =
+                    calculate_submerged_volume(world_position, water_height, VOXEL_SIZE);
+                let hull_density = 1.0;
+                let buoyancy_force = Vec3::new(0.0, gravity * submerged_volume * hull_density, 0.0);
+
+                // Apply the force at the voxel's rotated position, creating torque around the center of mass
+                external_force.apply_force_at_point(
+                    buoyancy_force,
+                    world_position,
+                    center_of_mass.0,
+                );
+
+                // TODO: Make this toggleable
+                // gizmos.sphere(center_of_mass.0, Quat::IDENTITY, 2.3, Color::RED);
+
+                // Visualize the buoyancy force as an arrow
+                // gizmos.arrow(
+                //     world_position, // Start point of the arrow
+                //     world_position + buoyancy_force * 0.1, // End point scaled for visibility
+                //     Color::BLUE, // Color of the arrow
+                // );
+                // Optionally visualize the lever arm
+                // gizmos.line(
+                //     center_of_mass.0,
+                //     world_position,
+                //     Color::YELLOW,
+                // );
+            }
+        }
+    }
+}
+
+
+=== src/buoyancy_physics/systems/visualize_mesh_bounds.rs ===
+use bevy::prelude::*;
+
+use crate::buoyancy_physics::{BuoyancyMarker, VisualizeMeshBoundsDebugToggle};
+use crate::utils::{calculate_mesh_bounds, find_mesh, visualize_bounds};
+
+/// Visualizes the bounding box of meshes for debugging purposes.
+///
+/// This system is used for visual debugging by drawing the outer bounds of meshes. It helps
+/// in understanding the voxelization process by showing the initial step of finding the
+/// mesh boundaries. The system identifies entities with the `BuoyancyMarker` component,
+/// calculates their mesh bounds, and visualizes these bounds in the game world.
+///
+/// Note: This system is intended to be made toggleable in the future for better control over
+/// debugging visuals.
+///
+/// # Parameters
+///
+/// * `visualize_mesh_bounds_debug_event_reader`: Event reader to determine if we should run the system.
+/// * `commands`: The Commands resource is used to spawn and configure entities for visualizing the bounds.
+/// * `meshes`: A mutable reference to the Assets resource containing Mesh objects.
+/// * `materials`: A mutable reference to the Assets resource containing StandardMaterial objects.
+/// * `query`: A Query to retrieve entities with the `BuoyancyMarker` component and their Transforms that were recently added.
+/// * `children`: A Query to retrieve child entities of a given parent entity.
+/// * `mesh_handles`: A Query to retrieve the mesh handle associated with an entity.
+///
+/// # Behavior
+///
+/// For each entity with an `Added<BuoyancyMarker>`:
+///
+/// 1. The system finds the mesh handle associated with the entity.
+/// 2. It retrieves the mesh and calculates its outer bounds.
+/// 3. It visualizes these bounds by spawning entities that represent the bounding box using PBR (Physically Based Rendering) components.
+///
+/// This visualization helps developers to see the initial step of the voxelization process, where the mesh bounds are determined.
+pub fn visualize_mesh_bounds(
+    mut visualize_mesh_bounds_debug_event_reader: EventReader<VisualizeMeshBoundsDebugToggle>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
+    children: Query<&Children>,
+    mesh_handles: Query<&Handle<Mesh>>,
+) {
+    for _event in visualize_mesh_bounds_debug_event_reader.read() {
+        for (entity, _, _mesh_transform) in query.iter() {
+            if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+                if let Some(mesh) = meshes.get(mesh_handle) {
+                    let bounds = calculate_mesh_bounds(mesh);
+                    visualize_bounds(&mut commands, &mut meshes, &mut materials, bounds);
+                }
+            }
+        }
+    }
+}
+
+
+=== src/buoyancy_physics/systems/mod.rs ===
+pub use {
+    calculate_and_apply_buoyancy::*, read_buoyancy_objects::*, update_voxel_solidity::*,
+    visualize_mesh_bounds::*, visualize_voxel_grid::*,
+};
+
+mod calculate_and_apply_buoyancy;
+mod read_buoyancy_objects;
+mod update_voxel_solidity;
+mod visualize_mesh_bounds;
+mod visualize_voxel_grid;
+
+
+=== src/buoyancy_physics/systems/read_buoyancy_objects.rs ===
+use bevy::asset::{Assets, Handle};
+use bevy::hierarchy::{Children, DespawnRecursiveExt, Parent};
+use bevy::math::Vec3;
+use bevy::prelude::*;
+use bevy_xpbd_3d::components::{
+    AngularDamping, CenterOfMass, ColliderDensity, ExternalForce, Inertia, LinearDamping, Mass,
+    RigidBody,
+};
+use bevy_xpbd_3d::math::Matrix3;
+use bevy_xpbd_3d::prelude::Collider;
+use oxidized_navigation::NavMeshAffector;
+
+use crate::buoyancy_physics::{Buoyancy, BuoyancyMarker};
+use crate::buoyancy_physics::utils::generate_voxel_grid;
+use crate::ship::Ship;
+use crate::utils::find_mesh;
+
+/// System to process and configure buoyancy objects within the game.
+///
+/// This system handles entities marked with the `BuoyancyMarker` component, generating
+/// voxel grids for buoyancy calculations and attaching necessary components to the
+/// top-level ship entity. The system ensures that buoyancy objects are correctly integrated
+/// into the ship's dynamics, allowing for realistic buoyancy and physics interactions.
+///
+/// # Parameters
+/// - `buoyancy_marker_query`: Query to retrieve entities with `BuoyancyMarker` components and their transforms.
+/// - `commands`: Commands for modifying entities and their components.
+/// - `children_query`: Query to retrieve the children of entities.
+/// - `parent_query`: Query to navigate up the hierarchy to find parent entities.
+/// - `ship_query`: Query to identify the top-level ship entity.
+/// - `meshes`: Resource containing the assets of meshes.
+/// - `mesh_handles`: Query to retrieve mesh handles from entities.
+///
+/// # Details
+/// For each `BuoyancyMarker` entity, the system:
+/// - Finds the associated mesh and generates a voxel grid for buoyancy calculations.
+/// - Navigates up the entity hierarchy to find the top-level ship entity.
+/// - Attaches the `Buoyancy` component and other physics-related components to the ship entity.
+/// - De-spawns the original marker entity after processing.
+pub fn read_buoyancy_objects(
+    buoyancy_marker_query: Query<(Entity, &BuoyancyMarker, &Transform), Added<BuoyancyMarker>>,
+    mut commands: Commands,
+    children_query: Query<&Children>,
+    parent_query: Query<&Parent>,
+    ship_query: Query<Entity, With<Ship>>,
+    meshes: Res<Assets<Mesh>>,
+    mesh_handles: Query<&Handle<Mesh>>,
+) {
+    for (entity, _, mesh_transform) in buoyancy_marker_query.iter() {
+        println!(
+            "Processing Entity: {:?}, Transform: {:?}",
+            entity, mesh_transform
+        );
+
+        if let Some(mesh_handle) = find_mesh(entity, &children_query, &mesh_handles) {
+            println!("Mesh handle found: {:?}", mesh_handle);
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                println!("Generating voxel grid for mesh.");
+                let voxels = generate_voxel_grid(mesh, mesh_transform);
+
+                // Find the top-level Ship entity
+                let mut current_parent = entity;
+                let mut ship_entity = None;
+                while let Ok(parent) = parent_query.get(current_parent) {
+                    if ship_query.get(parent.get()).is_ok() {
+                        ship_entity = Some(parent.get());
+                        break;
+                    }
+                    current_parent = parent.get();
+                }
+
+                if let Some(ship) = ship_entity {
+                    // Attach the Buoyancy component and collider to the Ship entity
+                    println!("Inserting collider and dynamics components to the Ship entity.");
+                    if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                        commands.entity(ship).insert((
+                            Buoyancy::from_voxels(voxels, true),
+                            collider,
+                            ColliderDensity(0.0),
+                            RigidBody::Dynamic,
+                            LinearDamping(0.8),
+                            AngularDamping(0.8),
+                            ExternalForce::new(Vec3::ZERO).with_persistence(false),
+                            Visibility::Visible,
+                            NavMeshAffector,
+                            CenterOfMass(Vec3::new(-2.0, 0.0, 0.2)),
+                            Mass(2000.0),
+                            Inertia(Matrix3::from_cols(
+                                Vec3::new(126395.3, -28743.2, 16967.54),
+                                Vec3::new(-28743.2, 259213.7, -6361.74),
+                                Vec3::new(16967.54, -6361.74, 246570.2),
+                            )),
+                        ));
+                        commands.entity(entity).despawn_recursive();
+                    }
+                } else {
+                    println!("No Ship entity found for the buoyancy component.");
+                }
+            } else {
+                eprintln!(
+                    "Failed to retrieve mesh from handle for entity marked with BuoyancyMarker"
+                );
+            }
+        } else {
+            eprintln!("Mesh not found for entity marked with BuoyancyMarker");
+        }
+    }
+}
+
+
+=== src/buoyancy_physics/utils/voxel_utils.rs ===
+use bevy::math::Vec3;
+use bevy::prelude::{Mesh, Transform};
+
+use crate::buoyancy_physics::constants::VOXEL_SIZE;
+use crate::buoyancy_physics::Voxel;
+use crate::utils::{calculate_mesh_bounds, Vec3I};
+
+/// Generates a voxel grid within the bounds of the given mesh.
+///
+/// This function calculates the bounding box of the mesh and fills it with a voxel grid,
+/// determining the center position of each voxel and initializing it as non-solid.
+/// The solidity of each voxel will be updated based on spatial queries in subsequent steps.
+///
+/// # Arguments
+///
+/// * `mesh` - A reference to the mesh to be voxelized.
+/// * `mesh_transform` - The transform of the mesh in the game world.
+///
+/// # Returns
+///
+/// A vector of `Voxel` structs representing the voxel grid.
+pub fn generate_voxel_grid(mesh: &Mesh, mesh_transform: &Transform) -> Vec<Voxel> {
+    let bounds = calculate_mesh_bounds(mesh);
+    let grid_size = calculate_grid_size(&bounds);
+    let mut voxels = Vec::new();
+
+    for x in 0..grid_size.x {
+        for y in 0..grid_size.y {
+            for z in 0..grid_size.z {
+                let position = Vec3::new(
+                    bounds.0.x + x as f32 * VOXEL_SIZE + VOXEL_SIZE / 2.0,
+                    bounds.0.y + y as f32 * VOXEL_SIZE + VOXEL_SIZE / 2.0,
+                    bounds.0.z + z as f32 * VOXEL_SIZE + VOXEL_SIZE / 2.0,
+                ) + mesh_transform.translation;
+
+                voxels.push(Voxel {
+                    position,
+                    is_solid: false,
+                });
+            }
+        }
+    }
+
+    voxels
+}
+
+/// Calculates the size of the voxel grid based on the mesh bounds.
+///
+/// This function computes the dimensions of the bounding box of the mesh and
+/// determines the number of voxels along each axis, ensuring that the grid size
+/// fully encompasses the mesh.
+///
+/// # Arguments
+///
+/// * `bounds` - A tuple containing the minimum and maximum coordinates of the bounding box.
+///
+/// # Returns
+///
+/// A `Vec3I` struct representing the number of voxels along each axis.
+fn calculate_grid_size(bounds: &(Vec3, Vec3)) -> Vec3I {
+    let (min, max) = bounds;
+    let size = *max - *min;
+
+    Vec3I::new(
+        (size.x / VOXEL_SIZE).ceil() as i32,
+        (size.y / VOXEL_SIZE).ceil() as i32,
+        (size.z / VOXEL_SIZE).ceil() as i32,
+    )
+}
+
+/// Calculates the submerged volume of a voxel based on its position and water height.
+///
+/// This function determines the volume of a voxel that is submerged under water,
+/// taking into account the voxel's size and its position relative to the water height.
+///
+/// # Arguments
+///
+/// * `world_position` - The position of the voxel in the game world.
+/// * `water_height` - The height of the water surface.
+/// * `voxel_size` - The size of the voxel.
+///
+/// # Returns
+///
+/// A `f32` value representing the submerged volume of the voxel.
+pub fn calculate_submerged_volume(world_position: Vec3, water_height: f32, voxel_size: f32) -> f32 {
+    let bottom_of_voxel = world_position.y - voxel_size / 2.0;
+    let top_of_voxel = world_position.y + voxel_size / 2.0;
+
+    if top_of_voxel <= water_height {
+        voxel_size.powi(3) // Fully submerged
+    } else if bottom_of_voxel >= water_height {
+        0.0 // Not submerged
+    } else {
+        let submerged_height = water_height - bottom_of_voxel;
+        submerged_height * voxel_size * voxel_size // Partially submerged volume
+    }
+}
+
+
+=== src/buoyancy_physics/utils/mod.rs ===
+pub use voxel_utils::*;
+
+mod voxel_utils;
+
+
+=== src/buoyancy_physics/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+pub use events::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod constants;
+mod events;
+mod systems;
+mod utils;
+
+/// Plugin for managing buoyancy physics within the game.
+///
+/// The `BuoyancyPhysicsPlugin` provides functionality for handling buoyancy calculations
+/// and visualizing voxel grids and mesh bounds. It registers the necessary components,
+/// initializes resources, and sets up systems to manage and apply buoyancy forces to
+/// objects in the game world.
+///
+/// # Components
+/// - `Buoyancy`: Represents the buoyancy properties of an object.
+/// - `BuoyancyMarker`: Marks an object to be processed for buoyancy calculations.
+/// - `Vec3I`: Represents a 3D vector with integer components.
+/// - `Voxel`: Represents a single voxel within the voxel grid.
+/// - `VoxelVisual`: Represents the visual properties of a voxel.
+///
+/// # Systems
+/// - `calculate_and_apply_buoyancy`: Calculates and applies buoyancy forces to marked objects.
+/// - `read_buoyancy_objects`: Reads and processes objects marked for buoyancy calculations.
+/// - `update_voxel_solidity`: Updates the solidity state of voxels based on game state.
+/// - `visualize_mesh_bounds`: Visualizes the bounds of the mesh for debugging and tuning.
+/// - `visualize_voxel_grid`: Visualizes the voxel grid for debugging and tuning.
+///
+/// This plugin is added to the app during the application setup and is configured to
+/// operate during the `AppStates::Running` state.
+
+pub struct BuoyancyPhysicsPlugin;
+
+impl Plugin for BuoyancyPhysicsPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Buoyancy>()
+            .register_type::<BuoyancyMarker>()
+            .register_type::<Voxel>()
+            .register_type::<VoxelVisual>()
+            .add_event::<VisualizeMeshBoundsDebugToggle>()
+            .add_event::<VisualizeVoxelsDebugToggle>()
+            .add_systems(
+                Update,
+                calculate_and_apply_buoyancy.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                read_buoyancy_objects.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                update_voxel_solidity.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                visualize_mesh_bounds.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                visualize_voxel_grid.run_if(in_state(AppStates::Running)),
+            );
+    }
+}
+
+
+=== src/buoyancy_physics/constants/voxel.rs ===
+/// The size of each voxel in the grid. This constant is used throughout the voxel-related
+/// systems to determine the dimensions of the grid and the placement of individual voxels.
+pub const VOXEL_SIZE: f32 = 2.0;
+
+
+=== src/buoyancy_physics/constants/mod.rs ===
+pub use voxel::*;
+
+mod voxel;
+
+
+=== src/atmospheric_lighting/mod.rs ===
+use bevy::pbr::*;
+use bevy::prelude::*;
+use bevy_atmosphere::prelude::*;
+
+/// Plugin for managing atmospheric lighting within the game world.
+///
+/// The `AtmosphericLightingPlugin` integrates the `bevy_atmosphere` crate to provide
+/// realistic atmospheric lighting effects. It sets up the necessary resources and plugins
+/// to simulate atmospheric scattering and directional light shadows, enhancing the visual
+/// quality of the game.
+///
+/// # Resources
+/// - `DirectionalLightShadowMap`: Configures the size of the shadow map for the directional light.
+/// - `AtmosphereModel`: Defines the atmospheric model used for rendering the sky and lighting effects.
+///
+/// # Plugins
+/// - `AtmospherePlugin`: Adds the core atmospheric rendering capabilities from the `bevy_atmosphere` crate.
+///
+/// This plugin is added to the app during the application setup.
+pub struct AtmosphericLightingPlugin;
+
+impl Plugin for AtmosphericLightingPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(DirectionalLightShadowMap { size: 4 * 1024 })
+            .insert_resource(AtmosphereModel::new(Nishita {
+                sun_position: Vec3::new(0.0, 1.0, 1.0),
+                ..default()
+            }))
+            .add_plugins(AtmospherePlugin);
+    }
+}
+
+
+=== src/navmesh/events/nav_mesh_debug_toggle.rs ===
+use bevy::prelude::*;
+
+/// An event sent for toggling the visibility of the navigation mesh debug drawing.
+///
+/// This event is used to enable or disable the debug visualization of the navigation mesh
+/// within the game. It can be triggered by various systems, typically in response to user input.
+#[derive(Event)]
+pub struct NavMeshDebugToggle;
+
+
+=== src/navmesh/events/mod.rs ===
+pub use nav_mesh_debug_toggle::*;
+
+mod nav_mesh_debug_toggle;
+
+
+=== src/navmesh/components/nav_mesh_marker.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// Marker component to designate an entity that should influence the navigation mesh.
+///
+/// This component is used to mark entities that will affect the navigation mesh generation or modification.
+/// Entities with this component are processed to include navigation mesh affector properties.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct NavMeshMarker;
+
+
+=== src/navmesh/components/mod.rs ===
+pub use nav_mesh_marker::*;
+
+mod nav_mesh_marker;
+
+
+=== src/navmesh/systems/mod.rs ===
+pub use toggle_nav_mesh_visibility::*;
+
+mod toggle_nav_mesh_visibility;
+
+
+=== src/navmesh/systems/toggle_nav_mesh_visibility.rs ===
+use bevy::prelude::{EventReader, ResMut};
+use oxidized_navigation::debug_draw::DrawNavMesh;
+
+use crate::navmesh::events::NavMeshDebugToggle;
+
+/// Toggles the visibility of the navigation mesh debug view.
+///
+/// This system listens for `NavMeshDebugToggle` events and toggles the visibility
+/// of the navigation mesh in the game world. It utilizes the `DrawNavMesh` resource
+/// from the `oxidized_navigation` crate to control the debug rendering of the
+/// navigation mesh.
+///
+/// # Parameters
+///
+/// * `navmesh_debug_event_reader`: An EventReader for `NavMeshDebugToggle` events. This
+/// reader listens for events that trigger the toggling of the navigation mesh visibility.
+/// * `show_navmesh`: A mutable reference to the `DrawNavMesh` resource, which controls
+/// whether the navigation mesh is currently being visualized in debug mode.
+///
+/// # Behavior
+///
+/// For each `NavMeshDebugToggle` event read from the event reader, the system toggles
+/// the `DrawNavMesh` resource's boolean value, effectively turning the debug visualization
+/// of the navigation mesh on or off.
+pub fn toggle_nav_mesh_visibility(
+    mut navmesh_debug_event_reader: EventReader<NavMeshDebugToggle>,
+    mut show_navmesh: ResMut<DrawNavMesh>,
+) {
+    // Show navmesh always
+    // show_navmesh.0 = true;
+
+    // Show navmesh on toggle
+    for _event in navmesh_debug_event_reader.read() {
+        show_navmesh.0 = !show_navmesh.0;
+    }
+}
+
+
+=== src/navmesh/mod.rs ===
+use bevy::prelude::*;
+use bevy_xpbd_3d::prelude::Collider;
+use oxidized_navigation::{
+    debug_draw::OxidizedNavigationDebugDrawPlugin, NavMeshSettings, OxidizedNavigationPlugin,
+};
+
+pub use components::*;
+pub use events::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod events;
+mod systems;
+
+/// Plugin for managing the navigation mesh within the game world.
+///
+/// The `NavMeshPlugin` integrates the `oxidized_navigation` crate to provide real-time
+/// navigation mesh generation and debug visualization. It sets up the necessary components,
+/// events, and systems to handle navigation mesh creation and visibility toggling.
+///
+/// # Components
+/// - `NavMeshMarker`: Marks an entity that should influence the navigation mesh generation.
+///
+/// # Events
+/// - `NavMeshDebugToggle`: Event used to toggle the visibility of the navigation mesh debug drawing.
+///
+/// # Systems
+/// - `toggle_nav_mesh_visibility`: Toggles the visibility of the navigation mesh debug view based on events.
+///
+/// # Plugins
+/// - `OxidizedNavigationPlugin`: Adds the core navigation mesh generation capabilities.
+/// - `OxidizedNavigationDebugDrawPlugin`: Adds debug visualization for the navigation mesh.
+///
+/// # Resources
+/// - `DrawNavMesh`: Controls the visibility of the navigation mesh debug rendering.
+pub struct NavMeshPlugin;
+
+impl Plugin for NavMeshPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<NavMeshMarker>()
+            .add_event::<NavMeshDebugToggle>()
+            .add_systems(
+                Update,
+                toggle_nav_mesh_visibility.run_if(in_state(AppStates::Running)),
+            )
+            .add_plugins((
+                OxidizedNavigationPlugin::<Collider>::new(NavMeshSettings {
+                    cell_width: 0.25,
+                    cell_height: 0.125,
+                    tile_width: 100,
+                    world_half_extents: 250.0,
+                    world_bottom_bound: -100.0,
+                    max_traversable_slope_radians: (100.0_f32).to_radians(),
+                    walkable_height: 10,
+                    walkable_radius: 1,
+                    step_height: 8,
+                    min_region_area: 100,
+                    merge_region_area: 500,
+                    max_contour_simplification_error: 1.5,
+                    max_edge_length: 80,
+                    max_tile_generation_tasks: Some(9),
+                }),
+                OxidizedNavigationDebugDrawPlugin,
+            ));
+    }
+}
+
+
+=== src/ship/components/mod.rs ===
+pub use ship::*;
+
+mod ship;
+
+
+=== src/ship/components/ship.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// A marker component indicating that an entity is a ship.
+///
+/// This component is used to distinguish entities that represent ships within the game world.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct Ship;
+
+
+=== src/ship/systems/spawn_ship.rs ===
+use bevy::core::Name;
+use bevy::prelude::{default, Commands, Res, SceneBundle};
+
+use crate::ship::resources::ShipAssets;
+use crate::ship::Ship;
+
+/// Spawns the main ship entity in the game world.
+///
+/// This function utilizes preloaded ship assets to create and configure the ship entity.
+/// The ship entity is assigned various components to integrate it into the game's
+/// entity-component system.
+///
+/// # Parameters
+///
+/// * `commands`: The Commands resource is used to spawn and configure entities.
+/// * `ship_assets`: A reference to the ShipAssets resource, which contains preloaded
+/// assets for the ship entity.
+///
+/// # Components
+///
+/// * `Ship`: A custom component that identifies the entity as the main ship.
+/// * `Name`: Assigns a name to the entity ("Ship").
+/// * `SceneBundle`: Combines the scene asset and other necessary data for the ship entity.
+pub fn spawn_ship(mut commands: Commands, ship_assets: Res<ShipAssets>) {
+    commands.spawn((
+        Ship,
+        Name::new("Ship"),
+        SceneBundle {
+            scene: ship_assets.ship.clone(),
+            ..default()
+        },
+    ));
+}
+
+
+=== src/ship/systems/mod.rs ===
+pub use spawn_ship::*;
+
+mod spawn_ship;
+
+
+=== src/ship/resources/ship_assets.rs ===
+use bevy::asset::Handle;
+use bevy::prelude::{Resource, Scene};
+use bevy_asset_loader::asset_collection::AssetCollection;
+
+/// A resource that contains handles to the ship assets used in the game.
+///
+/// This struct uses the `AssetCollection` trait from the `bevy_asset_loader` crate to automatically
+/// load the assets during a configurable loading state. The assets are then available as resources
+/// that can be used throughout the game.
+///
+/// # Fields
+///
+/// * `ship` - A handle to the ship scene asset.
+#[derive(AssetCollection, Resource)]
+pub struct ShipAssets {
+    #[asset(path = "models/export/ship/carrack_2.glb#Scene0")]
+    pub ship: Handle<Scene>,
+}
+    
+
+=== src/ship/resources/mod.rs ===
+pub use ship_assets::*;
+
+mod ship_assets;
+
+
+=== src/ship/mod.rs ===
+use bevy::prelude::*;
+use bevy_asset_loader::prelude::*;
+
+pub use components::*;
+use resources::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod resources;
+mod systems;
+
+/// Plugin for managing the ship entity within the game.
+///
+/// The `ShipPlugin` is responsible for loading and setting up the main ship entity in the game world.
+/// It registers the necessary components, initializes resources, and sets up systems to handle ship spawning and asset loading.
+///
+/// # Components
+/// - `Ship`: A marker component indicating that an entity is a ship.
+///
+/// # Resources
+/// - `ShipAssets`: Contains handles to the ship assets used in the game.
+///
+/// # Systems
+/// - `spawn_ship`: Spawns the ship entity with the necessary components and assets.
+pub struct ShipPlugin;
+
+impl Plugin for ShipPlugin {
+    fn build(&self, app: &mut App) {
+        app.configure_loading_state(
+            LoadingStateConfig::new(AppStates::AssetLoading).load_collection::<ShipAssets>(),
+        )
+        .register_type::<Ship>()
+        .add_systems(OnEnter(AppStates::Running), spawn_ship);
+    }
+}
+
+
+=== src/ai_eating_behavior/components/hunger.rs ===
+use bevy::prelude::*;
+
+/// Represents the hunger level and behavior of an entity.
+///
+/// The `Hunger` component is used to manage the hunger level of an entity in the game.
+/// It indicates whether the entity is currently eating, how quickly the hunger level
+/// increases per second, and the current hunger level of the entity.
+///
+/// # Fields
+/// - `is_eating`: A boolean indicating whether the entity is currently eating.
+/// - `per_second`: The rate at which the hunger level increases per second.
+/// - `level`: The current hunger level of the entity.
+#[derive(Component, Debug, Reflect, Default)]
+#[reflect(Component)]
+pub struct Hunger {
+    /// A boolean indicating whether the entity is currently eating.
+    pub is_eating: bool,
+    /// The rate at which the hunger level increases per second.
+    pub per_second: f32,
+    /// The current hunger level of the entity.
+    pub level: f32,
+}
+
+
+=== src/ai_eating_behavior/components/hunger_scorer.rs ===
+use bevy::prelude::*;
+use big_brain::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// This component serves as a scorer for evaluating the entity's need to eat based on its hunger
+/// level.
+///
+/// The `HungerScorer` component is used to calculate a score that indicates the urgency for an
+/// entity to perform the eating action. A higher score means a higher need to eat.
+#[derive(
+    Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default, ScorerBuilder,
+)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct HungerScorer;
+
+
+=== src/ai_eating_behavior/components/eat.rs ===
+use bevy::prelude::*;
+use big_brain::prelude::*;
+
+/// Represents the eating behavior of an entity.
+///
+/// The `Eat` component is used to manage the eating action of an entity in the game.
+/// It defines when the entity will stop eating based on its hunger level and how quickly
+/// the hunger level decreases while eating.
+///
+/// # Fields
+/// - `until`: The hunger level at which the entity will stop eating. When the entity's
+///   hunger level drops to or below this value, it will stop eating.
+/// - `per_second`: The rate at which the hunger level decreases while the entity is eating.
+///   This value represents the amount of hunger reduced per second.
+#[derive(Clone, Component, Debug, ActionBuilder, Reflect, Default)]
+#[reflect(Component)]
+pub struct Eat {
+    /// The hunger level at which the entity will stop eating.
+    pub until: f32,
+    /// The rate at which the hunger level decreases while eating.
+    pub per_second: f32,
+}
+
+
+=== src/ai_eating_behavior/components/mod.rs ===
+pub use {eat::*, hunger::*, hunger_scorer::*};
+
+mod eat;
+mod hunger;
+mod hunger_scorer;
+
+
+=== src/ai_eating_behavior/systems/calculate_hunger_score.rs ===
+use bevy::log::trace;
+use bevy::prelude::{Local, Query, With};
+use big_brain::prelude::{Actor, Score, ScorerSpan};
+
+use crate::ai_eating_behavior::components::HungerScorer;
+use crate::ai_eating_behavior::Hunger;
+
+/// This system calculates a score based on an entity's hunger level. The higher the hunger,
+/// the higher the score, indicating a greater need for the entity to eat.
+///
+/// The system iterates over entities with the `HungerScorer` component, fetches their `Hunger`
+/// component, and updates their `Score` component. If the entity is eating, the score remains
+/// unchanged. Otherwise, the score is updated based on the hunger level.
+///
+/// # Parameters
+/// - `last_score`: A local cache to store the last calculated score for eating entities.
+/// - `hungers`: A query to fetch the `Hunger` component of entities.
+/// - `query`: A query to fetch the `Actor`, `Score`, and `ScorerSpan` components of entities
+///   with the `HungerScorer` component.
+pub fn calculate_hunger_score(
+    mut last_score: Local<Option<f32>>,
+    hungers: Query<&Hunger>,
+    mut query: Query<(&Actor, &mut Score, &ScorerSpan), With<HungerScorer>>,
+) {
+    for (Actor(actor), mut score, span) in &mut query {
+        if let Ok(hunger) = hungers.get(*actor) {
+            let new_score = hunger.level / 100.0;
+
+            if hunger.is_eating {
+                let _score = last_score.get_or_insert(new_score);
+                score.set(*_score);
+            } else {
+                last_score.take();
+                score.set(new_score);
+                if hunger.level >= 100.0 {
+                    span.span().in_scope(|| {
+                        trace!("Hunger above threshold! Score: {}", hunger.level / 100.0)
+                    });
+                }
+            }
+        }
+    }
+}
+
+
+=== src/ai_eating_behavior/systems/increase_hunger.rs ===
+use bevy::log::trace;
+use bevy::prelude::{Query, Res, Time};
+
+use crate::ai_eating_behavior::Hunger;
+
+/// Increases an entity's hunger over time.
+///
+/// This system increments the hunger level of each entity based on the `per_second`
+/// rate specified in their `Hunger` component. The hunger level is capped at 100.0.
+///
+/// # Parameters
+/// - `time`: Resource providing the delta time for the game.
+/// - `hungers`: Query to fetch and modify the `Hunger` component of entities.
+pub fn increase_hunger(time: Res<Time>, mut hungers: Query<&mut Hunger>) {
+    for mut hunger in &mut hungers {
+        hunger.level += hunger.per_second * time.delta_seconds();
+        if hunger.level >= 100.0 {
+            hunger.level = 100.0;
+        }
+        trace!("Hunger: {}", hunger.level);
+    }
+}
+
+
+=== src/ai_eating_behavior/systems/eat_action.rs ===
+use bevy::log::{debug, trace};
+use bevy::prelude::{Query, Res, Time};
+use big_brain::actions::ActionState;
+use big_brain::prelude::{ActionSpan, Actor};
+
+use crate::ai_eating_behavior::components::{Eat, Hunger};
+
+/// This system manages the eating action of entities. It reduces the hunger
+/// level of the entity as it eats and updates the entity's state based on
+/// the `Eat` component's parameters.
+///
+/// # Parameters
+/// - `time`: Resource providing the delta time for the game.
+/// - `hungers`: Query to fetch and modify the `Hunger` component of entities.
+/// - `query`: Query to fetch and modify the `ActionState`, `Eat`, and `ActionSpan`
+///   components of entities, as well as the `Actor` component to identify the entity.
+pub fn eat_action(
+    time: Res<Time>,
+    mut hungers: Query<&mut Hunger>,
+    mut query: Query<(&Actor, &mut ActionState, &Eat, &ActionSpan)>,
+) {
+    for (Actor(actor), mut state, eat, span) in &mut query {
+        let _guard = span.span().enter();
+
+        if let Ok(mut hunger) = hungers.get_mut(*actor) {
+            match *state {
+                ActionState::Requested => {
+                    debug!("Time to eat!");
+                    hunger.is_eating = true;
+                    *state = ActionState::Executing;
+                }
+                ActionState::Executing => {
+                    trace!("Eating...");
+                    hunger.level -= hunger.per_second * time.delta_seconds();
+
+                    if hunger.level <= eat.until {
+                        debug!("No longer hungry!");
+                        hunger.is_eating = false;
+                        *state = ActionState::Success;
+                    }
+                }
+                // All actions should make sure to handle cancellations
+                ActionState::Cancelled => {
+                    hunger.is_eating = false;
+                    *state = ActionState::Failure;
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+
+=== src/ai_eating_behavior/systems/mod.rs ===
+pub use {calculate_hunger_score::*, eat_action::*, increase_hunger::*};
+
+mod calculate_hunger_score;
+mod eat_action;
+mod increase_hunger;
+
+
+=== src/ai_eating_behavior/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod systems;
+
+/// Plugin for managing AI eating behavior within the game.
+///
+/// The AiEatingBehaviorPlugin provides functionality for handling the hunger and eating
+/// behaviors of entities. It registers the necessary components, initializes resources,
+/// and sets up systems to manage hunger scoring, eating actions, and hunger increments.
+///
+/// # Components
+/// - Eat: Manages the eating action of an entity, defining when it stops eating and how quickly
+///   hunger decreases.
+/// - Hunger: Tracks the hunger level of an entity, including whether it is eating and how quickly
+///   hunger increases.
+/// - HungerScorer: Calculates a score indicating the urgency for an entity to eat.
+///
+/// # Systems
+/// - calculate_hunger_score: Calculates a score based on an entity's hunger level.
+/// - eat_action: Manages the eating action of entities, reducing their hunger level.
+/// - increase_hunger: Increases an entity's hunger level over time.
+pub struct AiEatingBehaviorPlugin;
+
+impl Plugin for AiEatingBehaviorPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Eat>()
+            .register_type::<Hunger>()
+            .register_type::<HungerScorer>()
+            .add_systems(
+                Update,
+                calculate_hunger_score.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(Update, eat_action.run_if(in_state(AppStates::Running)))
+            .add_systems(Update, increase_hunger.run_if(in_state(AppStates::Running)));
+    }
+}
+
+
+=== src/lib.rs ===
+pub use bevy::app::{PluginGroup, PluginGroupBuilder};
+use bevy::app::PreUpdate;
+use bevy_tnua::prelude::TnuaControllerPlugin;
+use bevy_tnua_xpbd3d::TnuaXpbd3dPlugin;
+use big_brain::BigBrainPlugin;
+
+use ai_eating_behavior::AiEatingBehaviorPlugin;
+use ai_navigation::AiNavigationPlugin;
+use ai_sleeping_behavior::AiSleepingBehaviorPlugin;
+use area_management::AreaManagementPlugin;
+use asset_management::AssetManagementPlugin;
+use atmospheric_lighting::AtmosphericLightingPlugin;
+use camera_control::CameraControlPlugin;
+use collider_management::ColliderManagementPlugin;
+use crew_management::CrewManagementPlugin;
+use food::FoodPlugin;
+use navmesh::NavMeshPlugin;
+use player::PlayerPlugin;
+use player_input::PlayerInputPlugin;
+use ship::ShipPlugin;
+use ship_items::ShipItemsPlugin;
+use sun::SunCyclePlugin;
+
+// use stairs_test::StairsTestPlugin;
+use crate::buoyancy_physics::BuoyancyPhysicsPlugin;
+use crate::ocean::OceanPlugin;
+
+mod ai_eating_behavior;
+mod ai_navigation;
+mod ai_sleeping_behavior;
+mod area_management;
+mod asset_management;
+mod atmospheric_lighting;
+mod buoyancy_physics;
+mod camera_control;
+mod collider_management;
+mod crew_management;
+mod food;
+mod navmesh;
+mod ocean;
+mod player;
+mod player_input;
+mod ship;
+mod ship_items;
+// mod stairs_test;
+mod sun;
+mod utils;
+
+/// PluginGroup for the Empire of Wind game.
+///
+/// The `EmpireOfWindPlugins` group encompasses all the individual plugins
+/// used within the game, ensuring they are initialized and managed together.
+// pub struct EmpireOfWindPlugins;
+//
+pub struct EmpireOfWindPlugins;
+
+impl PluginGroup for EmpireOfWindPlugins {
+    fn build(self) -> PluginGroupBuilder {
+        PluginGroupBuilder::start::<Self>()
+            .add(AiEatingBehaviorPlugin)
+            .add(AiNavigationPlugin)
+            .add(AiSleepingBehaviorPlugin)
+            .add(AreaManagementPlugin)
+            .add(AssetManagementPlugin)
+            .add(AtmosphericLightingPlugin)
+            .add(BigBrainPlugin::new(PreUpdate))
+            .add(BuoyancyPhysicsPlugin)
+            .add(CameraControlPlugin)
+            .add(ColliderManagementPlugin)
+            .add(CrewManagementPlugin)
+            .add(FoodPlugin)
+            .add(NavMeshPlugin)
+            .add(OceanPlugin)
+            .add(PlayerPlugin)
+            .add(PlayerInputPlugin)
+            .add(ShipPlugin)
+            .add(ShipItemsPlugin)
+            .add(SunCyclePlugin)
+            .add(TnuaControllerPlugin::default())
+            .add(TnuaXpbd3dPlugin::default())
+        // .add(StairsTestPlugin)
+    }
+}
+
+
+=== src/ship_items/components/sleep_area.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// Marker component for a place where a character can sleep.
+///
+/// The `SleepArea` component is used to designate areas or objects within the game world
+/// where characters are allowed to sleep. It is typically added to entities like beds or
+/// sleeping quarters.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct SleepArea;
+
+
+=== src/ship_items/components/mod.rs ===
+pub use sleep_area::*;
+
+mod sleep_area;
+
+
+=== src/ship_items/systems/spawn_furniture.rs ===
+use bevy::asset::Assets;
+use bevy::core::Name;
+use bevy::math::{Quat, Vec3};
+use bevy::pbr::{PbrBundle, StandardMaterial};
+/// This module provides a system for spawning furniture items on the ship.
+/// Currently, it includes the creation of a bed object.
+///
+/// Note: This system is expected to be deprecated as the game evolves and more
+/// sophisticated systems for spawning and managing furniture are developed.
+use bevy::prelude::{default, Color, Commands, Cuboid, Mesh, ResMut, Transform};
+use bevy_xpbd_3d::components::{Friction, RigidBody};
+use bevy_xpbd_3d::prelude::Collider;
+
+use crate::ship_items::SleepArea;
+
+/// Spawns a bed entity in the game world.
+///
+/// This function creates a simple bed entity using Bevy's PBR (Physically Based Rendering)
+/// components and some physics properties. The bed is positioned at a specific location on the ship
+/// and is marked as a `SleepArea` where characters can rest.
+///
+/// # Parameters
+///
+/// * `commands`: The Commands resource is used to spawn and configure entities.
+/// * `meshes`: A mutable reference to the Assets resource containing Mesh objects.
+/// * `materials`: A mutable reference to the Assets resource containing StandardMaterial objects.
+///
+/// # Components
+///
+/// * `Name`: Assigns a name to the entity ("Bed").
+/// * `PbrBundle`: Combines mesh, material, and transform data for the entity.
+/// * `SleepArea`: A custom component marking the entity as a sleeping area.
+/// * `RigidBody::Dynamic`: Marks the entity as a dynamic rigid body for physics simulation.
+/// * `Friction`: Sets the friction coefficient for the entity's collider.
+/// * `Collider::cuboid`: Defines the entity's collision shape as a cuboid.
+pub fn spawn_furniture(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Create a bed
+    commands.spawn((
+        Name::new("Bed"),
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(Cuboid::new(4.0, 1.0, 2.0))),
+            material: materials.add(StandardMaterial {
+                base_color: Color::BLUE,
+                ..default()
+            }),
+            transform: Transform {
+                translation: Vec3::new(-14.155, 8.4, -0.147),
+                rotation: Quat::from_rotation_z(-9.8367f32.to_radians()),
+                scale: Vec3::ONE,
+            },
+            ..default()
+        },
+        SleepArea,
+        RigidBody::Dynamic,
+        Friction::new(1.0),
+        Collider::cuboid(5.0, 1.0, 5.0),
+    ));
+}
+
+
+=== src/ship_items/systems/mod.rs ===
+pub use spawn_furniture::*;
+
+mod spawn_furniture;
+
+
+=== src/ship_items/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod systems;
+
+/// Plugin for managing ship items within the game.
+///
+/// The `ShipItemsPlugin` is responsible for setting up various interactive items within the ship,
+/// such as furniture. It registers the necessary components and sets up systems to handle the
+/// spawning of these items.
+///
+/// # Components
+/// - `SleepArea`: A marker component for designating areas where characters can sleep.
+///
+/// # Systems
+/// - `spawn_furniture`: Spawns furniture items such as beds in the game world.
+pub struct ShipItemsPlugin;
+
+impl Plugin for ShipItemsPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<SleepArea>();
+            // .add_systems(OnEnter(AppStates::Running), spawn_furniture);
+    }
+}
+
+
+=== src/ocean/consts/ocean_settings.rs ===
+/// Constants for configuring the ocean settings.
+
+/// The height of the water level in the game world.
+///
+/// This constant defines the vertical position of the water surface.
+/// It is used to set the base height for the water simulation.
+pub const WATER_HEIGHT: f32 = 2.0;
+
+/// The amplitude of the ocean waves.
+///
+/// This constant defines the maximum height variation of the ocean waves
+/// from the base water level. It is used to simulate the wave motion on the water surface.
+pub const WAVE_AMPLITUDE: f32 = 3.0;
+
+
+=== src/ocean/consts/mod.rs ===
+pub use ocean_settings::*;
+
+mod ocean_settings;
+
+
+=== src/ocean/mod.rs ===
+use bevy::prelude::*;
+use bevy_water::*;
+
+use crate::ocean::consts::{WATER_HEIGHT, WAVE_AMPLITUDE};
+
+mod consts;
+
+/// Plugin for managing the ocean and water effects within the game world.
+///
+/// The `OceanPlugin` integrates the `bevy_water` crate to provide realistic water
+/// and ocean wave effects. It sets up the necessary resources and plugins to simulate
+/// the ocean's appearance and behavior.
+///
+/// # Resources
+/// - `WaterSettings`: Configures the water properties such as height and wave amplitude.
+///
+/// # Plugins
+/// - `WaterPlugin`: Adds the core water simulation capabilities from the `bevy_water` crate.
+///
+/// This plugin is added to the app during the application setup and is configured to
+/// operate during the `AppStates::Running` state.
+pub struct OceanPlugin;
+
+impl Plugin for OceanPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(WaterSettings {
+            height: WATER_HEIGHT,
+            amplitude: WAVE_AMPLITUDE,
+            ..default()
+        })
+        .add_plugins(WaterPlugin);
+    }
+}
+
+
+=== src/area_management/components/occluding.rs ===
+use bevy::prelude::*;
+
+// TODO: Add Docs
+#[derive(Component, Reflect, Default, Debug)]
+#[reflect(Component)]
+pub struct Occluding {
+    pub areas: Vec<String>,
+}
+
+=== src/area_management/components/area_marker.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+// TODO: Review docs
+/// A marker component used to designate an area that a player can enter or detect entities within.
+///
+/// The AreaMarker component is used to identify entities that represent
+/// areas in the game world where specific actions should be taken when a player
+/// enters them. It also allows for detecting entities within the area. It works in
+/// conjunction with the manage_active_areas system to handle area entry and exit events.
+///
+/// # Usages
+/// - Adding the component to an entity marks it as an area.
+/// - Used in systems to detect when a player or other entities enter the marked area.
+///
+/// # Fields
+/// - name: A String representing the name of the area.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct AreaMarker {
+    pub name: String,
+}
+
+=== src/area_management/components/mod.rs ===
+pub use {area_exit_marker::*, area_marker::*, occluding::*};
+
+mod area_marker;
+mod area_exit_marker;
+mod occluding;
+
+
+=== src/area_management/components/area_exit_marker.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+// TODO: Update Docs - AreaEnterMarker changed
+/// A marker component used to designate an area that a player can exit.
+///
+/// The `AreaExitMarker` component is used to identify entities that represent
+/// areas in the game world where specific actions should be taken when a player
+/// exits them. It works in conjunction with the `AreaEnterMarker` component and
+/// the `manage_active_areas` system to handle area entry and exit events.
+///
+/// # Usages
+/// - Adding the component to an entity marks it as an area exit.
+/// - Used in systems to detect when a player exits the marked area.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct AreaExitMarker;
+
+
+=== src/area_management/systems/manage_active_areas.rs ===
+use bevy::prelude::*;
+use bevy::render::view::RenderLayers;
+use bevy_xpbd_3d::prelude::{Collision, Sensor};
+
+use crate::area_management::components::*;
+use crate::area_management::resources::ActiveAreas;
+use crate::area_management::utils::{update_camera_layers, update_zoom_target};
+use crate::camera_control::{CameraZoom, MainCamera};
+use crate::player::Player;
+
+/// Manages active areas based on player interactions with sensors.
+///
+/// This system updates the set of active areas when the player enters or exits an area,
+/// adjusts the camera zoom level, and updates the render layers accordingly. It listens for
+/// collision events involving the player and area sensors, and modifies the active areas
+/// resource, camera zoom, and render layers as necessary.
+///
+/// # Functionality
+/// - Detects collisions between the player and area sensors.
+/// - Updates the `ActiveAreas` resource when the player enters a new area.
+/// - Adjusts the camera zoom when entering a new area.
+/// - Updates the camera's render layers based on the entered area.
+///
+/// # Parameters
+/// - `collision_event_reader`: Event reader to capture collision events.
+/// - `sensor_query`: Query to fetch sensor components, area markers, and render layers.
+/// - `player_query`: Query to identify player entities.
+/// - `active_areas`: Resource to manage the set of active areas.
+/// - `param_set`: ParamSet to handle multiple conflicting queries safely.
+/// - `occluding_query`: Query to check for entities with `Occluding` components.
+///
+/// # Type Parameters
+/// - `Player`: Component type that identifies the player entity.
+/// - `Sensor`: Component type for area sensors.
+/// - `AreaMarker`: Component type that marks and names an area.
+/// - `Occluding`: Component type for entities that can occlude areas.
+#[allow(clippy::type_complexity)]
+pub fn manage_active_areas(
+    mut collision_event_reader: EventReader<Collision>,
+    sensor_query: Query<(Entity, &Sensor, Option<&AreaMarker>, Option<&RenderLayers>)>,
+    player_query: Query<&Player>,
+    mut active_areas: ResMut<ActiveAreas>,
+    mut param_set: ParamSet<(
+        Query<&mut RenderLayers, With<MainCamera>>,
+        Query<&mut CameraZoom, With<MainCamera>>,
+    )>,
+    occluding_query: Query<&Occluding>,
+) {
+    for Collision(contacts) in collision_event_reader.read() {
+        let entity1 = contacts.entity1;
+        let entity2 = contacts.entity2;
+
+        let player_involved =
+            player_query.get(entity1).is_ok() || player_query.get(entity2).is_ok();
+        if player_involved {
+            let (_player_entity, other_entity) = if player_query.get(entity1).is_ok() {
+                (entity1, entity2)
+            } else {
+                (entity2, entity1)
+            };
+
+            if let Ok((_, _, Some(area_marker), render_layers)) = sensor_query.get(other_entity) {
+                active_areas.0.insert(area_marker.name.clone());
+                update_zoom_target(&mut param_set.p1(), 10.0); // Adjust zoom for entry
+
+                // Use the entity's RenderLayers if available, otherwise use a default
+                let layers = render_layers.cloned().unwrap_or_else(|| RenderLayers::layer(0));
+
+                update_camera_layers(
+                    &mut param_set.p0(),
+                    &active_areas,
+                    &occluding_query,
+                    layers,
+                );
+            }
+        }
+    }
+}
+
+=== src/area_management/systems/propagate_render_layers.rs ===
+use bevy::prelude::*;
+use bevy::render::view::RenderLayers;
+
+/// System to propagate `RenderLayers` from parent entities to their child entities.
+///
+/// This system ensures that child entities inherit the render layers of their parent entities,
+/// which is essential for correctly rendering hierarchical scenes where child entities should
+/// follow the rendering settings of their parents.
+///
+/// # Parameters
+/// - `commands`: Commands for modifying entities and their components.
+/// - `parent_query`: Query to retrieve parent entities with their `RenderLayers` component and children.
+/// - `child_query`: Query to retrieve child entities that have a `Handle<Mesh>` and `Handle<StandardMaterial>`,
+///                  which are the components indicating the entity is a renderable child.
+///
+/// # Details
+/// For each parent entity with `RenderLayers`, the system iterates over its children and
+/// checks if the child entity has a `Handle<Mesh>` and `Handle<StandardMaterial>`. If so,
+/// it propagates the `RenderLayers` from the parent to the child entity.
+pub fn propagate_render_layers(
+    mut commands: Commands,
+    parent_query: Query<(&RenderLayers, &Children)>,
+    child_query: Query<(Entity, &Handle<Mesh>, &Handle<StandardMaterial>)>,
+) {
+    for (render_layers, children) in parent_query.iter() {
+        for &child in children.iter() {
+            if let Ok((child_entity, _, _)) = child_query.get(child) {
+                commands.entity(child_entity).insert(*render_layers);
+            }
+        }
+    }
+}
+
+
+=== src/area_management/systems/mod.rs ===
+pub use {manage_active_areas::*, propagate_render_layers::*, read_area_markers::*};
+
+mod manage_active_areas;
+mod propagate_render_layers;
+mod read_area_markers;
+
+
+=== src/area_management/systems/read_area_markers.rs ===
+use bevy::asset::{Assets, Handle};
+use bevy::hierarchy::{Children, Parent};
+use bevy::log::error;
+use bevy::prelude::*;
+use bevy_xpbd_3d::prelude::{Collider, Sensor};
+
+use crate::area_management::components::*;
+use crate::ship::Ship;
+use crate::utils::find_mesh;
+
+
+// TODO: DOCS
+/// System to process and configure area markers for entry and exit points.
+///
+/// This system handles the `AreaEnterMarker` and `AreaExitMarker` components,
+/// configuring the respective entities to act as sensors for entering and exiting
+/// specific areas. It attaches colliders and re-parents the markers to the top-level
+/// ship entity, ensuring that they are correctly integrated into the ship's hierarchy.
+///
+/// # Parameters
+/// - `enter_marker_query`: Query to retrieve entities with `AreaEnterMarker` components and their transforms.
+/// - `exit_marker_query`: Query to retrieve entities with `AreaExitMarker` components and their transforms.
+/// - `commands`: Commands for modifying entities and their components.
+/// - `children`: Query to retrieve the children of entities.
+/// - `meshes`: Resource containing the assets of meshes.
+/// - `mesh_handles`: Query to retrieve mesh handles from entities.
+/// - `parent_query`: Query to navigate up the hierarchy to find parent entities.
+/// - `ship_query`: Query to identify the top-level ship entity.
+///
+/// # Details
+/// For each `AreaEnterMarker` and `AreaExitMarker`, the system:
+/// - Finds the associated mesh and creates a collider from it.
+/// - Navigates up the entity hierarchy to find the top-level ship entity.
+/// - Re-parents the marker entity to the ship entity.
+/// - Configures the marker entity with the collider, sensor, transform, and other necessary components.
+#[allow(clippy::too_many_arguments)]
+pub fn read_area_markers(
+    area_marker_query: Query<(Entity, &Transform), Added<AreaMarker>>, // Query for AreaEnterMarker
+    exit_marker_query: Query<(Entity, &Transform), Added<AreaExitMarker>>, // Query for AreaExitMarker
+    mut commands: Commands,
+    children: Query<&Children>,
+    meshes: Res<Assets<Mesh>>,
+    mesh_handles: Query<&Handle<Mesh>>,
+    parent_query: Query<&Parent>, // Query to navigate up the hierarchy
+    ship_query: Query<Entity, With<Ship>>, // Query for the Ship entity
+) {
+    // Process AreaEnterMarkers
+    for (entity, transform) in area_marker_query.iter() {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    // Find the top-level Ship entity
+                    let mut current_parent = entity;
+                    let mut ship_entity = None;
+                    while let Ok(parent) = parent_query.get(current_parent) {
+                        if ship_query.get(parent.get()).is_ok() {
+                            ship_entity = Some(parent.get());
+                            break;
+                        }
+                        current_parent = parent.get();
+                    }
+
+                    if let Some(ship) = ship_entity {
+                        // Re-parent the sensor to the Ship entity
+                        commands.entity(ship).add_child(entity);
+
+                        // Insert components for AreaEnterMarker
+                        let entry_position = transform.translation; // Use the current position
+                        commands.entity(entity).insert((
+                            collider,
+                            Sensor,
+                            Transform {
+                                translation: entry_position,
+                                ..Default::default()
+                            },
+                            GlobalTransform::default(),
+                            Visibility::Hidden,
+                        ));
+                    } else {
+                        error!("No Ship entity found for the area marker");
+                    }
+                } else {
+                    error!("Failed to create area collider from mesh");
+                }
+            } else {
+                error!("Failed to get mesh from mesh handle");
+            }
+        } else {
+            error!("Failed to find mesh for area collider");
+        }
+    }
+
+    // Process AreaExitMarkers
+    for (entity, transform) in exit_marker_query.iter() {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    // Find the top-level Ship entity
+                    let mut current_parent = entity;
+                    let mut ship_entity = None;
+                    while let Ok(parent) = parent_query.get(current_parent) {
+                        if ship_query.get(parent.get()).is_ok() {
+                            ship_entity = Some(parent.get());
+                            break;
+                        }
+                        current_parent = parent.get();
+                    }
+
+                    if let Some(ship) = ship_entity {
+                        // Re-parent the sensor to the Ship entity
+                        commands.entity(ship).add_child(entity);
+
+                        // Insert components for AreaExitMarker
+                        let exit_position = transform.translation; // Use the current position
+                        commands.entity(entity).insert((
+                            collider,
+                            Sensor,
+                            Transform {
+                                translation: exit_position,
+                                ..Default::default()
+                            },
+                            GlobalTransform::default(),
+                            Visibility::Hidden,
+                        ));
+                    } else {
+                        error!("No Ship entity found for the area marker");
+                    }
+                } else {
+                    error!("Failed to create area collider from mesh");
+                }
+            } else {
+                error!("Failed to get mesh from mesh handle");
+            }
+        } else {
+            error!("Failed to find mesh for area collider");
+        }
+    }
+}
+
+
+=== src/area_management/resources/mod.rs ===
+pub use active_areas::*;
+
+mod active_areas;
+
+
+=== src/area_management/resources/active_areas.rs ===
+use std::collections::HashSet;
+
+use bevy::prelude::Resource;
+
+/// A resource that tracks the currently active areas in the game.
+///
+/// The `ActiveAreas` resource contains a set of strings, each representing the name of an active area.
+/// This resource is used by various systems to determine which areas are currently active, influencing
+/// gameplay elements such as camera zoom and rendering layers.
+#[derive(Default, Resource)]
+pub struct ActiveAreas(pub HashSet<String>);
+
+
+=== src/area_management/utils/area_visibility_utils.rs ===
+use bevy::prelude::{Query, With};
+use bevy::render::view::RenderLayers;
+
+use crate::area_management::{ActiveAreas, Occluding};
+use crate::camera_control::{CameraZoom, MainCamera};
+
+/// Updates the render layers of the main camera based on active areas and occlusion.
+///
+/// This function modifies the render layers of the main camera to show or hide certain
+/// areas based on which areas are active and which are being occluded. It uses the
+/// RenderLayers implementation from Bevy 0.14, which supports an unlimited number of layers.
+///
+/// # Parameters
+/// - `camera_query`: Query to fetch and modify the render layers of the main camera.
+/// - `active_areas`: Resource containing the set of active areas.
+/// - `occluding_query`: Query to check for entities with `Occluding` components.
+/// - `area_render_layers`: The render layers associated with the current area.
+pub fn update_camera_layers(
+    camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
+    active_areas: &ActiveAreas,
+    occluding_query: &Query<&Occluding>,
+    area_render_layers: RenderLayers,
+) {
+    for mut render_layers in camera_query.iter_mut() {
+        // Start with the current render layers
+        let mut new_layers = render_layers.clone();
+
+        for occluding in occluding_query.iter() {
+            if occluding.areas.iter().any(|area| active_areas.0.contains(area)) {
+                // Remove the layers that are in area_render_layers
+                new_layers = new_layers.intersection(&area_render_layers);
+            }
+        }
+
+        *render_layers = new_layers;
+    }
+}
+
+
+/// Updates the zoom target of the main camera.
+///
+/// This function iterates over all cameras with the `MainCamera` component and sets their
+/// zoom target scale to the specified value. It is typically used to adjust the camera
+/// zoom level dynamically based on game events.
+///
+/// # Parameters
+/// - `camera_zoom_query`: Query to fetch and modify the zoom target of the main camera.
+/// - `target_scale`: The new target zoom scale to set.
+pub fn update_zoom_target(
+    camera_zoom_query: &mut Query<&mut CameraZoom, With<MainCamera>>,
+    target_scale: f32,
+) {
+    for mut zoom in camera_zoom_query.iter_mut() {
+        zoom.target_scale = target_scale;
+    }
+}
+
+
+=== src/area_management/utils/mod.rs ===
+pub use area_visibility_utils::*;
+
+mod area_visibility_utils;
+
+
+=== src/area_management/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+pub use resources::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod resources;
+mod systems;
+mod utils;
+
+// TODO: Update Docs
+/// Plugin for managing areas within the game world.
+///
+/// The `AreaManagementPlugin` provides functionality for handling areas that
+/// players can enter and exit. It is largely concerned with modifying the visibility of certain areas
+/// based on the players location. For example, if the player walks into a room, this plugin provides
+/// the ability to hide and show walls as needed. It registers the necessary components, initializes
+/// resources, and sets up systems to manage the active areas and process area markers.
+///
+/// # Components
+/// - `AreaEnterMarker`: Marks an area that a player can enter.
+/// - `AreaExitMarker`: Marks an area that a player can exit.
+/// - `AreaName`: Assigns a name to a specific area.
+///
+/// # Resources
+/// - `ActiveAreas`: Tracks the currently active areas in the game.
+///
+/// # Systems
+/// - `manage_active_areas`: Manages active areas based on player interactions.
+/// - `read_area_markers`: Processes and configures area markers for entry and exit points.
+pub struct AreaManagementPlugin;
+
+impl Plugin for AreaManagementPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<AreaMarker>()
+            .register_type::<AreaExitMarker>()
+            .register_type::<Occluding>()
+            // TODO: Move this into a less specific plugin
+            .register_type::<Vec<String>>()
+            // TODO: Move this into a less specific plugin
+            .register_type::<String>()
+            // TODO: Move this into a less specific plugin
+            .register_type::<Vec<u8>>()
+            .insert_resource(ActiveAreas::default())
+            .add_systems(
+                Update,
+                manage_active_areas.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                read_area_markers.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                propagate_render_layers.run_if(in_state(AppStates::Running)),
+            );
+    }
+}
+
+
+=== src/utils/water_utils.rs ===
+use bevy::math::Vec3;
+use bevy_water::WaterParam;
+
+/// Retrieves the height of the water surface at a given position.
+///
+/// This function uses the `WaterParam` parameter from the `bevy_water` crate to
+/// calculate the height of the water surface at the specified position, accounting
+/// for waves and other water dynamics.
+///
+/// # Arguments
+///
+/// * `pos` - A `Vec3` representing the position in the game world where the water height is queried.
+/// * `water` - A reference to the `WaterParam` struct, which contains global water settings and time resources.
+///
+/// # Returns
+///
+/// A `f32` value representing the height of the water surface at the specified position.
+pub fn get_water_height_at_position(pos: Vec3, water: &WaterParam) -> f32 {
+    water.wave_point(pos).y
+}
+
+
+=== src/utils/mod.rs ===
+pub use mesh_utils::*;
+pub use vec3i::*;
+pub use water_utils::*;
+
+mod mesh_utils;
+mod vec3i;
+mod water_utils;
+
+
+=== src/utils/vec3i.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// A simple 3D vector with integer components.
+///
+/// The `Vec3I` struct represents a 3D vector using integer values for its components.
+/// It provides basic functionality for creating and using 3D vectors in integer space.
+///
+/// # Fields
+/// - `x`: The x-coordinate of the vector.
+/// - `y`: The y-coordinate of the vector.
+/// - `z`: The z-coordinate of the vector.
+#[derive(Debug, Clone, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Serialize, Deserialize)]
+pub struct Vec3I {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl Vec3I {
+    /// Creates a new `Vec3I` with the specified components.
+    ///
+    /// # Parameters
+    /// - `x`: The x-coordinate of the vector.
+    /// - `y`: The y-coordinate of the vector.
+    /// - `z`: The z-coordinate of the vector.
+    ///
+    /// # Returns
+    /// A new `Vec3I` instance with the specified components.
+    pub fn new(x: i32, y: i32, z: i32) -> Self {
+        Vec3I { x, y, z }
+    }
+}
+
+
+=== src/utils/mesh_utils.rs ===
+use bevy::math::Vec3;
+use bevy::prelude::*;
+use bevy::render::mesh::VertexAttributeValues;
+
+/// Finds the mesh handle for a given parent entity by traversing its children.
+///
+/// This function checks if any of the children of the specified parent entity
+/// have a `Mesh` component. If a mesh is found, its handle is returned.
+///
+/// # Parameters
+/// - `parent`: The parent entity whose children will be searched for a mesh handle.
+/// - `children_query`: Query to fetch the children of entities.
+/// - `mesh_handles`: Query to fetch mesh handles from entities.
+///
+/// # Returns
+/// An `Option<Handle<Mesh>>` which is:
+/// - `Some(Handle<Mesh>)` if a mesh handle is found among the children.
+/// - `None` if no mesh handle is found.
+pub fn find_mesh(
+    parent: Entity,
+    children_query: &Query<&Children>,
+    mesh_handles: &Query<&Handle<Mesh>>,
+) -> Option<Handle<Mesh>> {
+    if let Ok(children) = children_query.get(parent) {
+        for child in children.iter() {
+            if let Ok(mesh_handle) = mesh_handles.get(*child) {
+                return Some(mesh_handle.clone());
+            }
+        }
+    }
+    None
+}
+
+/// Visualizes the bounding box of a mesh in the game world.
+///
+/// This function creates a 3D cuboid to represent the bounding box of a mesh,
+/// which is useful for debugging purposes, especially in understanding the
+/// voxelization process. The bounding box is visualized using a `PbrBundle`
+/// with a red color.
+///
+/// # Parameters
+/// - `commands`: The `Commands` resource to spawn and configure entities.
+/// - `meshes`: Mutable reference to the `Assets` resource containing `Mesh` objects.
+/// - `materials`: Mutable reference to the `Assets` resource containing `StandardMaterial` objects.
+/// - `bounds`: A tuple containing the minimum and maximum coordinates (`Vec3`) of the bounding box.
+pub fn visualize_bounds(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    bounds: (Vec3, Vec3),
+) {
+    let bbox_size = bounds.1 - bounds.0;
+    let bbox_position = (bounds.0 + bounds.1) * 0.5;
+
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Cuboid::new(bbox_size.x, bbox_size.y, bbox_size.z)),
+        material: materials.add(Color::rgb(1.0, 0.0, 0.0)),
+        transform: Transform::from_translation(bbox_position),
+        ..default()
+    });
+}
+
+/// Calculates the axis-aligned bounding box (AABB) of a mesh.
+///
+/// This function computes the minimum and maximum coordinates of a mesh, which define
+/// its axis-aligned bounding box. The bounds are calculated based on the positions of
+/// the vertices in the mesh.
+///
+/// # Parameters
+/// - `mesh`: Reference to the `Mesh` object whose bounds are to be calculated.
+///
+/// # Returns
+/// A tuple containing two `Vec3` values:
+/// - The first value is the minimum coordinate of the bounding box.
+/// - The second value is the maximum coordinate of the bounding box.
+///
+/// # Panics
+/// This function will panic if the mesh does not contain position attributes.
+pub fn calculate_mesh_bounds(mesh: &Mesh) -> (Vec3, Vec3) {
+    let positions = if let Some(VertexAttributeValues::Float32x3(pos)) =
+        mesh.attribute(Mesh::ATTRIBUTE_POSITION)
+    {
+        pos
+    } else {
+        panic!("Mesh does not contain position attribute.");
+    };
+
+    // Initialize min and max with the first vertex to ensure correctness.
+    let mut min = Vec3::new(positions[0][0], positions[0][1], positions[0][2]);
+    let mut max = min;
+
+    for &vertex in positions.iter() {
+        min = min.min(Vec3::from(vertex));
+        max = max.max(Vec3::from(vertex));
+    }
+
+    (min, max)
+}
+
+
+=== src/collider_management/components/collider_marker.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// A marker component used to signify that an entity should be processed for colliders.
+///
+/// This component is added to entities that require collider generation. The system
+/// looks for entities with this marker and performs necessary operations such as
+/// generating colliders from meshes, attaching physics-related components, and
+/// handling transformations. If the entity also has a `NavMeshMarker`, it will be
+/// marked as an affector of the navigation mesh.
+///
+/// # Usages
+/// - Adding the component to an entity marks it for collider processing.
+/// - Used in systems to detect and handle collider setup for the entity.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct ColliderMarker;
+
+
+=== src/collider_management/components/mod.rs ===
+pub use collider_marker::*;
+
+mod collider_marker;
+
+
+=== src/collider_management/systems/mod.rs ===
+pub use read_colliders::*;
+
+mod read_colliders;
+
+
+=== src/collider_management/systems/read_colliders.rs ===
+use bevy::asset::{Assets, Handle};
+use bevy::hierarchy::Children;
+use bevy::log::error;
+use bevy::prelude::{
+    Added, Commands, Entity, GlobalTransform, Mesh, Query, Res, Transform, Visibility, With,
+};
+use bevy_xpbd_3d::components::RigidBody;
+use bevy_xpbd_3d::prelude::Collider;
+use oxidized_navigation::NavMeshAffector;
+
+use crate::collider_management::ColliderMarker;
+use crate::navmesh::NavMeshMarker;
+use crate::ship::Ship;
+use crate::utils::find_mesh;
+
+/// System to process and configure collider objects within the game.
+///
+/// This system handles entities marked with the `ColliderMarker` component, generating
+/// colliders from associated meshes and attaching necessary components. If the entity is
+/// also marked with `NavMeshMarker`, it will additionally be configured as an affector of the
+/// navigation mesh. The system ensures colliders are correctly integrated into the ship's
+/// hierarchy and physics system.
+///
+/// # Parameters
+/// - `collider_marker_query`: Query to retrieve entities with `ColliderMarker` components, optional `NavMeshMarker`, and their transforms.
+/// - `commands`: Commands for modifying entities and their components.
+/// - `children`: Query to retrieve the children of entities.
+/// - `meshes`: Resource containing the assets of meshes.
+/// - `mesh_handles`: Query to retrieve mesh handles from entities.
+/// - `parent_query`: Query to retrieve the transform of the ship entity.
+///
+/// # Details
+/// For each `ColliderMarker` entity, the system:
+/// - Finds the associated mesh and generates a collider from it.
+/// - Updates the entity's transform to follow the ship if necessary.
+/// - Attaches the `Collider` and `RigidBody::Kinematic` components.
+/// - Hides the entity's visibility.
+/// - If marked with `NavMeshMarker`, attaches the `NavMeshAffector` component.
+pub fn read_colliders(
+    collider_marker_query: Query<
+        (Entity, Option<&NavMeshMarker>, &Transform),
+        Added<ColliderMarker>,
+    >,
+    mut commands: Commands,
+    children: Query<&Children>,
+    meshes: Res<Assets<Mesh>>,
+    mesh_handles: Query<&Handle<Mesh>>,
+    parent_query: Query<&Transform, With<Ship>>,
+) {
+    for (entity, nav_mesh_marker_opt, transform) in collider_marker_query.iter() {
+        if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
+            if let Some(mesh) = meshes.get(mesh_handle) {
+                if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
+                    // Update transform to follow the ship if needed
+                    if let Ok(ship_transform) = parent_query.get_single() {
+                        commands.entity(entity).insert((
+                            Transform {
+                                translation: ship_transform.translation + transform.translation,
+                                rotation: ship_transform.rotation * transform.rotation,
+                                scale: ship_transform.scale * transform.scale,
+                            },
+                            GlobalTransform::default(),
+                        ));
+                    }
+
+                    commands.entity(entity).insert((
+                        collider,
+                        RigidBody::Kinematic, // Change to Kinematic
+                        Visibility::Visible,
+                    ));
+
+                    if nav_mesh_marker_opt.is_some() {
+                        commands.entity(entity).insert(NavMeshAffector);
+                    }
+                } else {
+                    error!("Failed to create collider from mesh");
+                }
+            } else {
+                error!("Failed to get mesh from mesh handle");
+            }
+        } else {
+            error!("Failed to find mesh handle for collider");
+        }
+    }
+}
+
+
+=== src/collider_management/mod.rs ===
+use bevy::app::{App, Plugin, Update};
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod systems;
+
+/// Plugin for managing colliders within the game.
+///
+/// The `ColliderManagementPlugin` provides functionality for handling collider generation
+/// and configuration for entities marked with the `ColliderMarker` component. It registers
+/// the necessary components and sets up systems to process and configure colliders.
+///
+/// # Components
+/// - `ColliderMarker`: Marks an entity for collider processing.
+///
+/// # Systems
+/// - `read_colliders`: Processes entities marked with `ColliderMarker`, generates colliders
+///   from meshes, and attaches necessary components such as `Collider` and `RigidBody::Kinematic`.
+///
+/// This plugin is added to the app during the application setup and is configured to
+/// operate during the `AppStates::Running` state.
+pub struct ColliderManagementPlugin;
+
+impl Plugin for ColliderManagementPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<ColliderMarker>()
+            .add_systems(Update, read_colliders.run_if(in_state(AppStates::Running)));
+    }
+}
+
+
+=== src/main.rs ===
+use bevy::{
+    diagnostic::LogDiagnosticsPlugin,
+    log::LogPlugin,
+    prelude::*,
+    window::{PresentMode, WindowTheme},
+};
+use bevy_editor_pls::prelude::*;
+use bevy_xpbd_3d::prelude::*;
+
+use empire_of_wind::EmpireOfWindPlugins;
+
+fn main() {
+    let mut app = App::new();
+
+    let default_plugins = DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            title: "Empire of Wind".into(),
+            resolution: (1920., 1080.).into(),
+            present_mode: PresentMode::AutoVsync,
+            window_theme: Some(WindowTheme::Dark),
+            ..default()
+        }),
+        ..default()
+    });
+
+    #[cfg(debug_assertions)]
+    let default_plugins = default_plugins.set(LogPlugin {
+        filter: "info,wgpu_core=warn,wgpu_hal=warn,empire_of_wind=debug".into(),
+        level: bevy::log::Level::DEBUG,
+        ..default()
+    });
+
+    // #[cfg(not(debug_assertions))]
+    // let default_plugins = default_plugins.set(LogPlugin {
+    //     filter: "warn".into(),
+    //     level: bevy::log::Level::WARN,
+    // });
+
+    app.add_plugins(default_plugins)
+        .add_plugins(PhysicsPlugins::default())
+        .add_plugins(EditorPlugin::default())
+        .add_plugins(EmpireOfWindPlugins)
+        .add_plugins(LogDiagnosticsPlugin::default());
+    app.run();
+}
+
+
+=== src/asset_management/states/app_states.rs ===
+use bevy::prelude::States;
+
+#[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
+pub enum AppStates {
+    #[default]
+    AssetLoading,
+    Running,
+}
+
+
+=== src/asset_management/states/mod.rs ===
+pub(crate) mod app_states;
+
+
+=== src/asset_management/mod.rs ===
+use bevy::prelude::*;
+use bevy_asset_loader::prelude::*;
+
+pub use states::app_states::AppStates;
+
+pub mod states;
+
+/// Plugin for managing the asset loading state flow within the game.
+///
+/// The `AssetManagementPlugin` sets up the state flow for loading assets using the `bevy_asset_loader` crate.
+/// It initializes the application states and configures the loading state, ensuring that all assets are loaded
+/// before transitioning to the main game state.
+///
+/// # States
+/// - `AppStates::AssetLoading`: The state during which game assets are loaded.
+/// - `AppStates::Running`: The main game state, entered after assets are loaded.
+pub struct AssetManagementPlugin;
+
+impl Plugin for AssetManagementPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_state::<AppStates>().add_loading_state(
+            LoadingState::new(AppStates::AssetLoading).continue_to_state(AppStates::Running),
+        );
+    }
+}
+
+
+=== src/ai_sleeping_behavior/components/sleep.rs ===
+use bevy::prelude::*;
+use big_brain::prelude::*;
+
+/// Represents the sleep state and behavior of an entity.
+///
+/// The `Sleep` component is used to manage the sleep behavior of an entity in the game.
+/// It defines when the entity will stop sleeping based on its fatigue level and how quickly
+/// the fatigue level decreases while sleeping.
+///
+/// # Fields
+/// - `until`: The fatigue level at which the entity will stop sleeping. When the entity's
+///   fatigue level drops to or below this value, it will wake up.
+/// - `per_second`: The rate at which the fatigue level decreases while the entity is sleeping.
+///   This value represents the amount of fatigue reduced per second.
+#[derive(Clone, Component, Debug, ActionBuilder, Reflect, Default)]
+#[reflect(Component)]
+pub struct Sleep {
+    /// The fatigue level at which the entity will stop sleeping.
+    pub until: f32,
+    /// The rate at which the fatigue level decreases while sleeping.
+    pub per_second: f32,
+}
+
+
+=== src/ai_sleeping_behavior/components/fatigue.rs ===
+use bevy::prelude::*;
+
+/// Represents the fatigue level and behavior of an entity.
+///
+/// The `Fatigue` component is used to manage the fatigue level of an entity in the game.
+/// It indicates whether the entity is currently sleeping, how quickly the fatigue level
+/// increases per second, and the current fatigue level of the entity.
+///
+/// # Fields
+/// - `is_sleeping`: A boolean indicating whether the entity is currently sleeping.
+/// - `per_second`: The rate at which the fatigue level increases per second.
+/// - `level`: The current fatigue level of the entity.
+#[derive(Component, Debug, Reflect, Default)]
+#[reflect(Component)]
+pub struct Fatigue {
+    /// A boolean indicating whether the entity is currently sleeping.
+    pub is_sleeping: bool,
+    /// The rate at which the fatigue level increases per second.
+    pub per_second: f32,
+    /// The current fatigue level of the entity.
+    pub level: f32,
+}
+
+
+=== src/ai_sleeping_behavior/components/fatigue_scorer.rs ===
+use bevy::prelude::*;
+use big_brain::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// This component serves as a scorer for evaluating the entity's need to sleep based on its
+/// fatigue level.
+///
+/// The `FatigueScorer` component is used to determine the priority of the sleeping action for
+/// an entity by calculating a score that reflects the entity's current fatigue level.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default, ScorerBuilder)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct FatigueScorer;
+
+
+=== src/ai_sleeping_behavior/components/mod.rs ===
+pub use {fatigue::*, fatigue_scorer::*, sleep::*};
+
+mod fatigue;
+mod fatigue_scorer;
+mod sleep;
+
+
+=== src/ai_sleeping_behavior/systems/sleep_action.rs ===
+use bevy::prelude::{Query, Res, Time};
+use big_brain::actions::ActionState;
+use big_brain::prelude::{ActionSpan, Actor};
+
+use crate::ai_sleeping_behavior::{Fatigue, Sleep};
+
+/// System that manages the sleeping action of entities.
+///
+/// This system reduces the fatigue level of an entity while it is sleeping and updates the entity's
+/// state based on the `Sleep` component's parameters.
+///
+/// # Parameters
+/// - `time`: A reference to the `Time` resource to get the elapsed time since the last update.
+/// - `fatigues`: A query to get the `Fatigue` components of the entities.
+/// - `query`: A query to get the `Actor`, `ActionState`, `Sleep`, and `ActionSpan` components of the entities.
+pub fn sleep_action(
+    time: Res<Time>,
+    mut fatigues: Query<&mut Fatigue>,
+    mut query: Query<(&Actor, &mut ActionState, &Sleep, &ActionSpan)>,
+) {
+    for (Actor(actor), mut state, sleep, span) in &mut query {
+        let _guard = span.span().enter();
+
+        // Use the sleep_action's actor to look up the corresponding Fatigue component.
+        if let Ok(mut fatigue) = fatigues.get_mut(*actor) {
+            match *state {
+                ActionState::Requested => {
+                    fatigue.is_sleeping = true;
+                    *state = ActionState::Executing;
+                }
+                ActionState::Executing => {
+                    fatigue.level -= sleep.per_second * time.delta_seconds();
+
+                    if fatigue.level <= sleep.until {
+                        fatigue.is_sleeping = false;
+                        *state = ActionState::Success;
+                    }
+                }
+                // All actions should make sure to handle cancellations
+                ActionState::Cancelled => {
+                    fatigue.is_sleeping = false;
+                    *state = ActionState::Failure;
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+
+=== src/ai_sleeping_behavior/systems/increase_fatigue.rs ===
+use bevy::log::trace;
+use bevy::prelude::{Query, Res, Time};
+
+use crate::ai_sleeping_behavior::Fatigue;
+
+/// Increases an entity's fatigue over time.
+///
+/// This system increments the fatigue level of each entity based on the `per_second`
+/// rate specified in their `Fatigue` component. The fatigue level is capped at 100.0.
+///
+/// # Parameters
+/// - `time`: Resource providing the delta time for the game.
+/// - `fatigues`: Query to fetch and modify the `Fatigue` component of entities.
+pub fn increase_fatigue(time: Res<Time>, mut fatigues: Query<&mut Fatigue>) {
+    for mut fatigue in &mut fatigues {
+        fatigue.level += fatigue.per_second * time.delta_seconds();
+        if fatigue.level >= 100.0 {
+            fatigue.level = 100.0;
+        }
+        trace!("Tiredness: {}", fatigue.level);
+    }
+}
+
+
+=== src/ai_sleeping_behavior/systems/mod.rs ===
+pub use {calculate_fatigue_score::*, increase_fatigue::*, sleep_action::*};
+
+mod calculate_fatigue_score;
+mod increase_fatigue;
+mod sleep_action;
+
+
+=== src/ai_sleeping_behavior/systems/calculate_fatigue_score.rs ===
+use bevy::log::trace;
+use bevy::prelude::{Local, Query, With};
+use big_brain::prelude::{Actor, Score, ScorerSpan};
+
+use crate::ai_sleeping_behavior::{Fatigue, FatigueScorer};
+
+/// This system calculates a score based on an entity's fatigue level. The higher the fatigue,
+/// the higher the score, indicating a greater need for the entity to sleep.
+///
+/// The system iterates over entities with the `FatigueScorer` component, fetches their `Fatigue`
+/// component, and updates their `Score` component. If the entity is sleeping, the score remains
+/// unchanged. Otherwise, the score is updated based on the fatigue level.
+///
+/// # Parameters
+/// - `last_score`: A local cache to store the last calculated score for sleeping entities.
+/// - `fatigues`: A query to fetch the `Fatigue` component of entities.
+/// - `query`: A query to fetch the `Actor`, `Score`, and `ScorerSpan` components of entities
+///   with the `FatigueScorer` component.
+pub fn calculate_fatigue_score(
+    mut last_score: Local<Option<f32>>,
+    fatigues: Query<&Fatigue>,
+    mut query: Query<(&Actor, &mut Score, &ScorerSpan), With<FatigueScorer>>,
+) {
+    for (Actor(actor), mut score, span) in &mut query {
+        if let Ok(fatigue) = fatigues.get(*actor) {
+            let new_score = fatigue.level / 100.0;
+
+            if fatigue.is_sleeping {
+                let _score = last_score.get_or_insert(new_score);
+                score.set(*_score);
+            } else {
+                last_score.take();
+                score.set(new_score);
+                if fatigue.level >= 80.0 {
+                    span.span().in_scope(|| {
+                        trace!("Fatigue above threshold! Score: {}", fatigue.level / 100.0)
+                    });
+                }
+            }
+        }
+    }
+}
+
+
+=== src/ai_sleeping_behavior/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod systems;
+
+/// Plugin for managing AI sleeping behavior within the game.
+///
+/// The AiSleepingBehaviorPlugin provides functionality for handling the fatigue and sleeping
+/// behaviors of entities. It registers the necessary components, initializes resources,
+/// and sets up systems to manage fatigue scoring, sleep actions, and fatigue increments.
+///
+/// # Components
+/// - Fatigue: Tracks the fatigue level of an entity, indicating whether it is currently sleeping and how quickly
+///   fatigue increases.
+/// - FatigueScorer: Calculates a score indicating the urgency for an entity to sleep.
+/// - Sleep: Manages the sleeping action of an entity, defining when it stops sleeping and how quickly
+///   fatigue decreases.
+///
+/// # Systems
+/// - calculate_fatigue_score: Calculates a score based on an entity's fatigue level.
+/// - increase_fatigue: Increases an entity's fatigue over time.
+/// - sleep_action: Manages the sleeping action of entities, reducing their fatigue level.
+pub struct AiSleepingBehaviorPlugin;
+
+impl Plugin for AiSleepingBehaviorPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Fatigue>()
+            .register_type::<FatigueScorer>()
+            .register_type::<Sleep>()
+            .add_systems(
+                Update,
+                calculate_fatigue_score.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                increase_fatigue.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(Update, sleep_action.run_if(in_state(AppStates::Running)));
+    }
+}
+
+
+=== src/player/components/player.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// A marker component indicating that an entity is the main player.
+///
+/// This component is used to distinguish the main player entity within the game world.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct Player;
+
+
+=== src/player/components/mod.rs ===
+pub use player::*;
+
+mod player;
+
+
+=== src/player/systems/spawn_player.rs ===
+use bevy::asset::Assets;
+use bevy::core::Name;
+use bevy::pbr::{PbrBundle, StandardMaterial};
+use bevy::prelude::{default, Capsule3d, Color, Commands, Mesh, ResMut, Transform};
+use bevy_tnua::controller::TnuaControllerBundle;
+use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
+use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
+use bevy_xpbd_3d::prelude::Collider;
+
+use crate::player::Player;
+
+/// Spawns the player entity in the game world.
+///
+/// This system sets up the player entity with components for 3D physics and movement control. It utilizes:
+///
+/// - `bevy_xpbd_3d`: Provides the `RigidBody` and `Collider` components for physics simulation.
+/// - `bevy_tnua`: Provides the `TnuaControllerBundle` for movement control.
+///
+/// The player is visually represented by a yellow capsule.
+pub fn spawn_player(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.spawn((
+        Name::new("Player"),
+        Player,
+        PbrBundle {
+            mesh: meshes.add(Capsule3d {
+                radius: 0.4,
+                ..default()
+            }),
+            material: materials.add(Color::YELLOW),
+            transform: Transform::from_xyz(-14.0, 14.5, -0.14),
+            ..default()
+        },
+        RigidBody::Dynamic,
+        Collider::capsule(0.5, 0.5),
+        TnuaControllerBundle::default(),
+        TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
+        LockedAxes::ROTATION_LOCKED,
+    ));
+}
+
+
+=== src/player/systems/mod.rs ===
+pub use spawn_player::*;
+
+mod spawn_player;
+
+
+=== src/player/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::AppStates;
+
+mod components;
+mod systems;
+
+/// Plugin for managing the player entity within the game.
+///
+/// The `PlayerPlugin` is responsible for setting up the main player entity in the game world.
+/// It registers the necessary components and sets up systems to handle player spawning and control.
+///
+/// # Components
+/// - `Player`: A marker component indicating that an entity is the main player.
+///
+/// # Systems
+/// - `spawn_player`: Spawns the player entity with the necessary components for 3D physics and movement control.
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Player>()
+            .add_systems(OnEnter(AppStates::Running), spawn_player);
+    }
+}
+
+
+=== src/sun/consts/mod.rs ===
+pub use sun_cycle_settings::*;
+
+mod sun_cycle_settings;
+
+
+=== src/sun/consts/sun_cycle_settings.rs ===
+/// Minimum speed for the sun cycle.
+///
+/// This constant defines the lowest allowable speed for the sun cycle,
+/// ensuring that the cycle does not progress too slowly.
+pub const SUN_CYCLE_SPEED_MIN: f32 = 0.05;
+
+/// Incremental change in speed for the sun cycle.
+///
+/// This constant defines the amount by which the speed of the sun cycle
+/// can be increased or decreased. It is used for adjusting the cycle speed
+/// based on user input or other factors.
+pub const SUN_CYCLE_SPEED_DELTA: f32 = 0.01;
+
+/// Maximum speed for the sun cycle.
+///
+/// This constant defines the highest allowable speed for the sun cycle,
+/// ensuring that the cycle does not progress too quickly.
+pub const SUN_CYCLE_SPEED_MAX: f32 = 1.0;
+
+
+=== src/sun/components/sun.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// Marker component for identifying the sun entity in the game.
+///
+/// The `Sun` component is used to tag an entity as the sun in the game's world. This component
+/// does not have any fields and is purely used for identification purposes by various systems
+/// that need to interact with the sun entity.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct Sun;
+
+
+=== src/sun/components/mod.rs ===
+pub use sun::*;
+
+mod sun;
+
+
+=== src/sun/systems/setup_sun.rs ===
+use bevy::math::Quat;
+use bevy::pbr::{DirectionalLight, DirectionalLightBundle};
+use bevy::prelude::{default, Commands, Transform};
+use bevy::render::view::RenderLayers;
+
+use crate::sun::components::Sun;
+
+/// System that sets up the atmospheric_lighting by spawning a directional light entity representing the sun.
+///
+/// This system initializes the "sun" entity in the scene with a directional light and default
+/// settings. The light is configured to cast shadows and is tagged with the `Sun` component for
+/// identification by other systems.
+///
+/// # Parameters
+/// - `commands`: A mutable reference to the `Commands` resource to issue commands for spawning entities.
+pub fn setup_sun(mut commands: Commands) {
+    // "Sun"
+    commands
+        .spawn((
+            DirectionalLightBundle {
+                directional_light: DirectionalLight {
+                    illuminance: 11127.65,
+                    shadows_enabled: true,
+                    ..default()
+                },
+                transform: Transform::from_rotation(Quat::from_rotation_x(-0.340)),
+                ..default()
+            },
+            RenderLayers::all(),
+        ))
+        .insert(Sun); // Marks the light as Sun
+}
+
+
+=== src/sun/systems/control_sun_cycle_timer.rs ===
+use bevy::input::ButtonInput;
+use bevy::prelude::{KeyCode, Res, ResMut};
+
+use crate::sun::consts::SUN_CYCLE_SPEED_DELTA;
+use crate::sun::resources::SunCycleTimer;
+
+/// Controls the cycle timer based on user input.
+///
+/// - Press `P` to toggle the pause state of the sun cycle timer.
+/// - Press `NumpadAdd` to increase the speed of the sun cycle timer.
+/// - Press `NumpadSubtract` to decrease the speed of the sun cycle timer.
+///
+/// # Parameters
+/// - `input`: Resource that captures keyboard input.
+/// - `timer`: Mutable resource that manages the sun cycle timer.
+pub fn control_sun_cycle_timer(input: Res<ButtonInput<KeyCode>>, mut timer: ResMut<SunCycleTimer>) {
+    if input.just_pressed(KeyCode::KeyP) {
+        timer.toggle_pause();
+    }
+
+    if input.pressed(KeyCode::NumpadAdd) {
+        timer.update_speed(SUN_CYCLE_SPEED_DELTA);
+        eprintln!("Increase speed: {}", timer.speed);
+    }
+
+    if input.pressed(KeyCode::NumpadSubtract) {
+        timer.update_speed(-SUN_CYCLE_SPEED_DELTA);
+        eprintln!("Decrease speed: {}", timer.speed);
+    }
+}
+
+
+=== src/sun/systems/update_sun_cycle.rs ===
+use bevy::math::Quat;
+use bevy::pbr::light_consts::lux::AMBIENT_DAYLIGHT;
+use bevy::pbr::DirectionalLight;
+use bevy::prelude::{Query, Res, ResMut, Time, Transform, With};
+use bevy_atmosphere::prelude::{AtmosphereMut, Nishita};
+
+use crate::sun::components::Sun;
+use crate::sun::resources::SunCycleTimer;
+
+/// System that updates the sun's position and lighting based on the cycle timer.
+///
+/// This system modifies the `Atmosphere` resource and adjusts the position and illuminance of the
+/// directional light representing the sun. It uses the `SunCycleTimer` resource to determine when
+/// and how these updates should be applied.
+///
+/// # Parameters
+/// - `atmospheric_lighting`: A mutable reference to the `Atmosphere` resource that will be updated.
+/// - `query`: A query to get the `Transform` and `DirectionalLight` components of the sun entity.
+/// - `timer`: A mutable reference to the `SunCycleTimer` resource to manage the day/night cycle timing.
+/// - `time`: A reference to the `Time` resource to get the elapsed time since the last update.
+pub fn update_sun_cycle(
+    mut atmosphere: AtmosphereMut<Nishita>,
+    mut query: Query<(&mut Transform, &mut DirectionalLight), With<Sun>>,
+    mut timer: ResMut<SunCycleTimer>,
+    time: Res<Time>,
+) {
+    // Do nothing if timer is paused.
+    if timer.paused() {
+        return;
+    }
+
+    timer.tick(time.delta());
+
+    if timer.update() {
+        let mut pos = atmosphere.sun_position;
+        let t = (timer.time() + 3.0) * 0.1;
+        pos.y = t.sin();
+        pos.z = t.cos();
+        atmosphere.sun_position = pos;
+
+        if let Some((mut light_trans, mut directional)) = query.single_mut().into() {
+            light_trans.rotation = Quat::from_rotation_x(-pos.y.atan2(pos.z));
+            directional.illuminance = t.sin().max(0.0).powf(2.0) * AMBIENT_DAYLIGHT;
+        }
+    }
+}
+
+
+=== src/sun/systems/mod.rs ===
+pub use {control_sun_cycle_timer::*, setup_sun::*, update_sun_cycle::*};
+
+mod control_sun_cycle_timer;
+mod setup_sun;
+mod update_sun_cycle;
+
+
+=== src/sun/resources/sun_cycle_timer.rs ===
+use std::time::Duration;
+
+use bevy::prelude::{Resource, Timer, TimerMode};
+use bevy::time::Stopwatch;
+
+use crate::sun::consts::{SUN_CYCLE_SPEED_MAX, SUN_CYCLE_SPEED_MIN};
+
+/// A resource for managing the day/night cycle in the game.
+///
+/// The `SunCycleTimer` resource handles the timing and speed of the day/night cycle. It uses a `Timer`
+/// to determine when to update the atmospheric_lighting and a `Stopwatch` to keep track of the elapsed time,
+/// scaled by the `speed` factor. This allows for incremental updates to the atmospheric_lighting, which is
+/// more efficient than updating it every frame.
+///
+/// # Fields
+/// - `update`: A `Timer` that triggers updates at a specified interval.
+/// - `time`: A `Stopwatch` that tracks the elapsed time for the cycle.
+/// - `speed`: A `f32` that controls the speed of the day/night cycle.
+///
+/// # Methods
+/// - `new(duration: Duration, speed: f32) -> Self`:
+///   Creates a new `SunCycleTimer` with the given update interval and speed.
+/// - `tick(&mut self, delta: Duration)`:
+///   Advances the timer and stopwatch by the given delta time.
+/// - `paused(&self) -> bool`:
+///   Returns whether the stopwatch is paused.
+/// - `toggle_pause(&mut self)`:
+///   Toggles the pause state of the stopwatch.
+/// - `time(&self) -> f32`:
+///   Returns the elapsed time in seconds, scaled by the speed factor.
+/// - `update(&self) -> bool`:
+///   Returns whether the timer has finished its current cycle.
+/// - `update_speed(&mut self, delta: f32)`:
+///   Adjusts the speed of the day/night cycle, clamping it between `SUN_CYCLE_SPEED_MIN` and
+///   `SUN_CYCLE_SPEED_MAX`.
+///
+#[derive(Resource)]
+pub struct SunCycleTimer {
+    pub update: Timer,
+    pub time: Stopwatch,
+    pub speed: f32,
+}
+
+impl SunCycleTimer {
+    /// Creates a new `SunCycleTimer`.
+    ///
+    /// # Parameters
+    /// - `duration`: The duration for the update timer.
+    /// - `speed`: The initial speed of the day/night cycle.
+    ///
+    /// # Returns
+    /// A new `SunCycleTimer` instance.
+    pub fn new(duration: Duration, speed: f32) -> Self {
+        Self {
+            update: Timer::new(duration, TimerMode::Repeating),
+            time: Stopwatch::new(),
+            speed,
+        }
+    }
+
+    /// Advances the timer and stopwatch by the given delta time.
+    ///
+    /// # Parameters
+    /// - `delta`: The amount of time to advance by.
+    pub fn tick(&mut self, delta: Duration) {
+        if !self.paused() {
+            self.update.tick(delta);
+            self.time.tick(delta.mul_f32(self.speed));
+        }
+    }
+
+    /// Checks if the stopwatch is paused.
+    ///
+    /// # Returns
+    /// `true` if the stopwatch is paused, `false` otherwise.
+    pub fn paused(&self) -> bool {
+        self.time.paused()
+    }
+
+    /// Toggles the pause state of the stopwatch.
+    pub fn toggle_pause(&mut self) {
+        if self.time.paused() {
+            self.time.unpause();
+        } else {
+            self.time.pause();
+        }
+    }
+
+    /// Returns the elapsed time in seconds, scaled by the speed factor.
+    ///
+    /// # Returns
+    /// The elapsed time in seconds.
+    pub fn time(&self) -> f32 {
+        self.time.elapsed().as_millis() as f32 / 2000.0
+    }
+
+    /// Checks if the timer has finished its current cycle.
+    ///
+    /// # Returns
+    /// `true` if the timer has finished, `false` otherwise.
+    pub fn update(&self) -> bool {
+        self.update.finished()
+    }
+
+    /// Adjusts the speed of the day/night cycle.
+    ///
+    /// # Parameters
+    /// - `delta`: The amount to adjust the speed by.
+    ///
+    /// The speed is clamped between `SUN_CYCLE_SPEED_MIN` and `SUN_CYCLE_SPEED_MAX`.
+    pub fn update_speed(&mut self, delta: f32) {
+        self.speed += delta;
+        self.speed = self.speed.clamp(SUN_CYCLE_SPEED_MIN, SUN_CYCLE_SPEED_MAX);
+    }
+}
+
+
+=== src/sun/resources/mod.rs ===
+pub use sun_cycle_timer::*;
+
+mod sun_cycle_timer;
+
+
+=== src/sun/mod.rs ===
+use std::time::Duration;
+
+use bevy::app::{App, Plugin};
+use bevy::prelude::*;
+
+use resources::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod consts;
+mod resources;
+mod systems;
+
+/// Plugin for managing the sun's movement throughout the day.
+///
+/// The `SunCyclePlugin` provides functionality for handling the day/night cycle
+/// by moving the sun's position and adjusting the lighting. It registers the necessary
+/// resources and sets up systems to control and update the sun cycle based on the
+/// elapsed time and user input.
+///
+/// # Resources
+/// - `SunCycleTimer`: Manages the timing and speed of the day/night cycle.
+///
+/// # Systems
+/// - `control_sun_cycle_timer`: Handles user input to control the sun cycle timer (pause/unpause, adjust speed).
+/// - `update_sun_cycle`: Updates the sun's position and lighting based on the cycle timer.
+///
+/// This plugin is added to the app during the application setup and is configured to
+/// operate during the `AppStates::Running` state.
+pub struct SunCyclePlugin;
+
+impl Plugin for SunCyclePlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(SunCycleTimer::new(Duration::from_millis(1000), 0.2))
+            .add_systems(OnEnter(AppStates::Running), setup_sun)
+            .add_systems(
+                Update,
+                control_sun_cycle_timer.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                Update,
+                update_sun_cycle.run_if(in_state(AppStates::Running)),
+            );
+    }
+}
+
+
+=== src/crew_management/components/crew_member.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// A marker component indicating that an entity is a Crew Member.
+///
+/// This component is used to distinguish entities that represent crew members within the game world.
+#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct CrewMember;
+
+
+=== src/crew_management/components/mod.rs ===
+pub use crew_member::*;
+
+mod crew_member;
+
+
+=== src/crew_management/systems/spawn_crew_members.rs ===
+use bevy::asset::Assets;
+use bevy::core::Name;
+use bevy::math::Vec3;
+use bevy::pbr::{PbrBundle, StandardMaterial};
+use bevy::prelude::{default, Capsule3d, Color, Commands, Mesh, ResMut, Transform};
+use bevy_tnua::controller::TnuaControllerBundle;
+use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
+use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
+use bevy_xpbd_3d::prelude::Collider;
+use big_brain::actions::Steps;
+use big_brain::pickers::FirstToScore;
+use big_brain::prelude::Thinker;
+
+use crate::ai_eating_behavior::{Eat, Hunger, HungerScorer};
+use crate::ai_navigation::{NavigationPath, SeekFoodBehavior, SeekSleepAreaBehavior};
+use crate::ai_sleeping_behavior::{Fatigue, FatigueScorer, Sleep};
+use crate::crew_management::CrewMember;
+
+/// Spawns a set of crew members in the game world.
+///
+/// Each crew member is configured with basic AI to handle eating and sleeping routines. The AI is managed
+/// using the `big_brain` crate, which allows for defining scorers and actions. The crew also utilize
+/// `bevy_xpbd_3d` for physics and `bevy_tnua` for movement and control.
+pub fn spawn_crew_members(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Define the starting point for the NPCs.
+    let start_position = Vec3::new(0.0, 8.0, -4.0);
+    let spacing = 1.0; // Spacing between each NPC.
+
+    let num_npcs = 8;
+    for i in 0..num_npcs {
+        let move_and_eat = Steps::build()
+            .label("MoveAndEat")
+            .step(SeekFoodBehavior {
+                speed: 1.5,
+                _marker: std::marker::PhantomData,
+            })
+            .step(Eat {
+                until: 10.0,
+                per_second: 10.0,
+            });
+
+        let move_and_sleep = Steps::build()
+            .label("MoveAndSleep")
+            .step(SeekSleepAreaBehavior {
+                speed: 1.5,
+                _marker: std::marker::PhantomData,
+            })
+            .step(Sleep {
+                until: 10.0,
+                per_second: 15.0,
+            });
+
+        let position = start_position + Vec3::new(0.0, 0.0, spacing * i as f32);
+
+        commands.spawn((
+            Name::new("Crew Member"),
+            PbrBundle {
+                mesh: meshes.add(Capsule3d {
+                    radius: 0.4,
+                    ..default()
+                }),
+                material: materials.add(Color::YELLOW),
+                transform: Transform::from_translation(position),
+                ..default()
+            },
+            RigidBody::Dynamic,
+            Collider::capsule(0.5, 0.5),
+            TnuaControllerBundle::default(),
+            TnuaXpbd3dSensorShape(Collider::cylinder(0.0, 0.49)),
+            LockedAxes::ROTATION_LOCKED,
+            CrewMember,
+            Hunger {
+                is_eating: false,
+                per_second: 4.0,
+                level: 0.0,
+            },
+            Fatigue {
+                is_sleeping: false,
+                per_second: 4.0,
+                level: 0.0,
+            },
+            NavigationPath::default(),
+            Thinker::build()
+                .label("Crew Member Thinker")
+                // Selects the action with the highest score that is above the threshold
+                .picker(FirstToScore::new(0.6))
+                .when(FatigueScorer, move_and_sleep)
+                .when(HungerScorer, move_and_eat),
+        ));
+    }
+}
+
+
+=== src/crew_management/systems/mod.rs ===
+pub use spawn_crew_members::*;
+
+mod spawn_crew_members;
+
+
+=== src/crew_management/mod.rs ===
+use bevy::prelude::*;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::AppStates;
+
+mod components;
+mod systems;
+
+pub struct CrewManagementPlugin;
+
+/// Plugin for managing the crew within the game world.
+///
+/// The `CrewManagementPlugin` handles the creation and management of crew members,
+/// setting up the necessary components and systems to simulate their behavior and interactions.
+///
+/// # Components
+/// - `CrewMember`: A marker component indicating that an entity is a crew member.
+///
+/// # Systems
+/// - `spawn_crew_members`: Spawns crew members in the game world and configures their initial behavior and properties.
+impl Plugin for CrewManagementPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<CrewMember>()
+            .add_systems(OnEnter(AppStates::Running), spawn_crew_members);
+    }
+}
+
+
+=== src/camera_control/components/debug_camera.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// The `DebugCamera` component is used to mark an entity as a debug camera in the game.
+/// This component allows systems to identify and manipulate the debug camera specifically.
+///
+/// The debug camera is typically used for development and debugging purposes, providing
+/// an alternative perspective that can be toggled during gameplay to help developers
+/// inspect and diagnose issues in the game world.
+///
+/// # Usage
+///
+/// The `DebugCamera` component is attached to a camera entity during setup. This camera can
+/// have various settings tailored for debugging, such as a freeform movement or different
+/// rendering layers.
+///
+/// The `DebugCamera` component is integral to providing a versatile camera for development
+/// and debugging, ensuring that it interacts correctly with various systems and inputs designed
+/// for debugging purposes.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct DebugCamera;
+
+
+=== src/camera_control/components/main_camera.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// The `MainCamera` component is used to mark the primary camera entity in the game.
+/// This component allows systems to identify and manipulate the main camera specifically.
+///
+/// # Usage
+///
+/// The `MainCamera` component is attached to the primary camera entity during setup.
+/// This primary camera can have various settings, including the camera's position,
+/// projection type, render layers, fog settings, and custom camera behaviors like zoom.
+///
+/// The `MainCamera` component is integral to identifying and controlling the primary camera in the game,
+/// ensuring that it interacts correctly with various systems and player inputs.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct MainCamera;
+
+
+=== src/camera_control/components/camera_zoom.rs ===
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// Manages the zoom functionality of the camera.
+///
+/// The `CameraZoom` component allows for smooth interpolation between different zoom levels
+/// for the camera. It maintains the target zoom scale, the current zoom scale, and the speed
+/// at which the zoom interpolation occurs.
+///
+/// # Fields
+/// - `target_scale`: The desired zoom scale that the camera should move towards.
+/// - `current_scale`: The current zoom scale of the camera.
+/// - `speed`: The speed at which the camera zooms in or out to reach the target scale.
+#[derive(Debug, Clone, Component, Reflect, Serialize, Deserialize, Default)]
+#[reflect(Component, Serialize, Deserialize)]
+pub struct CameraZoom {
+    pub target_scale: f32,
+    pub current_scale: f32,
+    pub speed: f32,
+}
+
+impl CameraZoom {
+    /// Creates a new `CameraZoom` component.
+    ///
+    /// # Parameters
+    /// - `target_scale`: The desired zoom scale that the camera should move towards.
+    /// - `current_scale`: The initial zoom scale of the camera.
+    /// - `speed`: The speed at which the camera zooms in or out to reach the target scale.
+    ///
+    /// # Returns
+    /// A new instance of `CameraZoom`.
+    pub fn new(target_scale: f32, current_scale: f32, speed: f32) -> Self {
+        Self {
+            target_scale,
+            current_scale,
+            speed,
+        }
+    }
+}
+
+
+=== src/camera_control/components/mod.rs ===
+pub use {camera_zoom::*, debug_camera::*, main_camera::*};
+
+mod camera_zoom;
+mod debug_camera;
+mod main_camera;
+
+
+=== src/camera_control/systems/move_camera.rs ===
+use bevy::math::Vec3;
+use bevy::prelude::{Query, Res, Time, Transform, With, Without};
+use bevy_tnua::controller::TnuaController;
+use crate::camera_control::MainCamera;
+use crate::player::Player;
+
+/// Moves the camera to follow the player with a smooth isometric view.
+///
+/// This system adjusts the main camera's position and orientation based on the player's position,
+/// providing an isometric perspective. The camera's movement is interpolated for smooth transitions.
+///
+/// # Parameters
+/// - `query`: A query that retrieves the transform component of the player entity that has both
+///   `TnuaController` and `Player` components.
+/// - `camera_query`: A query that retrieves the transform component of the main camera entity
+///   that has the `MainCamera` component and does not have the `TnuaController` component.
+/// - `time`: A resource that provides the elapsed time, used for smooth interpolation of the camera movement.
+pub fn move_camera(
+    query: Query<&Transform, (With<TnuaController>, With<Player>)>,
+    mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<TnuaController>)>,
+    time: Res<Time>,
+) {
+    if let Ok(player_transform) = query.get_single() {
+        if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+            // Adjust the camera offset for an isometric view
+            let camera_offset = Vec3::new(30.0, 50.0, 30.0); // Example isometric offset
+
+            // Calculate the target position based on the player's position and the offset
+            let target_position = player_transform.translation + camera_offset;
+
+            // Interpolation factor for smooth camera movement
+            let interpolation_factor = 10.0 * time.delta_seconds();
+
+            // Smoothly interpolate the camera's position
+            camera_transform.translation = camera_transform
+                .translation
+                .lerp(target_position, interpolation_factor.clamp(0.0, 1.0));
+
+            // Maintain the camera's isometric perspective while following the player
+            camera_transform.look_at(player_transform.translation, Vec3::Y);
+        }
+    }
+}
+
+
+=== src/camera_control/systems/setup_camera.rs ===
+use bevy::core::Name;
+use bevy::core_pipeline::prepass::DepthPrepass;
+use bevy::math::Vec3;
+use bevy::pbr::{FogFalloff, FogSettings};
+use bevy::prelude::{Camera, Camera3dBundle, Color, Commands, default, OrthographicProjection, Transform};
+use bevy::render::camera::ScalingMode;
+use bevy::render::view::RenderLayers;
+use bevy_atmosphere::plugin::AtmosphereCamera;
+use bevy_panorbit_camera::PanOrbitCamera;
+
+use crate::camera_control::{CameraZoom, DebugCamera, MainCamera};
+
+/// System to set up the main and debug cameras for the game.
+///
+/// This system spawns two camera entities:
+/// 1. The main camera, which is an orthographic camera used for the primary gameplay view.
+/// 2. A debug camera, which is an inactive perspective camera with pan and orbit capabilities.
+///
+/// # Main Camera
+/// The main camera is configured with:
+/// - Orthographic projection with an initial scale for zoom level.
+/// - Render layers to control what layers the camera can see.
+/// - Fog settings for atmospheric effects.
+/// - Depth prepass for improved rendering.
+/// - `AtmosphereCamera` for atmospheric rendering.
+/// - `CameraZoom` for handling zoom controls.
+///
+/// # Debug Camera
+/// The debug camera is configured with:
+/// - Perspective projection.
+/// - Pan and orbit capabilities for free movement.
+///
+/// # Parameters
+/// - `commands`: Commands for spawning and configuring entities.
+pub fn setup_camera(mut commands: Commands) {
+    let initial_scale = 20.0;
+
+    commands.spawn((
+        Name::new("Main Camera"),
+        Camera3dBundle {
+            camera: Camera {
+                order: 0,
+                is_active: true,
+                ..default()
+            },
+            projection: OrthographicProjection {
+                scale: initial_scale, // Initial scale for zoom level
+                scaling_mode: ScalingMode::FixedVertical(2.0),
+                ..default()
+            }
+                .into(),
+            transform: Transform::from_xyz(86.829, 90.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
+        },
+        RenderLayers::from_layers(&[0, 1, 2]), // Render both layers 0 and 1 initially
+        FogSettings {
+            color: Color::rgba(0.1, 0.2, 0.4, 1.0),
+            falloff: FogFalloff::from_visibility_colors(
+                400.0,
+                Color::rgb(0.35, 0.5, 0.66),
+                Color::rgb(0.8, 0.844, 1.0),
+            ),
+            ..default()
+        },
+        MainCamera,
+        DepthPrepass,
+        AtmosphereCamera::default(),
+        CameraZoom::new(initial_scale, initial_scale, 20.0), // Initialize CameraZoom
+    ));
+
+    commands.spawn((
+        Name::new("Debug Camera"),
+        Camera3dBundle {
+            camera: Camera {
+                order: 1,
+                is_active: false,
+                ..default()
+            },
+            transform: Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
+            ..default()
+        },
+        PanOrbitCamera::default(),
+        DebugCamera,
+    ));
+}
+
+
+=== src/camera_control/systems/mod.rs ===
+pub use {camera_switching::*, interpolate_zoom::*, move_camera::*, setup_camera::*};
+
+mod camera_switching;
+mod interpolate_zoom;
+mod move_camera;
+mod setup_camera;
+
+
+=== src/camera_control/systems/camera_switching.rs ===
+use bevy::input::ButtonInput;
+use bevy::prelude::{Camera, KeyCode, Query, Res, Without};
+
+use crate::camera_control::{DebugCamera, MainCamera};
+
+/// This system switches the active camera between the main camera and the debug camera
+/// when the `0` key is pressed.
+///
+/// The system toggles the `is_active` state of both the main camera and the debug camera.
+/// When the `0` key is pressed, the active camera is switched, allowing for quick toggling
+/// between different camera perspectives for debugging or gameplay purposes.
+///
+/// # Parameters
+/// - `keyboard_input`: A resource that provides the current state of the keyboard inputs.
+/// - `query`: A query to fetch the `Camera` and `DebugCamera` components of entities
+///   that are not the main camera.
+/// - `query_main`: A query to fetch the `Camera` and `MainCamera` components of entities
+///   that are not the debug camera.
+pub fn camera_switching(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut Camera, &DebugCamera), Without<MainCamera>>,
+    mut query_main: Query<(&mut Camera, &MainCamera), Without<DebugCamera>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Digit0) {
+        for (mut camera, _) in query.iter_mut() {
+            camera.is_active = !camera.is_active;
+        }
+
+        for (mut camera, _) in query_main.iter_mut() {
+            camera.is_active = !camera.is_active;
+        }
+    }
+}
+
+
+=== src/camera_control/systems/interpolate_zoom.rs ===
+use bevy::prelude::{Projection, Query, Res, Time, With};
+
+use crate::camera_control::{CameraZoom, MainCamera};
+
+/// Smoothly interpolates the camera zoom level towards the target zoom level.
+///
+/// This system adjusts the camera's zoom level based on the `CameraZoom` component,
+/// ensuring smooth transitions between different zoom levels. The interpolation
+/// speed is controlled by the `speed` field in the `CameraZoom` component.
+///
+/// # Parameters
+/// - `camera_zoom_query`: Query to fetch the `CameraZoom` and `Projection` components of the main camera.
+/// - `time`: Resource providing the delta time for the game.
+pub fn interpolate_zoom(
+    mut camera_zoom_query: Query<(&mut CameraZoom, &mut Projection), With<MainCamera>>,
+    time: Res<Time>,
+) {
+    for (mut zoom, mut projection) in camera_zoom_query.iter_mut() {
+        if let Projection::Orthographic(orthographic) = &mut *projection {
+            let delta_scale = zoom.speed * time.delta_seconds();
+            if (zoom.current_scale - zoom.target_scale).abs() < delta_scale {
+                zoom.current_scale = zoom.target_scale;
+            } else if zoom.current_scale < zoom.target_scale {
+                zoom.current_scale += delta_scale;
+            } else {
+                zoom.current_scale -= delta_scale;
+            }
+            orthographic.scale = zoom.current_scale;
+        }
+    }
+}
+
+
+=== src/camera_control/mod.rs ===
+use bevy::prelude::*;
+use bevy::transform::TransformSystem;
+use bevy_xpbd_3d::PhysicsSet;
+
+pub use components::*;
+use systems::*;
+
+use crate::asset_management::states::app_states::AppStates;
+
+mod components;
+mod systems;
+
+/// Plugin for managing camera controls within the game.
+///
+/// The `CameraControlPlugin` provides functionality for switching between different
+/// cameras, moving the camera based on player input, and setting up the initial camera
+/// configuration. It registers the necessary components and sets up systems to handle
+/// camera operations.
+///
+/// # Components
+/// - `CameraZoom`: Represents the zoom level of a camera.
+/// - `DebugCamera`: Marks a camera as a debug camera.
+/// - `MainCamera`: Marks the main camera used for gameplay.
+///
+/// # Systems
+/// - `camera_switching`: Handles switching between different cameras.
+/// - `move_camera`: Manages camera movement based on player input.
+/// - `setup_camera`: Sets up the initial configuration for cameras.
+///
+/// This plugin is added to the app during the application setup and is configured to
+/// operate during the `AppStates::Running` state.
+pub struct CameraControlPlugin;
+
+impl Plugin for CameraControlPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<CameraZoom>()
+            .register_type::<DebugCamera>()
+            .register_type::<MainCamera>()
+            .add_systems(
+                Update,
+                camera_switching.run_if(in_state(AppStates::Running)),
+            )
+            .add_systems(
+                PostUpdate,
+                move_camera
+                    .run_if(in_state(AppStates::Running))
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
+            )
+            .add_systems(OnEnter(AppStates::Running), setup_camera)
+            .add_systems(
+                Update,
+                interpolate_zoom.run_if(in_state(AppStates::Running)),
+            );
+    }
+}
+
+
+=== Assets Directory Structure ===
+├── audio
+│   └── 371171__borralbi__sailboat-cockpit-at-17kn-wind-speed.wav
+├── models
+│   ├── export
+│   │   ├── humans
+│   │   │   └── Cylinder_Human.glb
+│   │   ├── ship
+│   │   │   ├── carrack_2.glb
+│   │   │   ├── carrack_b.glb
+│   │   │   ├── carrack.glb
+│   │   │   ├── hull.glb
+│   │   │   └── test_level.glb
+│   │   ├── stairs
+│   │   │   └── stairs_1m.glb
+│   │   └── test
+│   │       └── navmeshtest.glb
+│   └── raw
+│       ├── humans
+│       │   └── Cylinder_Human.blend
+│       ├── ship
+│       │   ├── carrack_2.blend
+│       │   ├── carrack_2.blend1
+│       │   ├── carrack.blend
+│       │   ├── carrack.blend1
+│       │   ├── hull.blend
+│       │   ├── hull.blend1
+│       │   ├── ladder.blend
+│       │   ├── ladder.blend1
+│       │   ├── reference
+│       │   │   ├── 3d-carrack.jpg
+│       │   │   ├── carrack1.jpg
+│       │   │   └── carrack-real.jpg
+│       │   ├── test_level.blend
+│       │   └── test_level.blend1
+│       ├── stairs
+│       │   ├── stairs_1m.blend
+│       │   ├── stairs_1m.blend1
+│       │   ├── stairs_1m.glb
+│       │   ├── stairs.blend
+│       │   └── stairs.blend1
+│       └── test
+│           ├── navmeshtest.blend
+│           └── navmeshtest.blend1
+├── registry.json
+├── screenshots
+│   ├── Screenshot_20240211_084452.png
+│   └── Screenshot_20240224_080436.png
+├── shaders
+│   ├── invisible_material.frag
+│   ├── invisible_material.vert
+│   ├── invisible_material.wgsl
+│   └── transparent_blocking.wgsl
+└── textures
+    └── skybox
+        └── table_mountain_2_puresky
+            ├── table_mountain_2_puresky_4k_cubemap.jpg
+            └── table_mountain_2_puresky_4k.md
+
+
+=== Assets File List ===
+assets/screenshots/Screenshot_20240224_080436.png
+assets/screenshots/Screenshot_20240211_084452.png
+assets/audio/371171__borralbi__sailboat-cockpit-at-17kn-wind-speed.wav
+assets/registry.json
+assets/textures/skybox/table_mountain_2_puresky/table_mountain_2_puresky_4k_cubemap.jpg
+assets/textures/skybox/table_mountain_2_puresky/table_mountain_2_puresky_4k.md
+assets/models/export/test/navmeshtest.glb
+assets/models/export/ship/carrack_b.glb
+assets/models/export/ship/carrack.glb
+assets/models/export/ship/hull.glb
+assets/models/export/ship/carrack_2.glb
+assets/models/export/ship/test_level.glb
+assets/models/export/stairs/stairs_1m.glb
+assets/models/export/humans/Cylinder_Human.glb
+assets/models/raw/test/navmeshtest.blend1
+assets/models/raw/test/navmeshtest.blend
+assets/models/raw/ship/test_level.blend1
+assets/models/raw/ship/carrack_2.blend
+assets/models/raw/ship/carrack.blend
+assets/models/raw/ship/reference/carrack-real.jpg
+assets/models/raw/ship/reference/3d-carrack.jpg
+assets/models/raw/ship/reference/carrack1.jpg
+assets/models/raw/ship/test_level.blend
+assets/models/raw/ship/carrack_2.blend1
+assets/models/raw/ship/ladder.blend1
+assets/models/raw/ship/hull.blend1
+assets/models/raw/ship/hull.blend
+assets/models/raw/ship/carrack.blend1
+assets/models/raw/ship/ladder.blend
+assets/models/raw/stairs/stairs_1m.blend
+assets/models/raw/stairs/stairs.blend1
+assets/models/raw/stairs/stairs_1m.glb
+assets/models/raw/stairs/stairs_1m.blend1
+assets/models/raw/stairs/stairs.blend
+assets/models/raw/humans/Cylinder_Human.blend
+assets/shaders/invisible_material.vert
+assets/shaders/invisible_material.wgsl
+assets/shaders/invisible_material.frag
+assets/shaders/transparent_blocking.wgsl

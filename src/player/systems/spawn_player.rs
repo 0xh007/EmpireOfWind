@@ -6,6 +6,7 @@ use bevy_tnua::controller::TnuaControllerBundle;
 use bevy_tnua_xpbd3d::TnuaXpbd3dSensorShape;
 use bevy_xpbd_3d::components::{LockedAxes, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
+use bevy::color::palettes::css::YELLOW;
 
 use crate::player::Player;
 
@@ -30,7 +31,7 @@ pub fn spawn_player(
                 radius: 0.4,
                 ..default()
             }),
-            material: materials.add(Color::YELLOW),
+            material: materials.add(Color::from(YELLOW)),
             transform: Transform::from_xyz(-14.0, 14.5, -0.14),
             ..default()
         },

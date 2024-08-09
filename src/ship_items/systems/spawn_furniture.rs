@@ -1,15 +1,18 @@
-use bevy::asset::Assets;
-use bevy::core::Name;
-use bevy::math::{Quat, Vec3};
-use bevy::pbr::{PbrBundle, StandardMaterial};
 /// This module provides a system for spawning furniture items on the ship.
 /// Currently, it includes the creation of a bed object.
 ///
 /// Note: This system is expected to be deprecated as the game evolves and more
 /// sophisticated systems for spawning and managing furniture are developed.
+
+use bevy::asset::Assets;
+use bevy::core::Name;
+use bevy::math::{Quat, Vec3};
+use bevy::pbr::{PbrBundle, StandardMaterial};
 use bevy::prelude::{default, Color, Commands, Cuboid, Mesh, ResMut, Transform};
 use bevy_xpbd_3d::components::{Friction, RigidBody};
 use bevy_xpbd_3d::prelude::Collider;
+use bevy::color::palettes::css::BLUE;
+
 
 use crate::ship_items::SleepArea;
 
@@ -44,7 +47,7 @@ pub fn spawn_furniture(
         PbrBundle {
             mesh: meshes.add(Mesh::from(Cuboid::new(4.0, 1.0, 2.0))),
             material: materials.add(StandardMaterial {
-                base_color: Color::BLUE,
+                base_color: Color::from(BLUE),
                 ..default()
             }),
             transform: Transform {

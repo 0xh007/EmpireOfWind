@@ -38,7 +38,6 @@ impl Plugin for AreaManagementPlugin {
         app.register_type::<AreaMarker>()
             .register_type::<AreaExitMarker>()
             .register_type::<Occluding>()
-            .register_type::<LayerSet>()
             // TODO: Move this into a less specific plugin
             .register_type::<Vec<String>>()
             // TODO: Move this into a less specific plugin

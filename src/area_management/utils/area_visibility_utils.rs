@@ -4,17 +4,17 @@ use bevy::render::view::RenderLayers;
 use crate::area_management::{ActiveAreas, Occluding};
 use crate::camera_control::{CameraZoom, MainCamera};
 
-// TODO: Update Docs
-// TODO: Check if function should be renamed
-/// Updates the render layers of the main camera based on active areas.
+/// Updates the render layers of the main camera based on active areas and occlusion.
 ///
-/// This function iterates over all cameras with the `MainCamera` component and updates
-/// their render layers according to the specified active areas. Specific layers are
-/// removed depending on the presence of certain area names in the `active_areas` set.
+/// This function modifies the render layers of the main camera to show or hide certain
+/// areas based on which areas are active and which are being occluded. It uses the
+/// RenderLayers implementation from Bevy 0.14, which supports an unlimited number of layers.
 ///
 /// # Parameters
 /// - `camera_query`: Query to fetch and modify the render layers of the main camera.
 /// - `active_areas`: Resource containing the set of active areas.
+/// - `occluding_query`: Query to check for entities with `Occluding` components.
+/// - `area_render_layers`: The render layers associated with the current area.
 pub fn update_camera_layers(
     camera_query: &mut Query<&mut RenderLayers, With<MainCamera>>,
     active_areas: &ActiveAreas,
@@ -22,15 +22,17 @@ pub fn update_camera_layers(
     area_render_layers: RenderLayers,
 ) {
     for mut render_layers in camera_query.iter_mut() {
-        let mut layers = (0..RenderLayers::TOTAL_LAYERS as u8).collect::<Vec<u8>>(); // Start with all layers
+        // Start with the current render layers
+        let mut new_layers = render_layers.clone();
 
         for occluding in occluding_query.iter() {
             if occluding.areas.iter().any(|area| active_areas.0.contains(area)) {
-                layers.retain(|layer| !area_render_layers.iter().any(|l| l == *layer));
+                // Remove the layers that are in area_render_layers
+                new_layers = new_layers.intersection(&area_render_layers);
             }
         }
 
-        *render_layers = RenderLayers::from_layers(&layers);
+        *render_layers = new_layers;
     }
 }
 

@@ -49,7 +49,7 @@ pub fn read_colliders(
 ) {
     for (entity, nav_mesh_marker_opt, transform) in collider_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            if let Some(mesh) = meshes.get(mesh_handle) {
+            if let Some(mesh) = meshes.get(mesh_handle.id()) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                     // Update transform to follow the ship if needed
                     if let Ok(ship_transform) = parent_query.get_single() {

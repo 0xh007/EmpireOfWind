@@ -44,7 +44,7 @@ pub fn visualize_mesh_bounds(
     for _event in visualize_mesh_bounds_debug_event_reader.read() {
         for (entity, _, _mesh_transform) in query.iter() {
             if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-                if let Some(mesh) = meshes.get(mesh_handle) {
+                if let Some(mesh) = meshes.get(mesh_handle.id()) {
                     let bounds = calculate_mesh_bounds(mesh);
                     visualize_bounds(&mut commands, &mut meshes, &mut materials, bounds);
                 }

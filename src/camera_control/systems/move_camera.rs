@@ -1,7 +1,6 @@
 use bevy::math::Vec3;
 use bevy::prelude::{Query, Res, Time, Transform, With, Without};
 use bevy_tnua::controller::TnuaController;
-
 use crate::camera_control::MainCamera;
 use crate::player::Player;
 

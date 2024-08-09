@@ -47,7 +47,7 @@ pub fn read_area_markers(
     // Process AreaEnterMarkers
     for (entity, transform) in area_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            if let Some(mesh) = meshes.get(mesh_handle) {
+            if let Some(mesh) = meshes.get(mesh_handle.id()) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                     // Find the top-level Ship entity
                     let mut current_parent = entity;
@@ -93,7 +93,7 @@ pub fn read_area_markers(
     // Process AreaExitMarkers
     for (entity, transform) in exit_marker_query.iter() {
         if let Some(mesh_handle) = find_mesh(entity, &children, &mesh_handles) {
-            if let Some(mesh) = meshes.get(mesh_handle) {
+            if let Some(mesh) = meshes.get(mesh_handle.id()) {
                 if let Some(collider) = Collider::trimesh_from_mesh(mesh) {
                     // Find the top-level Ship entity
                     let mut current_parent = entity;
