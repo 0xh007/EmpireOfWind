@@ -25,7 +25,7 @@ pub fn propagate_render_layers(
     for (render_layers, children) in parent_query.iter() {
         for &child in children.iter() {
             if let Ok((child_entity, _, _)) = child_query.get(child) {
-                commands.entity(child_entity).insert(*render_layers);
+                commands.entity(child_entity).insert(render_layers.clone());
             }
         }
     }

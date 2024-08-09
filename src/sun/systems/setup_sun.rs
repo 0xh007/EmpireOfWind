@@ -26,7 +26,7 @@ pub fn setup_sun(mut commands: Commands) {
                 transform: Transform::from_rotation(Quat::from_rotation_x(-0.340)),
                 ..default()
             },
-            RenderLayers::all(),
+            RenderLayers::default(),
         ))
         .insert(Sun); // Marks the light as Sun
 }

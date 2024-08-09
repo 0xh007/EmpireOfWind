@@ -4,7 +4,7 @@ use bevy::{
     prelude::*,
     window::{PresentMode, WindowTheme},
 };
-use bevy_editor_pls::prelude::*;
+
 use bevy_xpbd_3d::prelude::*;
 
 use empire_of_wind::EmpireOfWindPlugins;
@@ -38,7 +38,6 @@ fn main() {
 
     app.add_plugins(default_plugins)
         .add_plugins(PhysicsPlugins::default())
-        .add_plugins(EditorPlugin::default())
         .add_plugins(EmpireOfWindPlugins)
         .add_plugins(LogDiagnosticsPlugin::default());
     app.run();
