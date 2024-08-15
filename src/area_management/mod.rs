@@ -1,12 +1,14 @@
 use bevy::prelude::*;
 
 pub use components::*;
+pub use events::*;
 pub use resources::*;
 use systems::*;
 
 use crate::asset_management::states::app_states::AppStates;
 
 mod components;
+mod events;
 mod resources;
 mod systems;
 mod utils;
