@@ -47,6 +47,9 @@ impl Plugin for AreaManagementPlugin {
             // TODO: Move this into a less specific plugin
             .register_type::<Vec<u8>>()
             .insert_resource(ActiveAreas::default())
+            .observe(observe_area_sensors)
+            .observe(observe_area_entry)
+            .observe(observe_area_exit)
             .add_systems(
                 Update,
                 manage_active_areas.run_if(in_state(AppStates::Running)),

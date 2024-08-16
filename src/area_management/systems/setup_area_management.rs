@@ -4,6 +4,7 @@ use crate::{
     area_management::{ActiveAreas, EnterArea, Occluding},
     camera_control::{self, CameraZoom, MainCamera},
 };
+use crate::area_management::ExitArea;
 
 pub fn setup_area_management(mut commands: Commands) {
     // Set up global observer for area entry
